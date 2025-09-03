@@ -1,0 +1,302 @@
+// Componente de lector de códigos de barras usando la API de Camera
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import toast from 'react-hot-toast'
+
+// Verificar si BarcodeDetector está disponible
+const isBarcodeDetectorSupported = () => {
+  return 'BarcodeDetector' in window
+}
+
+// Crear un BarcodeDetector con formatos comunes
+const createBarcodeDetector = () => {
+  if (!isBarcodeDetectorSupported()) {
+    return null
+  }
+  
+  return new (window as any).BarcodeDetector({
+    formats: ['qr_code', 'code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'data_matrix']
+  })
+}
+
+interface BarcodeScannerProps {
+  onScan: (barcode: string) => void
+  onError?: (error: string) => void
+}
+
+export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const barcodeDetectorRef = useRef<any>(null)
+  const scanningRef = useRef<boolean>(false)
+  
+  const [isSupported, setIsSupported] = useState(false)
+  const [permissionDenied, setPermissionDenied] = useState(false)
+  const [isScanning, setIsScanning] = useState(false)
+
+  // Inicializar el detector de códigos de barras
+  useEffect(() => {
+    const supported = isBarcodeDetectorSupported()
+    setIsSupported(supported)
+    
+    if (supported) {
+      barcodeDetectorRef.current = createBarcodeDetector()
+    }
+    
+    return () => {
+      stopCamera()
+    }
+  }, [])
+
+  // Iniciar la cámara
+  const startCamera = async () => {
+    try {
+      if (!videoRef.current) return
+      
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment', // Preferir cámara trasera
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
+      })
+      
+      streamRef.current = stream
+      videoRef.current.srcObject = stream
+      setIsScanning(true)
+      setPermissionDenied(false)
+      
+      // Iniciar escaneo una vez que el video esté listo
+      videoRef.current.onloadedmetadata = () => {
+        scanBarcode()
+      }
+    } catch (error: any) {
+      console.error('Error accessing camera:', error)
+      setPermissionDenied(true)
+      if (onError) {
+        onError('No se pudo acceder a la cámara. Por favor, verifica los permisos.')
+      }
+      toast.error('No se pudo acceder a la cámara. Por favor, verifica los permisos.')
+    }
+  }
+
+  // Detener la cámara
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
+    scanningRef.current = false
+    setIsScanning(false)
+  }
+
+  // Escanear códigos de barras
+  const scanBarcode = async () => {
+    if (!videoRef.current || !barcodeDetectorRef.current || !isScanning) return
+    
+    scanningRef.current = true
+    
+    try {
+      // Capturar frame del video
+      if (canvasRef.current && videoRef.current.videoWidth > 0) {
+        const canvas = canvasRef.current
+        const ctx = canvas.getContext('2d')
+        
+        if (ctx) {
+          canvas.width = videoRef.current.videoWidth
+          canvas.height = videoRef.current.videoHeight
+          ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
+          
+          // Detectar códigos de barras
+          const barcodes = await barcodeDetectorRef.current.detect(canvas)
+          
+          if (barcodes.length > 0) {
+            const barcode = barcodes[0].rawValue
+            console.log('Código de barras detectado:', barcode)
+            onScan(barcode)
+            
+            // Pausar brevemente antes de continuar escaneando
+            setTimeout(() => {
+              if (isScanning) {
+                requestAnimationFrame(scanBarcode)
+              }
+            }, 1000)
+            return
+          }
+        }
+      }
+      
+      // Continuar escaneando
+      if (isScanning) {
+        requestAnimationFrame(scanBarcode)
+      }
+    } catch (error) {
+      console.error('Error scanning barcode:', error)
+      if (isScanning) {
+        requestAnimationFrame(scanBarcode)
+      }
+    }
+  }
+
+  // Toggle de escaneo
+  const toggleScanning = () => {
+    if (isScanning) {
+      stopCamera()
+    } else {
+      startCamera()
+    }
+  }
+
+  // Si no hay soporte, mostrar mensaje
+  if (!isSupported) {
+    return (
+      <div style={{ 
+        padding: '20px', 
+        backgroundColor: '#f8d7da', 
+        color: '#721c24', 
+        borderRadius: '5px',
+        textAlign: 'center'
+      }}>
+        <p>⚠️ Tu navegador no soporta la detección de códigos de barras.</p>
+        <p>Por favor, usa un navegador moderno como Chrome, Edge o Safari.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ 
+      position: 'relative', 
+      width: '100%', 
+      maxWidth: '500px',
+      margin: '0 auto'
+    }}>
+      {/* Video y Canvas para escaneo */}
+      <div style={{ 
+        position: 'relative', 
+        width: '100%', 
+        height: '300px',
+        backgroundColor: '#000',
+        borderRadius: '8px',
+        overflow: 'hidden'
+      }}>
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          style={{ 
+            width: '100%', 
+            height: '100%',
+            objectFit: 'cover'
+          }}
+        />
+        <canvas
+          ref={canvasRef}
+          style={{ display: 'none' }}
+        />
+        
+        {/* Overlay para guía de escaneo */}
+        {!isScanning && (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            backgroundColor: 'rgba(0,0,0,0.5)'
+          }}>
+            <p>Presiona "Iniciar Escáner" para comenzar</p>
+          </div>
+        )}
+        
+        {isScanning && (
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            height: '20%',
+            border: '2px solid #2a9d8f',
+            borderRadius: '8px',
+            boxShadow: '0 0 0 1000px rgba(0,0,0,0.3)',
+            boxSizing: 'border-box'
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: '-20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: 'white',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
+            }}>
+              Enfoca el código de barras aquí
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Controles */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '10px', 
+        marginTop: '15px',
+        justifyContent: 'center'
+      }}>
+        <button
+          onClick={toggleScanning}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: isScanning ? '#e63946' : '#2a9d8f',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '16px',
+            fontWeight: 'bold'
+          }}
+        >
+          {isScanning ? 'Detener Escáner' : 'Iniciar Escáner'}
+        </button>
+        
+        {permissionDenied && (
+          <button
+            onClick={startCamera}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#1d3557',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontSize: '16px'
+            }}
+          >
+            Reintentar Permiso
+          </button>
+        )}
+      </div>
+      
+      {permissionDenied && (
+        <div style={{ 
+          marginTop: '10px',
+          padding: '10px',
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+          borderRadius: '5px',
+          fontSize: '14px'
+        }}>
+          ⚠️ Se requiere acceso a la cámara para escanear códigos de barras.
+        </div>
+      )}
+    </div>
+  )
+}

@@ -1,0 +1,177 @@
+/* Estilos globales para la aplicación */
+
+/* Estilo para el cuerpo de la aplicación */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #233D4D;
+  color: #CCCCCC;
+  min-height: 100vh;
+}
+
+/* Estilos para scrollbars personalizados */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #233D4D;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FE7F2D;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e06e1d;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #FE7F2D #233D4D;
+}
+
+/* Clase para contenedores con scroll */
+.scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: #FE7F2D #233D4D;
+}
+
+.scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: #233D4D;
+  border-radius: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: #FE7F2D;
+  border-radius: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #e06e1d;
+}
+
+/* Estilos para inputs y botones */
+.input-field {
+  width: 100%;
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #CCCCCC;
+  border: 1px solid #CCCCCC;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #FE7F2D;
+  box-shadow: 0 0 0 2px rgba(254, 127, 45, 0.2);
+}
+
+.primary-button {
+  padding: 12px 20px;
+  background-color: #FE7F2D;
+  color: #233D4D;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1.1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.primary-button:hover:not(:disabled) {
+  background-color: #e06e1d;
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  padding: 12px 20px;
+  background-color: transparent;
+  color: #CCCCCC;
+  border: 1px solid #CCCCCC;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1.1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.secondary-button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #FE7F2D;
+  color: #FE7F2D;
+}
+
+/* Estilos para tarjetas */
+.card {
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid #CCCCCC;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Animaciones */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Estilos para mensajes de notificación */
+.notification-success {
+  background-color: #a1c181;
+  color: #233D4D;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.notification-error {
+  background-color: #e63946;
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.notification-warning {
+  background-color: #ff9e00;
+  color: #233D4D;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+/* Estilos para el pie de página */
+.footer {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  color: #000000;
+  font-size: 9px;
+  z-index: 100;
+}

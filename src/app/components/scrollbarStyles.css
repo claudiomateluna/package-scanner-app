@@ -1,0 +1,50 @@
+/* Estilos personalizados para scrollbars */
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #233D4D;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FE7F2D;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e06e1d;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #FE7F2D #233D4D;
+}
+
+/* Estilos específicos para ciertos contenedores */
+.scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: #FE7F2D #233D4D;
+}
+
+.scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: #233D4D;
+  border-radius: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: #FE7F2D;
+  border-radius: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #e06e1d;
+}
