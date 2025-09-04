@@ -85,9 +85,11 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
     
     if (supported) {
       barcodeDetectorRef.current = createBarcodeDetector()
+      useJsQRFallback.current = false // No usar fallback si hay soporte
     } else {
       // Usar jsQR como fallback
       useJsQRFallback.current = true
+      barcodeDetectorRef.current = null // Asegurarse de que sea null
     }
     
     // Siempre permitir el uso de la cámara, independientemente del soporte de BarcodeDetector
@@ -177,8 +179,8 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
               return
             }
           } 
-          // Usar jsQR como fallback si BarcodeDetector no está disponible
-          else if (useJsQRFallback.current) {
+          // Usar jsQR como fallback si BarcodeDetector no está disponible o es null
+          else if (useJsQRFallback.current || !barcodeDetectorRef.current) {
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
             const code = jsQR(imageData.data, imageData.width, imageData.height)
             
