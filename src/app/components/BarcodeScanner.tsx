@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
+import jsQR from 'jsqr'
 
 // Definir tipos para BarcodeDetector
 interface BarcodeDetectorFormat {
@@ -16,23 +17,44 @@ interface BarcodeDetector {
 
 // Verificar si BarcodeDetector está disponible
 const isBarcodeDetectorSupported = () => {
-  return 'BarcodeDetector' in window
+  // En iOS Safari, BarcodeDetector puede estar presente pero no funcionar correctamente
+  // Vamos a verificar si realmente podemos crear una instancia
+  if (!('BarcodeDetector' in window)) {
+    return false;
+  }
+  
+  // En iOS, incluso si BarcodeDetector existe, puede no funcionar
+  // Vamos a hacer una prueba real
+  try {
+    // Intentar crear una instancia simple para verificar compatibilidad
+    // @ts-expect-error - BarcodeDetector puede no estar definido correctamente en algunos navegadores
+    new window['BarcodeDetector']({ formats: ['qr_code'] });
+    
+    // Si llegamos aquí sin error, parece que funciona
+    return true;
+  } catch (error) {
+    // Si hay un error al crear la instancia, no está realmente disponible
+    console.warn('BarcodeDetector está presente pero no se puede usar:', error);
+    return false;
+  }
 }
 
 // Crear un BarcodeDetector con formatos comunes
 const createBarcodeDetector = (): BarcodeDetector | null => {
+  // Verificar si BarcodeDetector está disponible y funciona
   if (!isBarcodeDetectorSupported()) {
     return null
   }
   
-  // Definir tipos para los formatos del BarcodeDetector
-  interface BarcodeDetectorOptions {
-    formats: string[];
+  try {
+    // @ts-expect-error - BarcodeDetector puede no estar definido correctamente en algunos navegadores
+    return new window['BarcodeDetector']({
+      formats: ['qr_code', 'code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'data_matrix']
+    })
+  } catch (error) {
+    console.error('Error al crear BarcodeDetector:', error);
+    return null;
   }
-  
-  return new (window as unknown as { BarcodeDetector: new (options: BarcodeDetectorOptions) => BarcodeDetector }).BarcodeDetector({
-    formats: ['qr_code', 'code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'data_matrix']
-  })
 }
 
 interface BarcodeScannerProps {
@@ -48,6 +70,7 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
   const streamRef = useRef<MediaStream | null>(null)
   const barcodeDetectorRef = useRef<BarcodeDetector | null>(null)
   const scanningRef = useRef<boolean>(false)
+  const useJsQRFallback = useRef<boolean>(false) // Nuevo estado para usar jsQR como fallback
   
   const [isSupported, setIsSupported] = useState(false)
   const [permissionDenied, setPermissionDenied] = useState(false)
@@ -60,6 +83,9 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
     
     if (supported) {
       barcodeDetectorRef.current = createBarcodeDetector()
+    } else {
+      // Usar jsQR como fallback
+      useJsQRFallback.current = true
     }
     
     return () => {
@@ -111,7 +137,7 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
 
   // Escanear códigos de barras
   const scanBarcode = async () => {
-    if (!videoRef.current || !barcodeDetectorRef.current || !isScanning) return
+    if (!videoRef.current || !isScanning) return
     
     scanningRef.current = true
     
@@ -126,21 +152,42 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
           canvas.height = videoRef.current.videoHeight
           ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
           
-          // Detectar códigos de barras
-          const barcodes = await barcodeDetectorRef.current.detect(canvas)
-          
-          if (barcodes.length > 0) {
-            const barcode = barcodes[0].rawValue
-            console.log('Código de barras detectado:', barcode)
-            onScan(barcode)
+          // Usar BarcodeDetector si está disponible
+          if (barcodeDetectorRef.current) {
+            // Detectar códigos de barras
+            const barcodes = await barcodeDetectorRef.current.detect(canvas)
             
-            // Pausar brevemente antes de continuar escaneando
-            setTimeout(() => {
-              if (isScanning) {
-                requestAnimationFrame(scanBarcode)
-              }
-            }, 1000)
-            return
+            if (barcodes.length > 0) {
+              const barcode = barcodes[0].rawValue
+              console.log('Código de barras detectado:', barcode)
+              onScan(barcode)
+              
+              // Pausar brevemente antes de continuar escaneando
+              setTimeout(() => {
+                if (isScanning) {
+                  requestAnimationFrame(scanBarcode)
+                }
+              }, 1000)
+              return
+            }
+          } 
+          // Usar jsQR como fallback si BarcodeDetector no está disponible
+          else if (useJsQRFallback.current) {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+            const code = jsQR(imageData.data, imageData.width, imageData.height)
+            
+            if (code) {
+              console.log('Código QR detectado con jsQR:', code.data)
+              onScan(code.data)
+              
+              // Pausar brevemente antes de continuar escaneando
+              setTimeout(() => {
+                if (isScanning) {
+                  requestAnimationFrame(scanBarcode)
+                }
+              }, 1000)
+              return
+            }
           }
         }
       }
@@ -167,7 +214,7 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
   }
 
   // Si no hay soporte, mostrar mensaje
-  if (!isSupported) {
+  if (!isSupported && !useJsQRFallback.current) {
     return (
       <div style={{ 
         padding: '20px', 
@@ -176,8 +223,9 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
         borderRadius: '5px',
         textAlign: 'center'
       }}>
-        <p>⚠️ Tu navegador no soporta la detección de códigos de barras.</p>
-        <p>Por favor, usa un navegador moderno como Chrome, Edge o Safari.</p>
+        <p>⚠️ Tu navegador no soporta la detección nativa de códigos de barras.</p>
+        <p>Por favor, usa un navegador moderno como Chrome, Edge o Safari en su última versión.</p>
+        <p>Alternativamente, puedes usar la función de escaneo manual ingresando el código manualmente.</p>
       </div>
     )
   }
