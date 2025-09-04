@@ -5,6 +5,25 @@ import { useState, useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
 import jsQR from 'jsqr'
 
+// Polyfill para BarcodeDetector si no está disponible nativamente
+let BarcodeDetectorPolyfill: unknown;
+try {
+  // Intentar usar el polyfill si no hay soporte nativo
+  if (typeof window !== 'undefined' && !('BarcodeDetector' in window)) {
+    import('barcode-detector').then(module => {
+      BarcodeDetectorPolyfill = (module as { BarcodeDetector: unknown }).BarcodeDetector;
+      // Registrar el polyfill en window si no existe
+      if (typeof window !== 'undefined' && !('BarcodeDetector' in window)) {
+        (window as { [key: string]: unknown }).BarcodeDetector = BarcodeDetectorPolyfill;
+      }
+    }).catch(error => {
+      console.warn('No se pudo cargar el polyfill de BarcodeDetector:', error);
+    });
+  }
+} catch (error) {
+  console.warn('Error al inicializar el polyfill de BarcodeDetector:', error);
+}
+
 // Definir tipos para BarcodeDetector
 interface BarcodeDetectorFormat {
   format: string;
@@ -16,42 +35,75 @@ interface BarcodeDetector {
 }
 
 // Verificar si BarcodeDetector está disponible
-const isBarcodeDetectorSupported = () => {
-  // En iOS Safari, BarcodeDetector puede estar presente pero no funcionar correctamente
-  // Vamos a verificar si realmente podemos crear una instancia
-  if (typeof window === 'undefined' || !('BarcodeDetector' in window)) {
-    console.log('BarcodeDetector no está presente en window');
+const isBarcodeDetectorSupported = async () => {
+  // En navegadores modernos, BarcodeDetector puede estar disponible
+  if (typeof window === 'undefined') {
+    console.log('BarcodeDetector: Window no disponible (entorno servidor)');
     return false;
   }
   
-  // En iOS, incluso si BarcodeDetector existe, puede no funcionar
-  // Vamos a hacer una prueba real
-  try {
-    // @ts-expect-error - BarcodeDetector puede no estar definido correctamente en algunos navegadores
-    new window['BarcodeDetector']({ formats: ['qr_code'] });
+  // Verificar si BarcodeDetector está disponible nativamente
+  if ('BarcodeDetector' in window) {
+    console.log('BarcodeDetector: Disponible nativamente');
     
-    // Si llegamos aquí sin error, parece que funciona
-    console.log('BarcodeDetector está disponible y funciona');
-    return true;
-  } catch (error) {
-    // Si hay un error al crear la instancia, no está realmente disponible
-    console.warn('BarcodeDetector está presente pero no se puede usar:', error);
-    return false;
+    // Hacer una prueba real para verificar que funciona
+    try {
+      const BarcodeDetectorClass = (window as unknown as { [key: string]: unknown })['BarcodeDetector'];
+      if (typeof BarcodeDetectorClass === 'function') {
+        // @ts-expect-error - BarcodeDetectorClass es una función constructora
+        new BarcodeDetectorClass({ formats: ['qr_code'] });
+        console.log('BarcodeDetector: Instancia creada exitosamente');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.warn('BarcodeDetector: Error al crear instancia nativa:', error);
+      return false;
+    }
   }
+  
+  // Intentar cargar el polyfill si no hay soporte nativo
+  try {
+    console.log('BarcodeDetector: Intentando cargar polyfill...');
+    
+    // Verificar si ya está cargado
+    if ((window as unknown as { [key: string]: unknown }).BarcodeDetector) {
+      console.log('BarcodeDetector: Polyfill ya está cargado');
+      return true;
+    }
+    
+    // Intentar cargar dinámicamente
+      const importedModule = await import('barcode-detector');
+      if ((importedModule as { BarcodeDetector: unknown }).BarcodeDetector) {
+        (window as unknown as { [key: string]: unknown }).BarcodeDetector = (importedModule as { BarcodeDetector: unknown }).BarcodeDetector;
+        console.log('BarcodeDetector: Polyfill cargado exitosamente');
+        return true;
+      }
+  } catch (error) {
+    console.warn('BarcodeDetector: Error al cargar polyfill:', error);
+  }
+  
+  console.log('BarcodeDetector: No disponible (ni nativo ni polyfill)');
+  return false;
 }
 
 // Crear un BarcodeDetector con formatos comunes
-const createBarcodeDetector = (): BarcodeDetector | null => {
+const createBarcodeDetector = async (): Promise<BarcodeDetector | null> => {
   // Verificar si BarcodeDetector está disponible y funciona
-  if (typeof window === 'undefined' || !isBarcodeDetectorSupported()) {
-    return null
+  const supported = await isBarcodeDetectorSupported();
+  if (!supported) {
+    return null;
   }
   
   try {
-    // @ts-expect-error - BarcodeDetector puede no estar definido correctamente en algunos navegadores
-      return new window['BarcodeDetector']({
+    const BarcodeDetectorClass = (window as unknown as { [key: string]: unknown })['BarcodeDetector'];
+    if (typeof BarcodeDetectorClass === 'function') {
+      // @ts-expect-error - BarcodeDetectorClass es una función constructora
+      return new BarcodeDetectorClass({
         formats: ['qr_code', 'code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'data_matrix']
-      })
+      });
+    }
+    return null;
   } catch (error) {
     console.error('Error al crear BarcodeDetector:', error);
     return null;
@@ -81,25 +133,29 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
   useEffect(() => {
     console.log('BarcodeScanner: Inicializando componente...');
     
-    // Verificar soporte de BarcodeDetector
-    const supported = isBarcodeDetectorSupported()
-    console.log('BarcodeScanner: Soporte de BarcodeDetector:', supported);
+    const initializeDetector = async () => {
+      // Verificar soporte de BarcodeDetector
+      const supported = await isBarcodeDetectorSupported();
+      console.log('BarcodeScanner: Soporte de BarcodeDetector:', supported);
+      
+      if (supported) {
+        barcodeDetectorRef.current = await createBarcodeDetector();
+        useJsQRFallback.current = false;
+        console.log('BarcodeScanner: Usando BarcodeDetector nativo o polyfill');
+      } else {
+        // Usar jsQR como fallback
+        useJsQRFallback.current = true;
+        barcodeDetectorRef.current = null;
+        console.log('BarcodeScanner: Usando jsQR como fallback');
+      }
+      
+      // Siempre permitir el uso de la cámara, independientemente del soporte de BarcodeDetector
+      // Esto permite que los usuarios intenten usar la cámara incluso en navegadores con soporte limitado
+      setIsSupported(true);
+      console.log('BarcodeScanner: Componente inicializado, soporte establecido como true');
+    };
     
-    if (supported) {
-      barcodeDetectorRef.current = createBarcodeDetector()
-      useJsQRFallback.current = false
-      console.log('BarcodeScanner: Usando BarcodeDetector nativo');
-    } else {
-      // Usar jsQR como fallback
-      useJsQRFallback.current = true
-      barcodeDetectorRef.current = null
-      console.log('BarcodeScanner: Usando jsQR como fallback');
-    }
-    
-    // Siempre permitir el uso de la cámara, independientemente del soporte de BarcodeDetector
-    // Esto permite que los usuarios intenten usar la cámara incluso en navegadores con soporte limitado
-    setIsSupported(true)
-    console.log('BarcodeScanner: Componente inicializado, soporte establecido como true');
+    initializeDetector();
     
     return () => {
       console.log('BarcodeScanner: Limpiando componente...');
@@ -187,9 +243,11 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
           
           console.log('scanBarcode: Frame capturado - Dimensiones:', canvas.width, 'x', canvas.height);
           
-          // Usar BarcodeDetector si está disponible
+          // Intentar usar BarcodeDetector si está disponible
+          let barcodeDetected = false;
+          
           if (barcodeDetectorRef.current) {
-            console.log('scanBarcode: Usando BarcodeDetector nativo');
+            console.log('scanBarcode: Intentando usar BarcodeDetector nativo o polyfill');
             try {
               // Detectar códigos de barras
               const barcodes = await barcodeDetectorRef.current.detect(canvas);
@@ -202,6 +260,7 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
                 if (onScan && typeof onScan === 'function') {
                   console.log('Llamando a onScan con código:', barcode);
                   onScan(barcode);
+                  barcodeDetected = true;
                   
                   // Pausar brevemente antes de continuar escaneando
                   setTimeout(() => {
@@ -224,7 +283,7 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
           } 
           
           // Usar jsQR como fallback si BarcodeDetector no está disponible o es null
-          if (useJsQRFallback.current || !barcodeDetectorRef.current) {
+          if (!barcodeDetected && (useJsQRFallback.current || !barcodeDetectorRef.current)) {
             console.log('scanBarcode: Usando jsQR como fallback');
             try {
               const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -232,6 +291,7 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
               
               if (code) {
                 console.log('Código QR detectado con jsQR:', code.data);
+                barcodeDetected = true;
                 
                 // Llamar a onScan con el código detectado
                 if (onScan && typeof onScan === 'function') {
@@ -254,6 +314,10 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
             } catch (jsQRError) {
               console.error('Error usando jsQR:', jsQRError);
             }
+          }
+          
+          if (!barcodeDetected) {
+            console.log('scanBarcode: No se detectó ningún código en este frame');
           }
         } else {
           console.log('scanBarcode: No se pudo obtener contexto 2D del canvas');
