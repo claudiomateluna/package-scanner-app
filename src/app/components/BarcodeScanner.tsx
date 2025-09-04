@@ -145,69 +145,90 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
 
   // Escanear códigos de barras
   const scanBarcode = async () => {
-    if (!videoRef.current || !isScanning) return
+    if (!videoRef.current || !isScanning) {
+      console.log('scanBarcode: Salir temprano - videoRef:', !!videoRef.current, 'isScanning:', isScanning);
+      return;
+    }
     
-    scanningRef.current = true
+    scanningRef.current = true;
+    console.log('scanBarcode: Iniciando escaneo...');
     
     try {
       // Capturar frame del video
       if (canvasRef.current && videoRef.current.videoWidth > 0) {
-        const canvas = canvasRef.current
-        const ctx = canvas.getContext('2d')
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
         
         if (ctx) {
-          canvas.width = videoRef.current.videoWidth
-          canvas.height = videoRef.current.videoHeight
-          ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
+          canvas.width = videoRef.current.videoWidth;
+          canvas.height = videoRef.current.videoHeight;
+          ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+          
+          console.log('scanBarcode: Frame capturado - Dimensiones:', canvas.width, 'x', canvas.height);
           
           // Usar BarcodeDetector si está disponible
           if (barcodeDetectorRef.current) {
+            console.log('scanBarcode: Usando BarcodeDetector nativo');
             // Detectar códigos de barras
-            const barcodes = await barcodeDetectorRef.current.detect(canvas)
+            const barcodes = await barcodeDetectorRef.current.detect(canvas);
             
             if (barcodes.length > 0) {
-              const barcode = barcodes[0].rawValue
-              console.log('Código de barras detectado:', barcode)
-              onScan(barcode)
+              const barcode = barcodes[0].rawValue;
+              console.log('Código de barras detectado con BarcodeDetector:', barcode);
+              onScan(barcode);
               
               // Pausar brevemente antes de continuar escaneando
               setTimeout(() => {
                 if (isScanning) {
-                  requestAnimationFrame(scanBarcode)
+                  requestAnimationFrame(scanBarcode);
                 }
-              }, 1000)
-              return
+              }, 1000);
+              return;
+            } else {
+              console.log('scanBarcode: No se detectaron códigos con BarcodeDetector');
             }
           } 
           // Usar jsQR como fallback si BarcodeDetector no está disponible o es null
           else if (useJsQRFallback.current || !barcodeDetectorRef.current) {
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-            const code = jsQR(imageData.data, imageData.width, imageData.height)
+            console.log('scanBarcode: Usando jsQR como fallback');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
             
             if (code) {
-              console.log('Código QR detectado con jsQR:', code.data)
-              onScan(code.data)
+              console.log('Código QR detectado con jsQR:', code.data);
+              onScan(code.data);
               
               // Pausar brevemente antes de continuar escaneando
               setTimeout(() => {
                 if (isScanning) {
-                  requestAnimationFrame(scanBarcode)
+                  requestAnimationFrame(scanBarcode);
                 }
-              }, 1000)
-              return
+              }, 1000);
+              return;
+            } else {
+              console.log('scanBarcode: No se detectó código QR con jsQR');
             }
+          } else {
+            console.log('scanBarcode: No hay método de detección disponible');
           }
+        } else {
+          console.log('scanBarcode: No se pudo obtener contexto 2D del canvas');
         }
+      } else {
+        console.log('scanBarcode: Canvas o video no disponible - canvasRef:', !!canvasRef.current, 'videoWidth:', videoRef.current?.videoWidth);
       }
       
       // Continuar escaneando
       if (isScanning) {
-        requestAnimationFrame(scanBarcode)
+        console.log('scanBarcode: Continuando escaneo...');
+        requestAnimationFrame(scanBarcode);
+      } else {
+        console.log('scanBarcode: Escaneo detenido');
       }
     } catch (error) {
-      console.error('Error scanning barcode:', error)
+      console.error('Error scanning barcode:', error);
       if (isScanning) {
-        requestAnimationFrame(scanBarcode)
+        requestAnimationFrame(scanBarcode);
       }
     }
   }
@@ -283,53 +304,61 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
         <canvas
           ref={canvasRef}
           style={{ display: 'none' }}
+          width="640"
+          height="480"
         />
         
         {/* Overlay para guía de escaneo */}
-        {!isScanning && (
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            backgroundColor: 'rgba(0,0,0,0.5)'
-          }}>
-            <p>Presiona &quot;Iniciar Escáner&quot; para comenzar</p>
-          </div>
-        )}
-        
         {isScanning && (
           <div style={{
             position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '80%',
-            height: '20%',
+            bottom: '20px',
+            left: '10%',
+            right: '10%',
+            height: '80px',
             border: '2px solid #2a9d8f',
             borderRadius: '8px',
             boxShadow: '0 0 0 1000px rgba(0,0,0,0.3)',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}>
+            {/* Línea de escaneo animada */}
+            <div 
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '2px',
+                backgroundColor: '#2a9d8f',
+                animation: 'scanLine 2s ease-in-out infinite'
+              }}
+            />
             <div style={{
-              position: 'absolute',
-              top: '-20px',
-              left: '50%',
-              transform: 'translateX(-50%)',
               color: 'white',
               fontSize: '14px',
               fontWeight: 'bold',
-              textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
+              textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+              zIndex: 1,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              padding: '4px 8px',
+              borderRadius: '4px'
             }}>
               Enfoca el código de barras aquí
             </div>
           </div>
         )}
+        
+        {/* Estilos para la animación */}
+        <style jsx>{`
+          @keyframes scanLine {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(76px); }
+            100% { transform: translateY(0); }
+          }
+        `}</style>
       </div>
       
       {/* Controles */}
