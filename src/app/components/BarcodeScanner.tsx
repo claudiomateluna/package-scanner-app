@@ -20,6 +20,7 @@ const isBarcodeDetectorSupported = () => {
   // En iOS Safari, BarcodeDetector puede estar presente pero no funcionar correctamente
   // Vamos a verificar si realmente podemos crear una instancia
   if (!('BarcodeDetector' in window)) {
+    console.log('BarcodeDetector no está presente en window');
     return false;
   }
   
@@ -31,6 +32,7 @@ const isBarcodeDetectorSupported = () => {
     new window['BarcodeDetector']({ formats: ['qr_code'] });
     
     // Si llegamos aquí sin error, parece que funciona
+    console.log('BarcodeDetector está disponible y funciona');
     return true;
   } catch (error) {
     // Si hay un error al crear la instancia, no está realmente disponible
@@ -87,6 +89,10 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
       // Usar jsQR como fallback
       useJsQRFallback.current = true
     }
+    
+    // Siempre permitir el uso de la cámara, independientemente del soporte de BarcodeDetector
+    // Esto permite que los usuarios intenten usar la cámara incluso en navegadores con soporte limitado
+    setIsSupported(true)
     
     return () => {
       stopCamera()
@@ -213,19 +219,34 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
     }
   }
 
-  // Si no hay soporte, mostrar mensaje
+  // Si no hay soporte, mostrar mensaje pero permitir el uso de la cámara
   if (!isSupported && !useJsQRFallback.current) {
     return (
       <div style={{ 
         padding: '20px', 
-        backgroundColor: '#f8d7da', 
-        color: '#721c24', 
+        backgroundColor: '#fff3cd', 
+        color: '#856404', 
         borderRadius: '5px',
         textAlign: 'center'
       }}>
         <p>⚠️ Tu navegador no soporta la detección nativa de códigos de barras.</p>
-        <p>Por favor, usa un navegador moderno como Chrome, Edge o Safari en su última versión.</p>
-        <p>Alternativamente, puedes usar la función de escaneo manual ingresando el código manualmente.</p>
+        <p>Puedes intentar usar la cámara para escanear códigos QR.</p>
+        <button
+          onClick={startCamera}
+          style={{
+            marginTop: '10px',
+            padding: '10px 20px',
+            backgroundColor: '#2a9d8f',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '16px',
+            fontWeight: 'bold'
+          }}
+        >
+          Intentar Escanear con Cámara
+        </button>
       </div>
     )
   }
