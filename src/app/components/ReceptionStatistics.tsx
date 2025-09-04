@@ -73,7 +73,7 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
         
         // Obtener estadísticas generales
         const endDate = new Date();
-        let startDate = new Date();
+        const startDate = new Date();
         
         switch (period) {
           case 'week':
@@ -149,7 +149,7 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
           most_active_local: mostActiveLocal,
           recent_activity: recentActivity
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error al cargar estadísticas:', error);
         toast.error('Error al cargar estadísticas');
       } finally {

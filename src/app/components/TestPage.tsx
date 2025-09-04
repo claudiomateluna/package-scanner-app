@@ -3,10 +3,24 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
+import { User } from '@supabase/supabase-js'
+
+interface Profile {
+  id: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  role?: string;
+}
+
+interface SessionInfo {
+  user: User;
+  profile: Profile | null;
+}
 
 export default function TestPage() {
-  const [sessionInfo, setSessionInfo] = useState(null)
-  const [profiles, setProfiles] = useState([])
+  const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null)
+  const [profiles, setProfiles] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -40,7 +54,7 @@ export default function TestPage() {
     }
   }
 
-  async function testDeleteUser(userId) {
+  async function testDeleteUser(userId: string) {
     if (!window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
       return
     }

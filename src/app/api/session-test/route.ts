@@ -27,22 +27,20 @@ export async function GET(request: Request) {
   )
 
   // Obtener la sesión del usuario
-  let sessionData
+  let session
   let sessionError
   
   if (token) {
     // Si tenemos un token, verificar la sesión con ese token
     const result = await supabase.auth.getUser(token)
-    sessionData = result.data
+    session = result.data?.user ? { user: result.data.user } : null
     sessionError = result.error
   } else {
     // Si no tenemos token, intentar obtener la sesión de las cookies
     const result = await supabase.auth.getSession()
-    sessionData = result.data
+    session = result.data?.session
     sessionError = result.error
   }
-  
-  const { session } = sessionData || {}
   
   if (sessionError) {
     return NextResponse.json({ 
@@ -52,7 +50,7 @@ export async function GET(request: Request) {
     })
   }
 
-  if (!session) {
+  if (!session || !session.user) {
     return NextResponse.json({ 
       status: 'no-session', 
       message: 'No hay sesión activa' 
@@ -67,7 +65,7 @@ export async function GET(request: Request) {
         id: session.user.id,
         email: session.user.email
       },
-      expires_at: session.expires_at
+      expires_at: 'expires_at' in session ? session.expires_at : null
     }
   })
 }

@@ -17,8 +17,15 @@ interface CompletedReception {
   unidades_esperadas: number;
   unidades_escaneadas: number;
   estado: string;
-  detalles: any[];
+  detalles: ReceptionDetail[];
   created_at: string;
+}
+
+interface ReceptionDetail {
+  olpn: string;
+  dn: string;
+  unidades: number;
+  escaneado: boolean;
 }
 
 interface ReceptionHistoryProps {
@@ -64,7 +71,7 @@ export default function ReceptionHistory({ onClose }: ReceptionHistoryProps) {
         }
 
         setReceptions(data || [])
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error al cargar historial de recepciones:', error)
         toast.error('Error al cargar historial de recepciones')
       } finally {
@@ -258,7 +265,7 @@ export default function ReceptionHistory({ onClose }: ReceptionHistoryProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedReception.detalles.map((detalle: any, index: number) => (
+                  {selectedReception.detalles.map((detalle: ReceptionDetail, index: number) => (
                     <tr 
                       key={index} 
                       style={{ 

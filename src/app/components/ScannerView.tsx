@@ -1,4 +1,4 @@
-import { useState, useEffect, CSSProperties, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { Session } from '@supabase/supabase-js'
 import toast from 'react-hot-toast';
@@ -8,15 +8,41 @@ import BarcodeScanner from './BarcodeScanner';
 import ReceptionSummary from './ReceptionSummary';
 import ReceptionHistory from './ReceptionHistory';
 import ReceptionStatistics from './ReceptionStatistics';
-import { isMobileDevice, isIPad, isIPhone, isAndroid } from '@/lib/deviceUtils';
+import { isMobileDevice } from '@/lib/deviceUtils';
+import Image from 'next/image';
 import './scrollbarStyles.css';
 
 // --- Tipos de Datos ---
 type Profile = { role: string | null; }
 type Selection = { local: string; fecha: string; }
 type Package = { OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; }
-type ScannedItem = { OLPN: string; }
+type ScannedItem = { OLPN: string; Fecha?: string; }
 type DNProgress = { dn: string; totalPackages: number; scannedPackages: number; }
+
+// SupabaseQuery se eliminó ya que no se usaba
+
+interface CompletedReceptionData {
+  id?: number;
+  local: string;
+  fecha_recepcion: string;
+  user_id: string;
+  fecha_hora_completada: string;
+  fecha_hora_inicio: string; // Nueva propiedad
+  olpn_esperadas: number;
+  olpn_escaneadas: number;
+  dn_esperadas: number;
+  dn_escaneadas: number;
+  unidades_esperadas: number;
+  unidades_escaneadas: number;
+  estado: string;
+  detalles: {
+    olpn: string;
+    dn: string;
+    unidades: number;
+    escaneado: boolean;
+  }[];
+  created_at?: string;
+}
 
 interface Props {
   session: Session;
@@ -25,18 +51,7 @@ interface Props {
   currentView: string; // Recibe la vista actual como prop
 }
 
-// --- Función de Ayuda para Timeouts ---
-async function fetchWithTimeout(query: any, timeout = 8000) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  try {
-    const { data, error } = await query.abortSignal(controller.signal);
-    if (error) throw error;
-    return data;
-  } finally {
-    clearTimeout(id);
-  }
-}
+// fetchWithTimeout se eliminó ya que no se usaba
 
 export default function ScannerView({ session, profile, selection, currentView }: Props) {
   const { user } = session
@@ -48,39 +63,44 @@ export default function ScannerView({ session, profile, selection, currentView }
   const [dnProgress, setDnProgress] = useState<DNProgress[]>([]);
   const [useBarcodeScanner, setUseBarcodeScanner] = useState(false);
   const [showReceptionSummary, setShowReceptionSummary] = useState(false);
-  const [completedReceptionData, setCompletedReceptionData] = useState<any>(null);
+  const [completedReceptionData, setCompletedReceptionData] = useState<CompletedReceptionData | null>(null);
   const [showReceptionHistory, setShowReceptionHistory] = useState(false);
   const [showReceptionStatistics, setShowReceptionStatistics] = useState(false);
+  const [isCompletingReception, setIsCompletingReception] = useState(false);
+  const [receptionStartTime, setReceptionStartTime] = useState<string | null>(null);
+  const [isReceptionCompleted, setIsReceptionCompleted] = useState(false); // Nuevo estado para verificar si la recepción ya fue completada
 
   const isWarehouseOrAdmin = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator';
   const canScan = profile?.role === 'administrador' || profile?.role === 'Store Operator' || profile?.role === 'Warehouse Operator' || profile?.role === 'Warehouse Supervisor';
   
   // Detectar si es un dispositivo móvil o tablet
   const isMobileOrTablet = isMobileDevice();
-  const isIPadDevice = isIPad();
-  const isIPhoneDevice = isIPhone();
-  const isAndroidDevice = isAndroid();
-
-  // Si estamos en la vista de administración, no necesitamos cargar datos
-  if (currentView === 'admin') {
-    return <AdminView profile={{...profile, id: session?.user?.id}} />;
-  }
-
-  // Si no hay selección, mostramos un mensaje
-  if (!selection || !selection.local || !selection.fecha) {
-    return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
-        <h3>Por favor, selecciona un local y una fecha para continuar</h3>
-        <p>Utiliza el botón "Volver" para regresar a la pantalla de selección</p>
-      </div>
-    );
-  }
+  // isIPadDevice, isIPhoneDevice, isAndroidDevice se eliminaron ya que no se usaban
 
   const fetchData = useCallback(async () => {
     setError(null)
     try {
       const startDate = selection.fecha;
       const endDate = new Date(new Date(startDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      // Verificar si la recepción ya fue completada
+      const { data: completedReceptions, error: completedError } = await supabase
+        .from('recepciones_completadas')
+        .select('*')
+        .eq('local', selection.local)
+        .eq('fecha_recepcion', selection.fecha)
+        .limit(1);
+      
+      if (completedError) {
+        console.error('Error al verificar recepciones completadas:', completedError);
+      } else if (completedReceptions && completedReceptions.length > 0) {
+        // La recepción ya fue completada
+        setIsReceptionCompleted(true);
+        setCompletedReceptionData(completedReceptions[0]);
+      } else {
+        // La recepción no ha sido completada aún
+        setIsReceptionCompleted(false);
+      }
       
       // Obtener paquetes esperados para el local seleccionado en la fecha seleccionada
       const { data: packageData, error: packageError } = await supabase
@@ -93,6 +113,11 @@ export default function ScannerView({ session, profile, selection, currentView }
       if (packageError) throw packageError;
       setPackages(packageData || []);
       
+      // Establecer la hora de inicio de la recepción si aún no está establecida y la recepción no ha sido completada
+      if (!receptionStartTime && !isReceptionCompleted) {
+        setReceptionStartTime(new Date().toISOString());
+      }
+      
       // Obtener paquetes ya escaneados para el local seleccionado en la fecha seleccionada
       const { data: scannedData, error: scannedError } = await supabase
         .from('recepcion')
@@ -103,28 +128,82 @@ export default function ScannerView({ session, profile, selection, currentView }
       
       if (scannedError) throw scannedError;
       setScanned(new Set(scannedData?.map((item: ScannedItem) => item.OLPN) || []));
-    } catch (error: any) { 
-      const errorMessage = error.name === 'AbortError' ? 'La petición tardó demasiado (timeout).' : error.message;
+    } catch (error: unknown) { 
+      const errorMessage = (error as Error).name === 'AbortError' ? 'La petición tardó demasiado (timeout).' : (error as Error).message;
       setError(errorMessage);
       toast.error("Error al recargar los datos: " + errorMessage);
     } finally {
       setLoading(false)
     }
-  }, [selection, isWarehouseOrAdmin]);
+  }, [selection, receptionStartTime, isReceptionCompleted]);
 
   useEffect(() => {
     setLoading(true);
     fetchData();
     const channel = supabase.channel('realtime_recepcion')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'recepcion' }, (payload) => {
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'recepcion',
+        filter: `Local=eq.${selection.local}`
+      }, (payload) => {
         const newRecord = payload.new as ScannedItem
-        if (newRecord && newRecord.OLPN) {
-          setScanned(prevScanned => new Set(prevScanned).add(newRecord.OLPN))
+        // Verificar que el registro sea de la fecha correcta también
+        if (newRecord && newRecord.OLPN && newRecord.Fecha) {
+          // Verificar que el registro pertenezca a la fecha seleccionada
+          const recordDate = newRecord.Fecha.split('T')[0];
+          if (recordDate === selection.fecha) {
+            setScanned(prevScanned => {
+              const newSet = new Set(prevScanned);
+              newSet.add(newRecord.OLPN);
+              return newSet;
+            });
+          }
+        }
+      })
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'recepcion',
+        filter: `Local=eq.${selection.local}`
+      }, (payload) => {
+        const updatedRecord = payload.new as ScannedItem
+        // Verificar que el registro sea de la fecha correcta también
+        if (updatedRecord && updatedRecord.OLPN && updatedRecord.Fecha) {
+          // Verificar que el registro pertenezca a la fecha seleccionada
+          const recordDate = updatedRecord.Fecha.split('T')[0];
+          if (recordDate === selection.fecha) {
+            setScanned(prevScanned => {
+              const newSet = new Set(prevScanned);
+              newSet.add(updatedRecord.OLPN);
+              return newSet;
+            });
+          }
+        }
+      })
+      .on('postgres_changes', { 
+        event: 'DELETE', 
+        schema: 'public', 
+        table: 'recepcion',
+        filter: `Local=eq.${selection.local}`
+      }, (payload) => {
+        const deletedRecord = payload.old as ScannedItem
+        // Verificar que el registro sea de la fecha correcta también
+        if (deletedRecord && deletedRecord.OLPN && deletedRecord.Fecha) {
+          // Verificar que el registro pertenecía a la fecha seleccionada
+          const recordDate = deletedRecord.Fecha.split('T')[0];
+          if (recordDate === selection.fecha) {
+            setScanned(prevScanned => {
+              const newSet = new Set(prevScanned);
+              newSet.delete(deletedRecord.OLPN);
+              return newSet;
+            });
+          }
         }
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [fetchData]);
+  }, [fetchData, selection.local, selection.fecha]);
 
   useEffect(() => {
     window.addEventListener('focus', fetchData);
@@ -134,23 +213,44 @@ export default function ScannerView({ session, profile, selection, currentView }
   useEffect(() => {
     if (packages.length === 0 && scanned.size === 0) {
       setDnProgress([]);
-      return;
+    } else {
+      const progressMap = new Map<string, { total: number; scanned: number }>();
+      for (const pkg of packages) {
+        if (!progressMap.has(pkg.DN)) { progressMap.set(pkg.DN, { total: 0, scanned: 0 }); }
+        progressMap.get(pkg.DN)!.total++;
+      }
+      for (const pkg of packages) {
+        if (scanned.has(pkg.OLPN)) { progressMap.get(pkg.DN)!.scanned++; }
+      }
+      const progressData = Array.from(progressMap.entries()).map(([dn, data]) => ({
+        dn,
+        totalPackages: data.total,
+        scannedPackages: data.scanned,
+      }));
+      setDnProgress(progressData.sort((a, b) => a.dn.localeCompare(b.dn)));
     }
-    const progressMap = new Map<string, { total: number; scanned: number }>();
-    for (const pkg of packages) {
-      if (!progressMap.has(pkg.DN)) { progressMap.set(pkg.DN, { total: 0, scanned: 0 }); }
-      progressMap.get(pkg.DN)!.total++;
-    }
-    for (const pkg of packages) {
-      if (scanned.has(pkg.OLPN)) { progressMap.get(pkg.DN)!.scanned++; }
-    }
-    const progressData = Array.from(progressMap.entries()).map(([dn, data]) => ({
-      dn,
-      totalPackages: data.total,
-      scannedPackages: data.scanned,
-    }));
-    setDnProgress(progressData.sort((a, b) => a.dn.localeCompare(b.dn)));
   }, [packages, scanned]);
+
+  // Si estamos en la vista de administración, no necesitamos cargar datos
+  const isAdminView = currentView === 'admin';
+  
+  // Si no hay selección, mostramos un mensaje
+  const hasNoSelection = !selection || !selection.local || !selection.fecha;
+
+  // Si estamos en la vista de administración, no necesitamos cargar datos
+  if (isAdminView) {
+    return <AdminView profile={{...profile, id: session?.user?.id}} />;
+  }
+
+  // Si no hay selección, mostramos un mensaje
+  if (hasNoSelection) {
+    return (
+      <div style={{ textAlign: 'center', padding: '40px' }}>
+        <h3>Por favor, selecciona un local y una fecha para continuar</h3>
+        <p>Utiliza el botón &quot;Volver&quot; para regresar a la pantalla de selección</p>
+      </div>
+    );
+  }
 
   const handleRegister = async () => {
     const olpnToRegister = scannedOlpn.trim()
@@ -162,9 +262,15 @@ export default function ScannerView({ session, profile, selection, currentView }
       const { error: insertError } = await supabase.from('recepcion').insert({ OLPN: foundPackage.OLPN, Local: foundPackage.Local, Fecha: foundPackage.Fecha, DN: foundPackage.DN, Unidades: foundPackage.Unidades, ScannedBy: user.email })
       if (insertError) throw insertError
       setScannedOlpn('')
+      // Actualizar el estado scanned inmediatamente para reflejar el cambio localmente
+      setScanned(prevScanned => {
+        const newSet = new Set(prevScanned);
+        newSet.add(olpnToRegister);
+        return newSet;
+      });
       toast.success("Paquete registrado en Recepción.")
-    } catch (error: any) {
-      toast.error(`Error al registrar: ${error.message}`)
+    } catch (error: unknown) {
+      toast.error(`Error al registrar: ${(error as Error).message}`)
     }
   }
 
@@ -190,14 +296,23 @@ export default function ScannerView({ session, profile, selection, currentView }
 
   // Manejar cuando se completa la recepción
   const handleReceptionCompleted = async () => {
+    // Verificar si ya se está completando la recepción o si ya se completó
+    if (isCompletingReception || isReceptionCompleted) {
+      return;
+    }
+    
     if (!(packages.length > 0 && scanned.size === packages.length)) {
       toast.error('La recepción aún no está completa');
       return;
     }
 
     try {
+      // Establecer el estado de completado para evitar múltiples clics
+      setIsCompletingReception(true);
+      
       // Mostrar confirmación
       if (!window.confirm('¿Estás seguro de que quieres completar esta recepción? Esta acción no se puede deshacer.')) {
+        setIsCompletingReception(false);
         return;
       }
 
@@ -221,8 +336,9 @@ export default function ScannerView({ session, profile, selection, currentView }
       const receptionData = {
         local: selection.local,
         fecha_recepcion: selection.fecha,
-        user_id: userId,
+        user_id: userId || '',
         fecha_hora_completada: new Date().toISOString(),
+        fecha_hora_inicio: receptionStartTime || new Date().toISOString(), // Incluir la hora de inicio
         olpn_esperadas: totalExpectedPackages,
         olpn_escaneadas: totalScannedPackages,
         dn_esperadas: totalExpectedDNs,
@@ -248,17 +364,42 @@ export default function ScannerView({ session, profile, selection, currentView }
         throw error;
       }
 
+      // Marcar la recepción como completada
+      setIsReceptionCompleted(true);
+      
       // Mostrar resumen de la recepción
-      setCompletedReceptionData(receptionData);
-      setShowReceptionSummary(true);
+      if (data && data.length > 0) {
+        setCompletedReceptionData(data[0]);
+        setShowReceptionSummary(true);
+      }
       
       toast.success('Recepción completada y guardada exitosamente');
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al completar la recepción:', error);
-      toast.error(`Error al completar la recepción: ${error.message}`);
+      toast.error(`Error al completar la recepción: ${(error as Error).message}`);
+    } finally {
+      // Restablecer el estado de completado
+      setIsCompletingReception(false);
     }
   }
+
+  // Función para manejar el escaneo de códigos de barras
+  const handleBarcodeScan = (scannedCode: string) => {
+    if (scannedCode) {
+      setScannedOlpn(scannedCode);
+      // Auto-registrar el código escaneado
+      if (canScan) {
+        handleRegister();
+      }
+    }
+  };
+
+  // Función para manejar errores del escáner
+  const handleScannerError = (error: string) => {
+    console.error('Error en el escáner:', error);
+    toast.error(`Error en el escáner: ${error}`);
+  };
 
   if (loading) return <div>Cargando datos para {selection.local} en fecha {selection.fecha}...</div>
   if (error) return <div><p style={{color: 'red'}}><b>Error:</b> {error}</p></div>
@@ -330,10 +471,11 @@ export default function ScannerView({ session, profile, selection, currentView }
                   style={{padding: '5px', backgroundColor: '#FE7F2D', color: '#233D4D', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
                   title="Usar escáner de código de barras"
                 >
-                  <img 
+                  <Image 
                     alt="Código de Barras" 
                     src="/barcode.svg" 
-                    style={{height: '34px', width: '44px'}} 
+                    width={44}
+                    height={34}
                   />
                 </button>
               </div>
@@ -362,10 +504,11 @@ export default function ScannerView({ session, profile, selection, currentView }
                 style={{padding: '5px', backgroundColor: '#FE7F2D', color: '#233D4D', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
                 title="Usar escáner de código de barras"
               >
-                <img 
+                <Image 
                   alt="Código de Barras" 
                   src="/barcode.svg" 
-                  style={{height: '34px', width: '44px'}} 
+                  width={44}
+                  height={34}
                 />
               </button>
             </div>
@@ -483,21 +626,21 @@ export default function ScannerView({ session, profile, selection, currentView }
                 {/* Botón de Recepción Completada */}
                 <button 
                   onClick={handleReceptionCompleted}
-                  disabled={!(packages.length > 0 && scanned.size === packages.length)}
+                  disabled={!(packages.length > 0 && scanned.size === packages.length) || isCompletingReception || isReceptionCompleted}
                   style={{ 
                     flex: '1',
                     padding: '10px', // Reducir padding
                     borderRadius: '5px',
-                    backgroundColor: packages.length > 0 && scanned.size === packages.length ? '#A1C181' : '#FE7F2D',
-                    color: packages.length > 0 && scanned.size === packages.length ? '#233D4D' : '#233D4D',
+                    backgroundColor: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#A1C181' : '#FE7F2D',
+                    color: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#233D4D' : '#233D4D',
                     fontWeight: 'bold',
                     fontSize: '1em',
                     border: 'none',
-                    cursor: packages.length > 0 && scanned.size === packages.length ? 'pointer' : 'not-allowed',
-                    opacity: packages.length > 0 && scanned.size === packages.length ? 1 : 0.6
+                    cursor: packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !isReceptionCompleted ? 'pointer' : 'not-allowed',
+                    opacity: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? 1 : 0.6
                   }}
                 >
-                  {packages.length > 0 && scanned.size === packages.length ? 'Recepción Completada' : 'Pendiente'}
+                  {isCompletingReception ? 'Completando...' : (isReceptionCompleted ? 'Recepción Completada' : (packages.length > 0 && scanned.size === packages.length ? 'Recepción Completada' : 'Pendiente'))}
                 </button>
                 
                 {/* Botón de Historial */}

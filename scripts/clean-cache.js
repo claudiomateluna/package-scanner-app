@@ -1,7 +1,12 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+// next.config.js - Configuración adicional para manejo de cache
+const nextConfig = {
+  // Otras configuraciones existentes...
+  
+  // Configuración para evitar problemas de cache
+  experimental: {
+    // Desactivar cache agresivo en desarrollo
+    disableCache: process.env.NODE_ENV === 'development',
+  },
   
   // Configuración de encabezados para controlar cache
   async headers() {
@@ -52,4 +57,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

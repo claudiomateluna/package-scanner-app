@@ -4,14 +4,39 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 
+interface ReceptionDetail {
+  olpn: string;
+  dn: string;
+  unidades: number;
+  escaneado: boolean;
+}
+
+interface ReceptionData {
+  id?: number;
+  local: string;
+  fecha_recepcion: string;
+  user_id: string;
+  fecha_hora_completada: string;
+  fecha_hora_inicio: string; // Nueva propiedad
+  olpn_esperadas: number;
+  olpn_escaneadas: number;
+  dn_esperadas: number;
+  dn_escaneadas: number;
+  unidades_esperadas: number;
+  unidades_escaneadas: number;
+  estado: string;
+  detalles: ReceptionDetail[];
+  created_at?: string;
+}
+
 interface ReceptionSummaryProps {
   onClose: () => void;
-  receptionData: any;
+  receptionData: ReceptionData;
 }
 
 export default function ReceptionSummary({ onClose, receptionData }: ReceptionSummaryProps) {
   const [loading, setLoading] = useState(true)
-  const [detailedData, setDetailedData] = useState<any>(null)
+  const [detailedData, setDetailedData] = useState<ReceptionData | null>(null)
 
   useEffect(() => {
     const fetchDetailedData = async () => {
@@ -22,7 +47,7 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
         // si es necesario
         
         setDetailedData(receptionData)
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error al cargar datos detallados:', error)
         toast.error('Error al cargar datos detallados')
       } finally {
@@ -114,7 +139,7 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
               <strong>Fecha Recepción:</strong> {detailedData?.fecha_recepcion}
             </div>
             <div>
-              <strong>Fecha/Hora Completada:</strong> {new Date(detailedData?.fecha_hora_completada).toLocaleString()}
+              <strong>Fecha/Hora Completada:</strong> {detailedData?.fecha_hora_completada ? new Date(detailedData.fecha_hora_completada).toLocaleString() : 'N/A'}
             </div>
             <div>
               <strong>Estado:</strong> 
@@ -196,7 +221,7 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
                   </tr>
                 </thead>
                 <tbody>
-                  {detailedData.detalles.map((detalle: any, index: number) => (
+                  {detailedData.detalles.map((detalle: ReceptionDetail, index: number) => (
                     <tr 
                       key={index} 
                       style={{ 

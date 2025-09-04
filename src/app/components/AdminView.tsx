@@ -9,7 +9,25 @@ import { canUserManageRole, getAssignableRoles } from '@/lib/roleHierarchy'
 // --- Tipos de Datos ---
 type ProfileFromProps = { role: string | null; id: string; }
 interface AdminViewProps { profile: ProfileFromProps; }
-type Profile = { id: string; role: string | null; first_name: string | null; last_name: string | null; assigned_locals?: string[]; local_asignado?: string | null; email?: string | null; }
+
+interface ProfileData {
+  id: string;
+  role: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  assigned_locals?: string[];
+  local_asignado?: string | null;
+  email?: string | null;
+}
+
+interface UserLocal {
+  user_id: string;
+  local_name: string;
+}
+
+// ProfilesMap se eliminó ya que no se usaba
+
+type Profile = ProfileData;
 
 // --- Estilos Reutilizables ---
 const inputStyle: CSSProperties = { 
@@ -29,7 +47,8 @@ const inputStyle: CSSProperties = {
   borderRightWidth: '1px',
   borderRightStyle: 'solid',
   borderRightColor: '#ccc',
-  borderRadius: '5px' 
+  borderRadius: '5px',
+  boxSizing: 'border-box' // Añadido para prevenir desbordamiento
 };
 
 const buttonStyle: CSSProperties = { 
@@ -349,7 +368,6 @@ export default function AdminView({ profile }: AdminViewProps) {
   const [email, setEmail] = useState(''); 
   const [password, setPassword] = useState(''); 
   const [role, setRole] = useState('Store Operator'); 
-  const [localAsignado, setLocalAsignado] = useState(''); 
   const [firstName, setFirstName] = useState(''); 
   const [lastName, setLastName] = useState('');
   const [availableLocals, setAvailableLocals] = useState<string[]>([]);
@@ -414,27 +432,27 @@ export default function AdminView({ profile }: AdminViewProps) {
       }
       
       // Combinar los datos de perfiles con los locales asignados
-      const profilesMap = profilesData.reduce((acc, profile) => {
+      const profilesMap: Record<string, Profile> = profilesData.reduce((acc: Record<string, Profile>, profile: ProfileData) => {
         acc[profile.id] = {
           ...profile,
           assigned_locals: []
         }
         return acc
       }, {})
-      
+
       // Agregar los locales asignados a cada perfil
-      userLocalsData.forEach(local => {
+      userLocalsData.forEach((local: UserLocal) => {
         if (profilesMap[local.user_id]) {
-          profilesMap[local.user_id].assigned_locals.push(local.local_name)
+          profilesMap[local.user_id].assigned_locals!.push(local.local_name)
         }
       })
-      
+
       // Convertir el mapa en array
-      const profilesWithLocals = Object.values(profilesMap)
+      const profilesWithLocals: Profile[] = Object.values(profilesMap)
       
       setProfiles(profilesWithLocals)
-    } catch (error) {
-      toast.error('Error inesperado al cargar los perfiles: ' + error.message)
+    } catch (error: unknown) {
+      toast.error('Error inesperado al cargar los perfiles: ' + ((error as Error).message || (error as Error).toString()))
     }
     setLoading(false)
   }
@@ -503,7 +521,7 @@ export default function AdminView({ profile }: AdminViewProps) {
     console.log('Iniciando eliminación de usuario:', { userId, userEmail, userRole, userLocal });
     
     // Verificar permisos de jerarquía
-    const canManage = canUserManageRole(profile?.role || '', userRole, profile?.local_asignado || null, userLocal);
+    const canManage = canUserManageRole(profile?.role || '', userRole, null, userLocal);
     console.log('Permiso de gestión:', canManage);
     
     if (!canManage) {
@@ -677,7 +695,7 @@ export default function AdminView({ profile }: AdminViewProps) {
                 <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                   <button onClick={() => setEditingProfileId(p.id)} style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', color: '#ccc'}}>Editar</button>
                   {canDeleteUsers && 
-                   canUserManageRole(userRole || '', p.role || '', profile?.local_asignado || null, p.local_asignado || null) && (
+                   canUserManageRole(userRole || '', p.role || '', null, p.local_asignado || null) && (
                     <button 
                       onClick={() => handleDeleteUser(p.id, p.email || 'Usuario', p.role || '', p.local_asignado || null)} 
                       style={{...buttonStyle, backgroundColor: '#e63946', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#e63946', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#e63946', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#e63946', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#e63946', color: '#fff'}}
@@ -686,7 +704,7 @@ export default function AdminView({ profile }: AdminViewProps) {
                     </button>
                   )}
                 </div>
-                {editingProfileId === p.id && <EditProfileForm profile={p} onSave={() => { setEditingProfileId(null); fetchProfiles(); }} onCancel={() => setEditingProfileId(null)} currentUserRole={userRole} currentUserLocal={profile?.local_asignado || null} />}
+                {editingProfileId === p.id && <EditProfileForm profile={p} onSave={() => { setEditingProfileId(null); fetchProfiles(); }} onCancel={() => setEditingProfileId(null)} currentUserRole={userRole} currentUserLocal={null} />}
               </div>
             ))}
           </div>

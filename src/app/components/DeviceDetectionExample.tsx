@@ -5,7 +5,16 @@ import { useEffect, useState } from 'react'
 import { detectDevice, isMobile, isTablet, getDeviceInfo } from '@/lib/deviceDetection'
 
 export default function DeviceDetectionExample() {
-  const [deviceInfo, setDeviceInfo] = useState(null)
+  const [deviceInfo, setDeviceInfo] = useState<{ 
+    deviceType: string; 
+    isMobile: boolean; 
+    isTablet: boolean;
+    userAgent: string;
+    screenWidth: number;
+    screenHeight: number;
+    windowWidth: number;
+    windowHeight: number;
+  } | null>(null)
   
   useEffect(() => {
     // Detectar el dispositivo cuando el componente se monta

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from 'react-hot-toast';
+import ChunkErrorBoundary from './components/ChunkErrorBoundary';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,8 +46,10 @@ export default function RootLayout({
           minHeight: '100vh'
         }}
       >
-        <Toaster position="bottom-center" />
-        {children}
+        <ChunkErrorBoundary>
+          <Toaster position="bottom-center" />
+          {children}
+        </ChunkErrorBoundary>
       </body>
     </html>
   );

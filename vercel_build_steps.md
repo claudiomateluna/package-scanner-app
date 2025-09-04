@@ -249,3 +249,173 @@ git commit -m "fix: corregir error en scanner de códigos"
 - **Documentación de Vercel**: [vercel.com/docs](https://vercel.com/docs)
 - **Comunidad**: [vercel.com/community](https://vercel.com/community)
 - **Soporte**: Disponible en el plan Hobby por comunidad y documentación
+
+## **Pasos Adicionales para Resolver Problemas de Build**
+
+### 1. Verificar que la aplicación se ejecute localmente
+
+**Paso 1:** Abre una terminal en el directorio del proyecto (`C:\Users\matelcla\qwenRecepciones`)
+
+**Paso 2:** Ejecuta la aplicación en modo desarrollo
+```bash
+npm run dev
+```
+
+**Paso 3:** Abre tu navegador y ve a `http://localhost:3000`
+
+**Paso 4:** Verifica que la aplicación se carga correctamente y funciona como esperas
+
+**Paso 5:** Detén la aplicación presionando `Ctrl + C` en la terminal
+
+### 2. Crear una build de producción limpia
+
+**Paso 1:** En la terminal, asegúrate de estar en el directorio del proyecto
+
+**Paso 2:** Elimina cualquier build anterior
+```bash
+# En Windows
+rmdir /s .next
+# Si te pregunta, responde "S" para eliminar
+```
+
+**Paso 3:** Crea una nueva build de producción
+```bash
+npx next build --no-lint
+```
+
+**Paso 4:** Espera a que termine el proceso (debería mostrar algo como "Compiled successfully")
+
+### 3. Probar la build de producción localmente (opcional)
+
+**Paso 1:** Ejecuta el servidor de producción localmente
+```bash
+npm start
+```
+
+**Paso 2:** Abre tu navegador y ve a `http://localhost:3000`
+
+**Paso 3:** Verifica que la aplicación funciona correctamente en modo producción
+
+**Paso 4:** Detén el servidor presionando `Ctrl + C` en la terminal
+
+### 4. Instalar y configurar Vercel CLI
+
+**Paso 1:** Abre una nueva terminal como administrador (click derecho en el ícono de terminal y selecciona "Ejecutar como administrador")
+
+**Paso 2:** Instala Vercel CLI globalmente
+```bash
+npm install -g vercel
+```
+
+**Paso 3:** Verifica que se instaló correctamente
+```bash
+vercel --version
+```
+
+### 5. Hacer login en Vercel
+
+**Paso 1:** En la terminal, ejecuta:
+```bash
+vercel login
+```
+
+**Paso 2:** Se abrirá tu navegador predeterminado
+
+**Paso 3:** Inicia sesión con tu cuenta de Vercel (o crea una si no tienes)
+
+**Paso 4:** Una vez iniciada la sesión en el navegador, vuelve a la terminal
+
+### 6. Deploy inicial en Vercel
+
+**Paso 1:** Asegúrate de estar en el directorio del proyecto (`C:\Users\matelcla\qwenRecepciones`)
+
+**Paso 2:** Ejecuta el comando de deployment
+```bash
+vercel
+```
+
+**Paso 3:** Responde las preguntas que aparecen:
+- **Set up and deploy:** "Y" (presiona Enter)
+- **Which scope:** Selecciona tu cuenta personal (usa las flechas y Enter)
+- **Link to existing project:** "N" (presiona Enter) - Esto es para un nuevo proyecto
+- **What's your project's name:** Puedes dejar el nombre por defecto o escribir uno nuevo (por ejemplo: "package-scanner-app")
+- **In which directory is your code located?:** "." (presiona Enter)
+- **Want to override the settings?:** "N" (presiona Enter)
+
+**Paso 4:** Espera a que termine el deployment. Verás una URL similar a: `https://package-scanner-app-xxxx.vercel.app`
+
+**Paso 5:** Abre esa URL en tu navegador para verificar que la aplicación funciona
+
+### 7. Configurar variables de entorno en Vercel
+
+**Paso 1:** Ve al dashboard de Vercel: https://vercel.com/dashboard
+
+**Paso 2:** Encuentra tu proyecto en la lista y haz clic en él
+
+**Paso 3:** Haz clic en "Settings" en el menú superior
+
+**Paso 4:** En el menú izquierdo, haz clic en "Environment Variables"
+
+**Paso 5:** Agrega las siguientes variables (usa el botón "Add"):
+
+1. **Nombre:** `NEXT_PUBLIC_SUPABASE_URL`
+   **Valor:** El valor de tu archivo `.env.local` (ejemplo: `https://gkqebmqtmjeinjuoivvu.supabase.co`)
+   **Entornos:** Selecciona "Production", "Preview", y "Development"
+
+2. **Nombre:** `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   **Valor:** El valor de tu archivo `.env.local`
+   **Entornos:** Selecciona "Production", "Preview", y "Development"
+
+3. **Nombre:** `SUPABASE_SERVICE_ROLE_KEY`
+   **Valor:** El valor de tu archivo `.env.local`
+   **Entornos:** Selecciona "Production", "Preview", y "Development"
+
+**Paso 6:** Haz clic en "Save" después de agregar cada variable
+
+### 8. Redeploy para aplicar las variables de entorno
+
+**Paso 1:** En el dashboard de tu proyecto en Vercel, haz clic en "Deployments" en el menú superior
+
+**Paso 2:** Haz clic en el botón de "Redeploy" (el ícono de flechas circulares) en el deployment más reciente
+
+**Paso 3:** En el modal que aparece, asegúrate de que "Use existing Build Cache" esté seleccionado
+
+**Paso 4:** Haz clic en "Redeploy"
+
+**Paso 5:** Espera a que termine el redeploy (puede tomar 1-2 minutos)
+
+### 9. Verificación final
+
+**Paso 1:** Una vez que el redeploy haya terminado, haz clic en "Visit" para abrir tu aplicación
+
+**Paso 2:** Prueba las funcionalidades principales:
+- Inicia sesión con un usuario existente
+- Navega a la sección de escaneo
+- Verifica que puedes ver los paquetes
+- Prueba el panel de administración si tienes permisos
+
+### 10. Configuración para futuros deployments automáticos
+
+**Paso 1:** En el dashboard de Vercel, ve a "Settings" → "Git"
+
+**Paso 2:** Si no has conectado tu repositorio, haz clic en "Connect Git Repository"
+
+**Paso 3:** Sigue las instrucciones para conectar tu repositorio Git (GitHub, GitLab, o Bitbucket)
+
+**Paso 4:** Una vez conectado, Vercel automáticamente hará deployments cuando hagas push a tu repositorio
+
+### Problemas comunes y soluciones
+
+1. **Si el deployment falla:**
+   - Verifica que no haya errores en la consola de Vercel
+   - Asegúrate de que todas las variables de entorno están correctamente configuradas
+   - Revisa los logs de build haciendo clic en "View Logs" en el deployment fallido
+
+2. **Si la aplicación se despliega pero no funciona correctamente:**
+   - Verifica que las variables de entorno estén correctamente configuradas
+   - Abre las herramientas de desarrollador del navegador (F12) y revisa la consola
+   - Verifica que la conexión a Supabase esté funcionando
+
+3. **Si tienes problemas con permisos en Windows:**
+   - Asegúrate de ejecutar la terminal como administrador
+   - Si tienes problemas con `rmdir`, puedes eliminar manualmente la carpeta `.next` desde el explorador de archivos

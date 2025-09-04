@@ -16,7 +16,7 @@ export default function Home() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [selection, setSelection] = useState<Selection | null>(null)
   const [loading, setLoading] = useState(true)
-  const [currentView, setCurrentView] = useState('scanner'); // Estado para la vista (scanner o admin)
+  const [currentView, setCurrentView] = useState<'scanner' | 'admin'>('scanner'); // Estado para la vista (scanner o admin)
 
   useEffect(() => {
     setLoading(true);
@@ -78,7 +78,6 @@ export default function Home() {
       onBack={selection ? handleBackToSelection : undefined}
       currentView={currentView}
       setCurrentView={setCurrentView}
-      hasSelection={!!selection}
     >
       {!selection && currentView === 'scanner' ? (
         <SelectionScreen profile={profile} onSelectionComplete={handleSelectionComplete} session={session} />

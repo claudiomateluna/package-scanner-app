@@ -4,6 +4,7 @@ import { Session } from '@supabase/supabase-js'
 import { CSSProperties, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
+import Image from 'next/image'
 
 // --- Tipos de Datos ---
 type Profile = { role: string | null; }
@@ -16,7 +17,6 @@ interface Props {
   children: React.ReactNode;
   currentView: View;
   setCurrentView: (view: View) => void;
-  hasSelection?: boolean;
 }
 
 // --- Iconos SVG como Componentes ---
@@ -160,7 +160,7 @@ const ChangePasswordForm = ({ onDone }: { onDone: () => void }) => {
 };
 
 // --- Componente Principal del Layout ---
-export default function AppLayout({ session, profile, onBack, children, currentView, setCurrentView, hasSelection }: Props) {
+export default function AppLayout({ session, profile, onBack, children, currentView, setCurrentView }: Props) {
   const { user } = session;
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
@@ -173,7 +173,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
     borderBottomWidth: '1px',
     borderBottomStyle: 'solid',
     borderBottomColor: '#555',
-    padding: '15px 20px',
+    padding: '10px',
     position: 'sticky',
     top: 0,
     backgroundColor: '#FE7F2D',
@@ -251,18 +251,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   };
 
   // Obtener el nombre del usuario
-  const getUserDisplayName = () => {
-    if (user.user_metadata?.first_name && user.user_metadata?.last_name) {
-      return `${user.user_metadata.first_name} ${user.user_metadata.last_name}`;
-    }
-    if (user.user_metadata?.full_name) {
-      return user.user_metadata.full_name;
-    }
-    if (user.email) {
-      return user.email.split('@')[0];
-    }
-    return 'Usuario';
-  };
+  // getUserDisplayName se eliminó ya que no se usaba
 
   // Obtener nombre y apellido por separado
   const getUserFirstAndLastName = () => {
@@ -295,10 +284,11 @@ export default function AppLayout({ session, profile, onBack, children, currentV
     <div>
       <header style={headerStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <img 
+          <Image 
             src="/adidas_shp.svg" 
             alt="Adidas Logo" 
-            style={{ height: '60px', width: '60px' }} 
+            width={60}
+            height={60}
           />
           <div>
             <h2 style={{ margin: 0, color: '#233D4D' }}>Recepciones</h2>
@@ -324,10 +314,11 @@ export default function AppLayout({ session, profile, onBack, children, currentV
                 style={currentView === 'scanner' ? activeScannerButtonStyle : scannerButtonStyle}
                 title="Recepción"
               >
-                <img 
+                <Image 
                   src="/barcode.svg" 
                   alt="Código de Barras" 
-                  style={{ height: '34px', width: '44px' }} 
+                  width={44}
+                  height={34}
                 />
               </button>
               <button 

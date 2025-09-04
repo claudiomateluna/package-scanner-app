@@ -1,9 +1,9 @@
 // Función para detectar el tipo de dispositivo
 export function detectDevice() {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const userAgent = navigator.userAgent || navigator.vendor || (window as unknown as { opera: string }).opera;
   
   // Detectar iOS (iPhone, iPad, iPod)
-  if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+  if (/iPad|iPhone|iPod/.test(userAgent) && !(window as unknown as { MSStream: boolean }).MSStream) {
     if (/iPad/.test(userAgent)) {
       return 'iPad';
     } else if (/iPhone|iPod/.test(userAgent)) {
@@ -33,7 +33,7 @@ export function detectDevice() {
 
 // Función más específica para detectar tablets
 export function isTablet() {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const userAgent = navigator.userAgent || navigator.vendor || (window as unknown as { opera: string }).opera;
   
   // Detectar iPad
   if (/iPad/.test(userAgent)) {
@@ -58,7 +58,7 @@ export function isTablet() {
 
 // Función para detectar móviles
 export function isMobile() {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const userAgent = navigator.userAgent || navigator.vendor || (window as unknown as { opera: string }).opera;
   
   // Detectar iPhone, iPod, Android móvil, etc.
   if (/iPhone|iPod|android.*mobile/i.test(userAgent)) {
@@ -75,7 +75,7 @@ export function isMobile() {
 
 // Función para obtener información detallada del dispositivo
 export function getDeviceInfo() {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const userAgent = navigator.userAgent || navigator.vendor || (window as unknown as { opera: string }).opera;
   
   return {
     deviceType: detectDevice(),
@@ -87,19 +87,4 @@ export function getDeviceInfo() {
     windowWidth: window.innerWidth,
     windowHeight: window.innerHeight
   };
-}
-
-// Hook personalizado para React (si se usa React)
-export function useDeviceDetection() {
-  const [deviceInfo, setDeviceInfo] = useState({
-    deviceType: 'Unknown',
-    isMobile: false,
-    isTablet: false
-  });
-  
-  useEffect(() => {
-    setDeviceInfo(getDeviceInfo());
-  }, []);
-  
-  return deviceInfo;
 }

@@ -4,18 +4,33 @@
 import { useState, useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
 
+// Definir tipos para BarcodeDetector
+interface BarcodeDetectorFormat {
+  format: string;
+  rawValue: string;
+}
+
+interface BarcodeDetector {
+  detect: (image: HTMLCanvasElement) => Promise<BarcodeDetectorFormat[]>;
+}
+
 // Verificar si BarcodeDetector está disponible
 const isBarcodeDetectorSupported = () => {
   return 'BarcodeDetector' in window
 }
 
 // Crear un BarcodeDetector con formatos comunes
-const createBarcodeDetector = () => {
+const createBarcodeDetector = (): BarcodeDetector | null => {
   if (!isBarcodeDetectorSupported()) {
     return null
   }
   
-  return new (window as any).BarcodeDetector({
+  // Definir tipos para los formatos del BarcodeDetector
+  interface BarcodeDetectorOptions {
+    formats: string[];
+  }
+  
+  return new (window as unknown as { BarcodeDetector: new (options: BarcodeDetectorOptions) => BarcodeDetector }).BarcodeDetector({
     formats: ['qr_code', 'code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'data_matrix']
   })
 }
@@ -25,11 +40,13 @@ interface BarcodeScannerProps {
   onError?: (error: string) => void
 }
 
+// MediaDeviceInfo se eliminó ya que no se usaba
+
 export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const barcodeDetectorRef = useRef<any>(null)
+  const barcodeDetectorRef = useRef<BarcodeDetector | null>(null)
   const scanningRef = useRef<boolean>(false)
   
   const [isSupported, setIsSupported] = useState(false)
@@ -72,7 +89,7 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
       videoRef.current.onloadedmetadata = () => {
         scanBarcode()
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error accessing camera:', error)
       setPermissionDenied(true)
       if (onError) {
@@ -211,7 +228,7 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
             color: 'white',
             backgroundColor: 'rgba(0,0,0,0.5)'
           }}>
-            <p>Presiona "Iniciar Escáner" para comenzar</p>
+            <p>Presiona &quot;Iniciar Escáner&quot; para comenzar</p>
           </div>
         )}
         
