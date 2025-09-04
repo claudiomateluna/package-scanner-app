@@ -175,7 +175,13 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
             if (barcodes.length > 0) {
               const barcode = barcodes[0].rawValue;
               console.log('Código de barras detectado con BarcodeDetector:', barcode);
-              onScan(barcode);
+              // Llamar a onScan con el código detectado
+              if (onScan && typeof onScan === 'function') {
+                console.log('Llamando a onScan con código:', barcode);
+                onScan(barcode);
+              } else {
+                console.error('onScan no es una función válida:', onScan);
+              }
               
               // Pausar brevemente antes de continuar escaneando
               setTimeout(() => {
@@ -196,7 +202,13 @@ export default function BarcodeScanner({ onScan, onError }: BarcodeScannerProps)
             
             if (code) {
               console.log('Código QR detectado con jsQR:', code.data);
-              onScan(code.data);
+              // Llamar a onScan con el código detectado
+              if (onScan && typeof onScan === 'function') {
+                console.log('Llamando a onScan con código:', code.data);
+                onScan(code.data);
+              } else {
+                console.error('onScan no es una función válida:', onScan);
+              }
               
               // Pausar brevemente antes de continuar escaneando
               setTimeout(() => {

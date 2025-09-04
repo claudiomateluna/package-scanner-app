@@ -386,12 +386,24 @@ export default function ScannerView({ session, profile, selection, currentView }
 
   // Función para manejar el escaneo de códigos de barras
   const handleBarcodeScan = (scannedCode: string) => {
+    console.log('handleBarcodeScan llamado con código:', scannedCode);
+    console.log('canScan:', canScan);
+    console.log('profile.role:', profile?.role);
+    
     if (scannedCode) {
       setScannedOlpn(scannedCode);
+      console.log('scannedOlpn actualizado a:', scannedCode);
+      
       // Auto-registrar el código escaneado
       if (canScan) {
+        console.log('Llamando a handleRegister...');
         handleRegister();
+      } else {
+        console.log('No se puede escanear: canScan es falso');
+        toast.error('No tienes permisos para escanear en este momento.');
       }
+    } else {
+      console.log('Código escaneado vacío');
     }
   };
 
