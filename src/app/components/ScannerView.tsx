@@ -253,23 +253,54 @@ export default function ScannerView({ session, profile, selection, currentView }
   }
 
   const handleRegister = async () => {
+    console.log('handleRegister: Iniciando registro...');
+    console.log('handleRegister: user:', user);
+    console.log('handleRegister: scannedOlpn:', scannedOlpn);
+    console.log('handleRegister: packages.length:', packages.length);
+    console.log('handleRegister: scanned.size:', scanned.size);
+    
     const olpnToRegister = scannedOlpn.trim()
-    if (!olpnToRegister) { return toast.error("El campo de escaneo está vacío.") }
+    console.log('handleRegister: olpnToRegister (después de trim):', olpnToRegister);
+    
+    if (!olpnToRegister) { 
+      console.log('handleRegister: Campo de escaneo vacío');
+      return toast.error("El campo de escaneo está vacío.");
+    }
+    
     const foundPackage = packages.find(p => p.OLPN === olpnToRegister)
-    if (!foundPackage) { return toast.error("¡ATENCIÓN! Este bulto no corresponde a los paquetes esperados.") }
-    if (scanned.has(olpnToRegister)) { return toast.error("¡ATENCIÓN! Este bulto ya fue registrado (duplicado).") }
+    console.log('handleRegister: foundPackage:', foundPackage);
+    
+    if (!foundPackage) { 
+      console.log('handleRegister: Bulto no encontrado en paquetes esperados');
+      return toast.error("¡ATENCIÓN! Este bulto no corresponde a los paquetes esperados.");
+    }
+    
+    if (scanned.has(olpnToRegister)) { 
+      console.log('handleRegister: Bulto ya registrado (duplicado)');
+      return toast.error("¡ATENCIÓN! Este bulto ya fue registrado (duplicado).");
+    }
+    
     try {
-      const { error: insertError } = await supabase.from('recepcion').insert({ OLPN: foundPackage.OLPN, Local: foundPackage.Local, Fecha: foundPackage.Fecha, DN: foundPackage.DN, Unidades: foundPackage.Unidades, ScannedBy: user.email })
-      if (insertError) throw insertError
+      console.log('handleRegister: Insertando en recepcion...');
+      const { error: insertError } = await supabase.from('recepcion').insert({ 
+        OLPN: foundPackage.OLPN, 
+        Local: foundPackage.Local, 
+        Fecha: foundPackage.Fecha, 
+        DN: foundPackage.DN, 
+        Unidades: foundPackage.Unidades, 
+        ScannedBy: user.email 
+      })
+      
+      if (insertError) {
+        console.error('handleRegister: Error al insertar:', insertError);
+        throw insertError;
+      }
+      
+      console.log('handleRegister: Registro exitoso');
       setScannedOlpn('')
-      // Actualizar el estado scanned inmediatamente para reflejar el cambio localmente
-      setScanned(prevScanned => {
-        const newSet = new Set(prevScanned);
-        newSet.add(olpnToRegister);
-        return newSet;
-      });
       toast.success("Paquete registrado en Recepción.")
-    } catch (error: unknown) {
+    } catch (error) {
+      console.error('handleRegister: Error al registrar:', error);
       toast.error(`Error al registrar: ${(error as Error).message}`)
     }
   }
@@ -386,24 +417,30 @@ export default function ScannerView({ session, profile, selection, currentView }
 
   // Función para manejar el escaneo de códigos de barras
   const handleBarcodeScan = (scannedCode: string) => {
-    console.log('handleBarcodeScan llamado con código:', scannedCode);
-    console.log('canScan:', canScan);
-    console.log('profile.role:', profile?.role);
+    console.log('handleBarcodeScan: Código escaneado recibido:', scannedCode);
+    console.log('handleBarcodeScan: canScan:', canScan);
+    console.log('handleBarcodeScan: profile.role:', profile?.role);
     
-    if (scannedCode) {
-      setScannedOlpn(scannedCode);
-      console.log('scannedOlpn actualizado a:', scannedCode);
+    if (scannedCode && scannedCode.trim() !== '') {
+      const trimmedCode = scannedCode.trim();
+      console.log('handleBarcodeScan: Estableciendo scannedOlpn a:', trimmedCode);
+      setScannedOlpn(trimmedCode);
+      console.log('handleBarcodeScan: scannedOlpn actualizado');
       
       // Auto-registrar el código escaneado
       if (canScan) {
-        console.log('Llamando a handleRegister...');
-        handleRegister();
+        console.log('handleBarcodeScan: Llamando a handleRegister automáticamente...');
+        // Usar setTimeout para asegurar que el estado se actualice antes de llamar a handleRegister
+        setTimeout(() => {
+          handleRegister();
+        }, 100);
       } else {
-        console.log('No se puede escanear: canScan es falso');
+        console.log('handleBarcodeScan: No se puede escanear en este momento - canScan es falso');
         toast.error('No tienes permisos para escanear en este momento.');
       }
     } else {
-      console.log('Código escaneado vacío');
+      console.log('handleBarcodeScan: Código escaneado vacío o solo espacios');
+      toast.error('Código escaneado inválido.');
     }
   };
 
