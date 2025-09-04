@@ -97,9 +97,14 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
 
   useEffect(() => {
     async function fetchLocals() {
+      console.log('SelectionScreen: fetchLocals iniciado');
+      console.log('SelectionScreen: profile.role:', profile.role);
+      console.log('SelectionScreen: session?.user?.id:', session?.user?.id);
+      
       try {
         // Para usuarios administradores o warehouse, obtener todos los locales de la tabla data
         if (profile.role === 'administrador' || profile.role === 'Warehouse Supervisor' || profile.role === 'Warehouse Operator') {
+          console.log('SelectionScreen: Usuario administrador o warehouse, obteniendo todos los locales');
           const { data, error } = await supabase.from('data').select('Local');
           
           if (error) {
@@ -122,10 +127,12 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
             return;
           }
           
+          console.log('SelectionScreen: Locales cargados:', uniqueLocals);
           setAvailableLocals(uniqueLocals);
           
           // Para usuarios Warehouse, verificar si tienen locales asignados para usar como predeterminado
           if ((profile.role === 'Warehouse Supervisor' || profile.role === 'Warehouse Operator') && session?.user?.id) {
+            console.log('SelectionScreen: Usuario Warehouse, verificando locales asignados');
             try {
               const { data: userLocalsData, error: userLocalsError } = await supabase
                 .from('user_locals')
@@ -136,20 +143,23 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
                 const assignedLocal = userLocalsData[0].local_name;
                 // Verificar que el local asignado esté en la lista de locales disponibles
                 if (uniqueLocals.includes(assignedLocal)) {
+                  console.log('SelectionScreen: Usando local asignado:', assignedLocal);
                   setSelectedLocal(assignedLocal);
                   return;
                 }
               }
-            } catch (userLocalsError) {
+            } catch (userLocalsError: unknown) {
               console.warn('No se pudieron obtener locales asignados del usuario:', userLocalsError);
             }
           }
           
           // Usar el primer local disponible por defecto
+          console.log('SelectionScreen: Usando primer local disponible:', uniqueLocals[0]);
           setSelectedLocal(uniqueLocals[0]);
         } 
         // Para usuarios Store, obtener solo sus locales asignados
         else if ((profile.role === 'Store Supervisor' || profile.role === 'Store Operator') && session?.user?.id) {
+          console.log('SelectionScreen: Usuario Store, obteniendo locales asignados');
           try {
             const { data, error } = await supabase
               .from('user_locals')
@@ -162,27 +172,31 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
             }
             
             const locals = [...new Set(data.map(item => item.local_name).filter(local => local))].sort();
+            console.log('SelectionScreen: Locales asignados cargados:', locals);
             setAvailableLocals(locals);
             
             if (locals.length > 0) {
+              console.log('SelectionScreen: Usando primer local asignado:', locals[0]);
               setSelectedLocal(locals[0]);
             } else {
               toast.error('No tienes locales asignados. Contacta a un administrador.');
             }
-          } catch (error) {
+          } catch (error: unknown) {
             toast.error('Error al cargar los locales asignados.');
           }
         }
         // Para otros usuarios, usar el local asignado en su perfil
         else {
+          console.log('SelectionScreen: Otro tipo de usuario, usando local asignado en perfil');
           if (profile.local_asignado) {
+            console.log('SelectionScreen: Usando local asignado en perfil:', profile.local_asignado);
             setAvailableLocals([profile.local_asignado]);
             setSelectedLocal(profile.local_asignado);
           } else {
             toast.error('No tienes un local asignado. Contacta a un administrador.');
           }
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error inesperado cargando locales:', error);
         toast.error('Error al cargar los locales del sistema.');
       }
