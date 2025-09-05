@@ -4,7 +4,7 @@ import { Session } from '@supabase/supabase-js'
 import toast from 'react-hot-toast';
 import AdminView from './AdminView';
 import DNProgressCard from './DNProgressCard';
-import BarcodeScannerZXing from './BarcodeScannerZXing';
+import VideoCropperScanner from './VideoCropperScanner';
 import ReceptionSummary from './ReceptionSummary';
 import ReceptionHistory from './ReceptionHistory';
 import ReceptionStatistics from './ReceptionStatistics';
@@ -492,7 +492,7 @@ export default function ScannerView({ session, profile, selection, currentView }
                 )}
               </div>
               
-              <BarcodeScannerZXing 
+              <VideoCropperScanner 
                 onScan={handleBarcodeScan}
                 onError={handleScannerError}
               />
