@@ -4,7 +4,6 @@ import { Session } from '@supabase/supabase-js'
 import toast from 'react-hot-toast';
 import AdminView from './AdminView';
 import DNProgressCard from './DNProgressCard';
-import VideoCropperScanner from './VideoCropperScanner';
 import ReceptionSummary from './ReceptionSummary';
 import ReceptionHistory from './ReceptionHistory';
 import ReceptionStatistics from './ReceptionStatistics';
@@ -416,6 +415,8 @@ export default function ScannerView({ session, profile, selection, currentView }
     }
   }
 
+  
+
   // Función para manejar el escaneo de códigos de barras
   const handleBarcodeScan = (scannedCode: string) => {
     console.log('handleBarcodeScan: Código escaneado recibido:', scannedCode);
@@ -443,12 +444,6 @@ export default function ScannerView({ session, profile, selection, currentView }
       console.log('handleBarcodeScan: Código escaneado vacío o solo espacios');
       toast.error('Código escaneado inválido.');
     }
-  };
-
-  // Función para manejar errores del escáner
-  const handleScannerError = (error: string) => {
-    console.error('Error en el escáner:', error);
-    toast.error(`Error en el escáner: ${error}`);
   };
 
   if (loading) return <div>Cargando datos para {selection.local} en fecha {selection.fecha}...</div>
@@ -493,12 +488,7 @@ export default function ScannerView({ session, profile, selection, currentView }
                 )}
               </div>
 
-              <div><BarcodeScannerZXing/></div>;
-              
-              <VideoCropperScanner 
-                onScan={handleBarcodeScan}
-                onError={handleScannerError}
-              />
+              <BarcodeScannerZXing onScan={handleBarcodeScan} />
               
               {/* Input manual como fallback */}
               <div style={{ display: 'flex', gap: '10px', margin: '15px 0' }}>

@@ -2,13 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
-import {  Result } from "@zxing/library";
+import { Result } from "@zxing/library";
+
+interface BarcodeScannerZXingProps {
+  onScan?: (barcode: string) => void;
+}
 
 // Aspect ratio and crop size factor
 const DESIRED_CROP_ASPECT_RATIO = 3 / 2;
 const CROP_SIZE_FACTOR = 0.4;
 
-export default function CameraView() {
+export default function BarcodeScannerZXing({ onScan }: BarcodeScannerZXingProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const displayCroppedCanvasRef = useRef<HTMLCanvasElement>(null);
   const cropOverlayRef = useRef<HTMLDivElement>(null);
@@ -77,8 +81,6 @@ export default function CameraView() {
       cropWidth = Math.max(MIN_CROP_WIDTH, Math.min(MAX_CROP_WIDTH, cropWidth));
       cropHeight = Math.max(MIN_CROP_HEIGHT, Math.min(MAX_CROP_HEIGHT, cropHeight));
 
-
-
       const cropX = (video.videoWidth - cropWidth) / 2;
       const cropY = (video.videoHeight - cropHeight) / 2;
 
@@ -112,10 +114,15 @@ export default function CameraView() {
           const result: Result = await codeReader.current.decodeFromCanvas(displayCanvas);
           console.log("Decoded barcode:", result.getText());
           setBarcodeResult(result.getText());
+          
+          // Llamar a la función onScan si está definida
+          if (onScan) {
+            onScan(result.getText());
+          }
         } catch (err: unknown) {
-           if (err instanceof Error && err.name !== "NotFoundException") {
-                console.error("Decoding error:", err);
-              }
+          if (err instanceof Error && err.name !== "NotFoundException") {
+            console.error("Decoding error:", err);
+          }
         }
       };
 
@@ -131,7 +138,7 @@ export default function CameraView() {
       }
       if (intervalId) clearInterval(intervalId);
     };
-  }, []);
+  }, [onScan]);
 
   return (
     <div style={{
