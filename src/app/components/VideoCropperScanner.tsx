@@ -179,6 +179,11 @@ export default function VideoCropperScanner({ onScan, onError }: VideoCropperSca
       if (codeReaderRef.current) {
         const result: Result = await codeReaderRef.current.decodeFromCanvas(displayCroppedCanvasRef.current)
         console.log('VideoCropperScanner: Código de barras detectado:', result.getText())
+        // Mostrar toast con el código detectado para pruebas
+        toast.success(`Código detectado: ${result.getText()}`, {
+          duration: 3000,
+          position: 'bottom-center'
+        })
         setBarcodeResult(result.getText())
         onScan(result.getText())
       }
