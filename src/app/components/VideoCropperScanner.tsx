@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
+import { Result } from '@zxing/library'
 import toast from 'react-hot-toast'
 
 interface VideoCropperScannerProps {
@@ -176,7 +177,7 @@ export default function VideoCropperScanner({ onScan, onError }: VideoCropperSca
 
     try {
       if (codeReaderRef.current) {
-        const result = await codeReaderRef.current.decodeFromCanvas(displayCroppedCanvasRef.current)
+        const result: Result = await codeReaderRef.current.decodeFromCanvas(displayCroppedCanvasRef.current)
         console.log('VideoCropperScanner: Código de barras detectado:', result.getText())
         setBarcodeResult(result.getText())
         onScan(result.getText())
