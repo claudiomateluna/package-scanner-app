@@ -8,6 +8,7 @@ import VideoCropperScanner from './VideoCropperScanner';
 import ReceptionSummary from './ReceptionSummary';
 import ReceptionHistory from './ReceptionHistory';
 import ReceptionStatistics from './ReceptionStatistics';
+import BarcodeScannerZXing from './BarcodeScannerZXing';
 import { isMobileDevice } from '@/lib/deviceUtils';
 import Image from 'next/image';
 import './scrollbarStyles.css';
@@ -491,6 +492,8 @@ export default function ScannerView({ session, profile, selection, currentView }
                   </button>
                 )}
               </div>
+
+              <div><BarcodeScannerZXing/></div>;
               
               <VideoCropperScanner 
                 onScan={handleBarcodeScan}
