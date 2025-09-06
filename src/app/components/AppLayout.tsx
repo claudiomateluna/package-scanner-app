@@ -284,7 +284,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
     <div>
       <header style={headerStyle}>
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             <Image 
               src="/adidas_shp.svg" 
               alt="Adidas Logo" 
@@ -293,12 +293,12 @@ export default function AppLayout({ session, profile, onBack, children, currentV
             />
             <div>
               <h2 style={{ margin: 0, color: '#233D4D' }}>Recepciones</h2>
-              <p style={{ margin: '5px 0 0', fontSize: '0.9em', color: '#233D4D' }}>
-                Bienvenido {getUserFirstAndLastName().firstName} {getUserFirstAndLastName().lastName}
+              <p style={{ margin: '0', fontSize: '0.9em', color: '#233D4D' }}>
+                Bienvenido {getUserFirstAndLastName().firstName}{getUserFirstAndLastName().lastName ? ` ${getUserFirstAndLastName().lastName}` : ''}
               </p>
             </div>
           </div>
-          <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
           {onBack && (
             <button 
               onClick={onBack} 
