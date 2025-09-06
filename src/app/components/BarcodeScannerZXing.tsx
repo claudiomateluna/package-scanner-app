@@ -45,7 +45,7 @@ export default function BarcodeScannerZXing({
           videoRef.current?.play();
           // Solo iniciar el intervalo si isScanning es true
           if (isScanning) {
-            intervalIdRef.current = setInterval(captureFrameAndCrop, 1000);
+            intervalIdRef.current = setInterval(captureFrameAndCrop, 500);
           }
         };
       }
@@ -97,7 +97,7 @@ export default function BarcodeScannerZXing({
           onScanningChange(false);
         }
       } else {
-        intervalIdRef.current = setInterval(captureFrameAndCrop, 1000);
+        intervalIdRef.current = setInterval(captureFrameAndCrop, 500);
         if (onScanningChange) {
           onScanningChange(true);
         }
@@ -200,7 +200,7 @@ export default function BarcodeScannerZXing({
   useEffect(() => {
     if (streamRef.current) {
       if (isScanning && !intervalIdRef.current) {
-        intervalIdRef.current = setInterval(captureFrameAndCrop, 1000);
+        intervalIdRef.current = setInterval(captureFrameAndCrop, 500);
       } else if (!isScanning && intervalIdRef.current) {
         clearInterval(intervalIdRef.current);
         intervalIdRef.current = null;
@@ -260,7 +260,8 @@ export default function BarcodeScannerZXing({
       <h3 style={{
         fontSize: '1rem',
         fontWeight: 'semibold',
-        color: '#1f2937'
+        color: '#1f2937',
+        display: 'none'
       }}>
         Área de Escaneo Focalizada:
       </h3>
@@ -273,7 +274,7 @@ export default function BarcodeScannerZXing({
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
           maxWidth: '100%',
           height: 'auto',
-          display: 'block',
+          display: 'none',
           minWidth: '240px',
           minHeight: '80px'
         }}
@@ -285,7 +286,7 @@ export default function BarcodeScannerZXing({
         color: '#9ca3af',
         fontSize: '0.75rem',
       }}>
-        Esto se actualiza cada 1 segundo con el área focalizada.
+        Esto se actualiza cada 0.5 segundo con el área focalizada.
       </p>
         <div style={{
           padding: '1rem',

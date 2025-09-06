@@ -441,9 +441,9 @@ export default function ScannerView({ session, profile, selection, currentView }
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: '20px', flexDirection: isMobileOrTablet ? 'column' : 'row' }}>
+      <div style={{ display: 'flex', gap: '10px', flexDirection: isMobileOrTablet ? 'column' : 'row' }}>
         <main style={{ width: isMobileOrTablet ? '100%' : '50%' }}>
-          <h3>Recepción - {selection.local} @ {selection.fecha}</h3>
+          <h3>{selection.local} / {selection.fecha}</h3>
           {!canScan && (
             <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>
               <strong>Acceso restringido:</strong> Solo los Operadores de tienda pueden registrar paquetes.
@@ -452,7 +452,7 @@ export default function ScannerView({ session, profile, selection, currentView }
           
           {/* Mostrar lector de códigos de barras para dispositivos móviles o cuando se active manualmente */}
           {(isMobileOrTablet || useBarcodeScanner) ? (
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '10px' }}>
               <div style={{ 
                 display: 'flex', 
                 justifyContent: 'space-between', 
