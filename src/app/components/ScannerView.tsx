@@ -429,7 +429,7 @@ export default function ScannerView({ session, profile, selection, currentView }
       console.log('handleBarcodeScan: Estableciendo scannedOlpn a:', trimmedCode);
       setScannedOlpn(trimmedCode);
       console.log('handleBarcodeScan: scannedOlpn actualizado');
-      toast.success(`Código escaneado: ${trimmedCode}`);
+      toast.success(`Código escaneado: ${trimmedCode} Presiona "Registrar" para confirmar.`);
       
       // Auto-registrar el código escaneado
       if (canScan) {
@@ -496,39 +496,6 @@ export default function ScannerView({ session, profile, selection, currentView }
                 onScanningChange={setIsScannerActive}
               />
               
-              {/* Controles para iniciar/detener el escáner */}
-              <div style={{ display: 'flex', gap: '10px', margin: '10px 0' }}>
-                <button
-                  onClick={() => setIsScannerActive(true)}
-                  style={{
-                    padding: '8px 15px',
-                    backgroundColor: isScannerActive ? '#cccccc' : '#2a9d8f',
-                    color: '#233D4D',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: isScannerActive ? 'not-allowed' : 'pointer',
-                    fontWeight: 'bold'
-                  }}
-                  disabled={isScannerActive}
-                >
-                  Iniciar Escáner
-                </button>
-                <button
-                  onClick={() => setIsScannerActive(false)}
-                  style={{
-                    padding: '8px 15px',
-                    backgroundColor: isScannerActive ? '#e63946' : '#cccccc',
-                    color: '#233D4D',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: isScannerActive ? 'pointer' : 'not-allowed',
-                    fontWeight: 'bold'
-                  }}
-                  disabled={!isScannerActive}
-                >
-                  Detener Escáner
-                </button>
-              </div>
               
               {/* Input manual como fallback */}
               <div style={{ display: 'flex', gap: '10px', margin: '15px 0' }}>

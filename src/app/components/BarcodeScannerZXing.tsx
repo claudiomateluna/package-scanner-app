@@ -295,7 +295,8 @@ export default function BarcodeScannerZXing({
           color: '#065f46',
           fontSize: '1rem',
           fontWeight: '500',
-          textAlign: 'center'
+          textAlign: 'center',
+          display: 'none'
         }}>
           ✅ Barcode : {barcodeResult}
         </div>
