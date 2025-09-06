@@ -283,7 +283,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   return (
     <div>
       <header style={headerStyle}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 10px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <Image 
               src="/adidas_shp.svg" 
@@ -349,7 +349,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
       </div>
     </header>
       
-      <main style={{padding: '20px', maxWidth: '1000px', margin: 'auto'}}>
+      <main style={{padding: '20px', maxWidth: '800px', margin: 'auto'}}>
         {showPasswordForm ? 
           <ChangePasswordForm onDone={() => setShowPasswordForm(false)} /> : 
           children
