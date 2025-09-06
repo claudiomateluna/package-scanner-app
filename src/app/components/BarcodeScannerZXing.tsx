@@ -11,7 +11,7 @@ interface BarcodeScannerZXingProps {
 }
 
 // Aspect ratio and crop size factor
-const DESIRED_CROP_ASPECT_RATIO = 3 / 2;
+const DESIRED_CROP_ASPECT_RATIO = 4 / 3;
 const CROP_SIZE_FACTOR = 0.6;
 
 export default function BarcodeScannerZXing({ 
@@ -22,6 +22,7 @@ export default function BarcodeScannerZXing({
   const videoRef = useRef<HTMLVideoElement>(null);
   const displayCroppedCanvasRef = useRef<HTMLCanvasElement>(null);
   const cropOverlayRef = useRef<HTMLDivElement>(null);
+  const scanLineRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [barcodeResult, setBarcodeResult] = useState<string | null>(null);
   const codeReader = useRef(new BrowserMultiFormatReader());
@@ -171,10 +172,26 @@ export default function BarcodeScannerZXing({
     overlayDiv.style.top = `${(cropY / video.videoHeight) * 100}%`;
     overlayDiv.style.width = `${(cropWidth / video.videoWidth) * 100}%`;
     overlayDiv.style.height = `${(cropHeight / video.videoHeight) * 100}%`;
-    overlayDiv.style.border = '2px solid white';
+    overlayDiv.style.border = '2px solid #FE7F2D';
     overlayDiv.style.borderRadius = '0.5rem';
     overlayDiv.style.pointerEvents = 'none';
     overlayDiv.style.boxSizing = 'border-box';
+    overlayDiv.style.overflow = 'hidden';
+    
+    // Crear o actualizar la línea de escaneo
+    if (!scanLineRef.current) {
+      const scanLine = document.createElement('div');
+      scanLine.style.position = 'absolute';
+      scanLine.style.top = '0';
+      scanLine.style.left = '0';
+      scanLine.style.right = '0';
+      scanLine.style.height = '2px';
+      scanLine.style.backgroundColor = '#FE7F2D';
+      scanLine.style.boxShadow = '0 0 10px rgba(254, 127, 45, 0.8)';
+      scanLine.style.animation = 'scanLineMove 2s ease-in-out infinite';
+      scanLineRef.current = scanLine;
+      overlayDiv.appendChild(scanLine);
+    }
 
     const decodeCanvas = async () => {
       try {
@@ -302,6 +319,17 @@ export default function BarcodeScannerZXing({
         }}>
           ✅ Barcode : {barcodeResult}
         </div>
+        <style jsx>{`
+          @keyframes scanLineMove {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(calc(100% - 2px)); }
+            100% { transform: translateY(0); }
+          }
+        `}</style>
+      </div>
+    </div>
+  );
+}
     </div>
   );
 }
