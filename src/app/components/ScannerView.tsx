@@ -440,10 +440,17 @@ export default function ScannerView({ session, profile, selection, currentView }
   if (error) return <div><p style={{color: 'red'}}><b>Error:</b> {error}</p></div>
 
   return (
-    <div>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 10px' }}>
       <div style={{ display: 'flex', gap: '10px', flexDirection: isMobileOrTablet ? 'column' : 'row' }}>
         <main style={{ width: isMobileOrTablet ? '100%' : '50%' }}>
-          <h3>{selection.local} / {selection.fecha.split('-').reverse().join('-')}</h3>
+          <h3 style={{ 
+            fontSize: isMobileOrTablet ? '1.2rem' : '1.5rem',
+            textAlign: 'center',
+            margin: '10px 0',
+            color: '#FE7F2D'
+          }}>
+            {selection.local} / {selection.fecha.split('-').reverse().join('-')}
+          </h3>
           {!canScan && (
             <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>
               <strong>Acceso restringido:</strong> Solo los Operadores de tienda pueden registrar paquetes.
@@ -551,9 +558,16 @@ export default function ScannerView({ session, profile, selection, currentView }
             </div>
           )}
           
-          <h4>Paquetes Esperados ({scanned.size} / {packages.length})</h4>
+          <h4 style={{ 
+            fontSize: isMobileOrTablet ? '1rem' : '1.2rem',
+            marginTop: '15px',
+            marginBottom: '10px',
+            color: '#CCCCCC'
+          }}>
+            Paquetes Esperados ({scanned.size} / {packages.length})
+          </h4>
           <div className="scroll-container" style={{ 
-            maxHeight: '60vh', 
+            maxHeight: isMobileOrTablet ? '50vh' : '60vh', 
             overflowY: 'auto', 
             borderTopWidth: '1px', 
             borderTopStyle: 'solid', 
@@ -567,14 +581,15 @@ export default function ScannerView({ session, profile, selection, currentView }
             borderRightWidth: '1px', 
             borderRightStyle: 'solid', 
             borderRightColor: '#555', 
-            borderRadius: '5px'
+            borderRadius: '5px',
+            fontSize: isMobileOrTablet ? '0.9rem' : '1rem'
           }}>
             <table style={{width: '100%', borderCollapse: 'collapse'}}>
               <thead>
                 <tr style={{borderBottom: '1px solid #ccc'}}>
-                  <th style={{padding: '8px', textAlign: 'left', color: '#CCCCCC'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: '150px', color: '#CCCCCC'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#CCCCCC'}}>Unidades</th>
+                  <th style={{padding: '8px', textAlign: 'left', color: '#CCCCCC', fontSize: isMobileOrTablet ? '0.85rem' : '1rem'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
+                  <th style={{padding: '8px', textAlign: 'left', width: isMobileOrTablet ? '100px' : '150px', color: '#CCCCCC', fontSize: isMobileOrTablet ? '0.85rem' : '1rem'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
+                  <th style={{padding: '8px', textAlign: 'left', width: isMobileOrTablet ? '80px' : '120px', color: '#CCCCCC', fontSize: isMobileOrTablet ? '0.85rem' : '1rem'}}>Unidades</th>
                 </tr>
               </thead>
               <tbody>
@@ -601,16 +616,16 @@ export default function ScannerView({ session, profile, selection, currentView }
             <div style={{ 
               backgroundColor: 'rgba(0,0,0,0.2)', 
               borderRadius: '8px', 
-              padding: '10px', // Cambiado de 20px a 10px
+              padding: isMobileOrTablet ? '8px' : '10px',
               border: '1px solid #CCCCCC',
               display: 'flex',
               flexDirection: 'column'
             }}>
               <h3 style={{ 
-                margin: '0 0 5px 0', // Cambiado de 15px a 5px
+                margin: '0 0 5px 0',
                 color: '#CCCCCC', 
                 textAlign: 'center',
-                fontSize: '1.2em'
+                fontSize: isMobileOrTablet ? '1em' : '1.2em'
               }}>
                 Resumen - {selection.fecha.split('-').reverse().join('-')}
               </h3>
@@ -620,34 +635,34 @@ export default function ScannerView({ session, profile, selection, currentView }
                 justifyContent: 'space-around', 
                 textAlign: 'center',
                 flexWrap: 'wrap',
-                gap: '5px' // Reducir el espacio entre elementos
+                gap: '5px'
               }}>
-                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
-                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
+                <div style={{ margin: '5px', minWidth: isMobileOrTablet ? '70px' : '80px' }}>
+                  <div style={{ fontSize: isMobileOrTablet ? '1.5em' : '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
                     {/* Calcular DN/Facturas escaneadas */}
                     {Array.from(new Set(packages.filter(pkg => scanned.has(pkg.OLPN)).map(pkg => pkg.DN))).length} / {dnProgress.length}
                   </div>
-                  <div style={{ fontSize: '0.9em', color: '#CCCCCC' }}>
+                  <div style={{ fontSize: isMobileOrTablet ? '0.8em' : '0.9em', color: '#CCCCCC' }}>
                     {isWarehouseOrAdmin ? 'DN' : 'Facturas'}
                   </div>
                 </div>
                 
-                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
-                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
+                <div style={{ margin: '5px', minWidth: isMobileOrTablet ? '70px' : '80px' }}>
+                  <div style={{ fontSize: isMobileOrTablet ? '1.5em' : '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
                     {scanned.size} / {packages.length}
                   </div>
-                  <div style={{ fontSize: '0.9em', color: '#CCCCCC' }}>
+                  <div style={{ fontSize: isMobileOrTablet ? '0.8em' : '0.9em', color: '#CCCCCC' }}>
                     {isWarehouseOrAdmin ? 'OLPN' : 'Bultos'}
                   </div>
                 </div>
                 
-                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
-                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
+                <div style={{ margin: '5px', minWidth: isMobileOrTablet ? '70px' : '80px' }}>
+                  <div style={{ fontSize: isMobileOrTablet ? '1.5em' : '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
                     {/* Calcular total de unidades */}
                     {packages.reduce((total, pkg) => total + (scanned.has(pkg.OLPN) ? pkg.Unidades : 0), 0)} /{' '}
                     {packages.reduce((total, pkg) => total + pkg.Unidades, 0)}
                   </div>
-                  <div style={{ fontSize: '0.9em', color: '#CCCCCC' }}>
+                  <div style={{ fontSize: isMobileOrTablet ? '0.8em' : '0.9em', color: '#CCCCCC' }}>
                     Unidades
                   </div>
                 </div>
@@ -656,7 +671,7 @@ export default function ScannerView({ session, profile, selection, currentView }
               {/* Botones de acción */}
               <div style={{ 
                 display: 'flex', 
-                gap: '10px', 
+                gap: '8px', 
                 marginTop: '10px',
                 flexWrap: 'wrap'
               }}>
@@ -666,12 +681,12 @@ export default function ScannerView({ session, profile, selection, currentView }
                   disabled={!(packages.length > 0 && scanned.size === packages.length) || isCompletingReception || isReceptionCompleted}
                   style={{ 
                     flex: '1',
-                    padding: '10px', // Reducir padding
+                    padding: isMobileOrTablet ? '8px' : '10px',
                     borderRadius: '5px',
                     backgroundColor: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#A1C181' : '#FE7F2D',
                     color: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#233D4D' : '#233D4D',
                     fontWeight: 'bold',
-                    fontSize: '1em',
+                    fontSize: isMobileOrTablet ? '0.9em' : '1em',
                     border: 'none',
                     cursor: packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !isReceptionCompleted ? 'pointer' : 'not-allowed',
                     opacity: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? 1 : 0.6
@@ -685,12 +700,12 @@ export default function ScannerView({ session, profile, selection, currentView }
                   onClick={handleShowReceptionHistory}
                   style={{ 
                     flex: '1',
-                    padding: '10px',
+                    padding: isMobileOrTablet ? '8px' : '10px',
                     borderRadius: '5px',
                     backgroundColor: '#233D4D',
                     color: '#CCCCCC',
                     fontWeight: 'bold',
-                    fontSize: '1em',
+                    fontSize: isMobileOrTablet ? '0.9em' : '1em',
                     border: '1px solid #CCCCCC',
                     cursor: 'pointer'
                   }}
@@ -704,12 +719,12 @@ export default function ScannerView({ session, profile, selection, currentView }
                     onClick={handleShowReceptionStatistics}
                     style={{ 
                       flex: '1',
-                      padding: '10px',
+                      padding: isMobileOrTablet ? '8px' : '10px',
                       borderRadius: '5px',
                       backgroundColor: '#233D4D',
                       color: '#CCCCCC',
                       fontWeight: 'bold',
-                      fontSize: '1em',
+                      fontSize: isMobileOrTablet ? '0.9em' : '1em',
                       border: '1px solid #CCCCCC',
                       cursor: 'pointer'
                     }}
@@ -724,17 +739,17 @@ export default function ScannerView({ session, profile, selection, currentView }
             <div style={{ 
               backgroundColor: 'rgba(0,0,0,0.2)', 
               borderRadius: '8px', 
-              padding: '10px', 
+              padding: isMobileOrTablet ? '8px' : '10px',
               flex: '1',
               display: 'flex',
               flexDirection: 'column',
-              maxHeight: '50vh' // Añadido max-height: 50vh
+              maxHeight: '50vh'
             }}>
               <h3 style={{ 
-                margin: '0 0 15px 0', 
+                margin: '0 0 10px 0',
                 color: '#CCCCCC', 
                 textAlign: 'center',
-                fontSize: '1.2em'
+                fontSize: isMobileOrTablet ? '1em' : '1.2em'
               }}>
                 Progreso por {isWarehouseOrAdmin ? 'DN' : 'Factura'}
               </h3>
