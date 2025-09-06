@@ -349,7 +349,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
       </div>
     </header>
       
-      <main style={{padding: '20px', maxWidth: '800px', margin: 'auto'}}>
+      <main style={{padding: '5px', maxWidth: '800px', margin: 'auto'}}>
         {showPasswordForm ? 
           <ChangePasswordForm onDone={() => setShowPasswordForm(false)} /> : 
           children
