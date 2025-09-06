@@ -429,19 +429,7 @@ export default function ScannerView({ session, profile, selection, currentView }
       console.log('handleBarcodeScan: Estableciendo scannedOlpn a:', trimmedCode);
       setScannedOlpn(trimmedCode);
       console.log('handleBarcodeScan: scannedOlpn actualizado');
-      toast.success(`Código escaneado: ${trimmedCode} Presiona "Registrar" para confirmar.`);
-      
-      // Auto-registrar el código escaneado
-      if (canScan) {
-        console.log('handleBarcodeScan: Llamando a handleRegister automáticamente...');
-        // Usar setTimeout para asegurar que el estado se actualice antes de llamar a handleRegister
-        setTimeout(() => {
-          handleRegister();
-        }, 100);
-      } else {
-        console.log('handleBarcodeScan: No se puede escanear en este momento - canScan es falso');
-        toast.error('No tienes permisos para escanear en este momento.');
-      }
+      toast.success(`Código escaneado: ${trimmedCode} Presiona "Registrar" o "Enter" para confirmar.`);
     } else {
       console.log('handleBarcodeScan: Código escaneado vacío o solo espacios');
       toast.error('Código escaneado inválido.');
