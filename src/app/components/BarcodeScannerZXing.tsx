@@ -143,7 +143,7 @@ export default function BarcodeScannerZXing({
 
     const MIN_CROP_WIDTH = 240;
     const MAX_CROP_WIDTH = 800;
-    const MIN_CROP_HEIGHT = 80;
+    const MIN_CROP_HEIGHT = 160;
     const MAX_CROP_HEIGHT = 500;
 
     cropWidth = Math.max(MIN_CROP_WIDTH, Math.min(MAX_CROP_WIDTH, cropWidth));
@@ -319,13 +319,6 @@ export default function BarcodeScannerZXing({
         }}>
           ✅ Barcode : {barcodeResult}
         </div>
-        <style jsx>{`
-          @keyframes scanLineMove {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(calc(100% - 2px)); }
-            100% { transform: translateY(0); }
-          }
-        `}</style>
     </div>
   );
 }
