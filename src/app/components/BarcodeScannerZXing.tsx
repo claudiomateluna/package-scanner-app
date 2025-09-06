@@ -222,14 +222,22 @@ export default function BarcodeScannerZXing({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      fontFamily: 'sans-serif'
+      fontFamily: 'sans-serif',
+      backgroundColor: '#1a1a1a',
+      borderRadius: '12px',
+      padding: '16px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
+      maxWidth: '100%',
+      width: '100%'
     }}>
-
       <div style={{
         position: 'relative',
         width: '100%',
-        maxWidth: '400px',
+        height: '240px',
         overflow: 'hidden',
+        borderRadius: '8px',
+        border: '2px solid #333',
+        backgroundColor: '#000'
       }}>
         <video
           ref={videoRef}
@@ -247,59 +255,42 @@ export default function BarcodeScannerZXing({
         ></div>
       </div>
 
-      {error && <p style={{ color: '#ef4444', marginTop: '1rem', fontSize: '0.875rem' }}>{error}</p>}
+      {error && <p style={{ color: '#ef4444', marginTop: '12px', fontSize: '0.875rem' }}>{error}</p>}
 
-      <p style={{
-        color: '#4b5563',
-        fontSize: '0.875rem',
-        textAlign: 'center'
-      }}>
-        Camara activa. El borde blanco indica el área de escaneo.
-      </p>
-
-      <h3 style={{
-        fontSize: '1rem',
-        fontWeight: 'semibold',
-        color: '#1f2937'
-      }}>
-        Área de Escaneo Focalizada:
-      </h3>
-
-      <canvas
-        ref={displayCroppedCanvasRef}
-        style={{
-          border: '2px solid #3b82f6',
-          borderRadius: '0.5rem',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
-          maxWidth: '100%',
-          height: 'auto',
-          display: 'block',
-          minWidth: '240px',
-          minHeight: '80px'
-        }}
-      >
-        Tu navegador no soporta el elemento.
-      </canvas>
-
-      <p style={{
+      <div style={{
+        marginTop: '12px',
+        textAlign: 'center',
         color: '#9ca3af',
         fontSize: '0.75rem',
+        lineHeight: '1.3'
       }}>
-        Esto se actualiza cada 1 segundo con el área focalizada.
-      </p>
         <div style={{
-          padding: '1rem',
-          border: '2px dashed #10b981',
-          borderRadius: '0.5rem',
-          backgroundColor: '#ecfdf5',
-          color: '#065f46',
-          fontSize: '1rem',
-          fontWeight: '500',
-          textAlign: 'center',
-          display: 'none'
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          marginBottom: '4px'
         }}>
-          ✅ Barcode : {barcodeResult}
+          <div style={{
+            width: '12px',
+            height: '12px',
+            borderRadius: '50%',
+            backgroundColor: '#10b981',
+            animation: 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+          }}></div>
+          <span>Escaneando...</span>
         </div>
+        <p style={{ margin: 0 }}>
+          Apunta la cámara hacia el código de barras
+        </p>
+      </div>
+
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `}</style>
     </div>
   );
 }
