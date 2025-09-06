@@ -326,10 +326,6 @@ export default function BarcodeScannerZXing({
             100% { transform: translateY(0); }
           }
         `}</style>
-      </div>
-    </div>
-  );
-}
     </div>
   );
 }
