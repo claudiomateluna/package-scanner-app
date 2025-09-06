@@ -45,7 +45,7 @@ export default function BarcodeScannerZXing({
           videoRef.current?.play();
           // Solo iniciar el intervalo si isScanning es true
           if (isScanning) {
-            intervalIdRef.current = setInterval(captureFrameAndCrop, 100);
+            intervalIdRef.current = setInterval(captureFrameAndCrop, 1000);
           }
         };
       }
@@ -97,7 +97,7 @@ export default function BarcodeScannerZXing({
           onScanningChange(false);
         }
       } else {
-        intervalIdRef.current = setInterval(captureFrameAndCrop, 100);
+        intervalIdRef.current = setInterval(captureFrameAndCrop, 1000);
         if (onScanningChange) {
           onScanningChange(true);
         }
@@ -200,7 +200,7 @@ export default function BarcodeScannerZXing({
   useEffect(() => {
     if (streamRef.current) {
       if (isScanning && !intervalIdRef.current) {
-        intervalIdRef.current = setInterval(captureFrameAndCrop, 100);
+        intervalIdRef.current = setInterval(captureFrameAndCrop, 1000);
       } else if (!isScanning && intervalIdRef.current) {
         clearInterval(intervalIdRef.current);
         intervalIdRef.current = null;
@@ -285,7 +285,7 @@ export default function BarcodeScannerZXing({
         color: '#9ca3af',
         fontSize: '0.75rem',
       }}>
-        Esto se actualiza cada 0.1 segundos con el área focalizada.
+        Esto se actualiza cada 1 segundo con el área focalizada.
       </p>
         <div style={{
           padding: '1rem',
