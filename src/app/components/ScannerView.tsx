@@ -69,6 +69,7 @@ export default function ScannerView({ session, profile, selection, currentView }
   const [isCompletingReception, setIsCompletingReception] = useState(false);
   const [receptionStartTime, setReceptionStartTime] = useState<string | null>(null);
   const [isReceptionCompleted, setIsReceptionCompleted] = useState(false); // Nuevo estado para verificar si la recepción ya fue completada
+  const [isScannerActive, setIsScannerActive] = useState(true); // Nuevo estado para manejar si el escáner está activo
 
   const isWarehouseOrAdmin = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator';
   const canScan = profile?.role === 'administrador' || profile?.role === 'Store Operator' || profile?.role === 'Warehouse Operator' || profile?.role === 'Warehouse Supervisor';
@@ -488,7 +489,45 @@ export default function ScannerView({ session, profile, selection, currentView }
                 )}
               </div>
 
-              <BarcodeScannerZXing onScan={handleBarcodeScan} />
+              <BarcodeScannerZXing 
+                onScan={handleBarcodeScan} 
+                isScanning={isScannerActive}
+                onScanningChange={setIsScannerActive}
+              />
+              
+              {/* Controles para iniciar/detener el escáner */}
+              <div style={{ display: 'flex', gap: '10px', margin: '10px 0' }}>
+                <button
+                  onClick={() => setIsScannerActive(true)}
+                  style={{
+                    padding: '8px 15px',
+                    backgroundColor: isScannerActive ? '#cccccc' : '#2a9d8f',
+                    color: '#233D4D',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: isScannerActive ? 'not-allowed' : 'pointer',
+                    fontWeight: 'bold'
+                  }}
+                  disabled={isScannerActive}
+                >
+                  Iniciar Escáner
+                </button>
+                <button
+                  onClick={() => setIsScannerActive(false)}
+                  style={{
+                    padding: '8px 15px',
+                    backgroundColor: isScannerActive ? '#e63946' : '#cccccc',
+                    color: '#233D4D',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: isScannerActive ? 'pointer' : 'not-allowed',
+                    fontWeight: 'bold'
+                  }}
+                  disabled={!isScannerActive}
+                >
+                  Detener Escáner
+                </button>
+              </div>
               
               {/* Input manual como fallback */}
               <div style={{ display: 'flex', gap: '10px', margin: '15px 0' }}>
