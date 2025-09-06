@@ -54,8 +54,8 @@ export default function BarcodeScannerZXing({
         onScanningChange(true);
       }
     } catch (err) {
-      console.error("Camera error:", err);
-      setError("Unable to access the camera. Please check permissions.");
+      console.error("Error de Camara:", err);
+      setError("No es posible acceder a la cámara. Por favor, verifica los permisos.");
       
       if (onScanningChange) {
         onScanningChange(false);
@@ -224,13 +224,6 @@ export default function BarcodeScannerZXing({
       alignItems: 'center',
       fontFamily: 'sans-serif'
     }}>
-      <h2 style={{
-        fontSize: '1.5rem',
-        fontWeight: 'bold',
-        color: '#1f2937'
-      }}>
-        Camera View for Barcode Scanning
-      </h2>
 
       <div style={{
         position: 'relative',
@@ -261,15 +254,15 @@ export default function BarcodeScannerZXing({
         fontSize: '0.875rem',
         textAlign: 'center'
       }}>
-        Camera active. The white border indicates the barcode scanning area.
+        Camara activa. El borde blanco indica el área de escaneo.
       </p>
 
       <h3 style={{
-        fontSize: '1.25rem',
+        fontSize: '1rem',
         fontWeight: 'semibold',
         color: '#1f2937'
       }}>
-        Cropped Barcode Scan Area:
+        Área de Escaneo Focalizada:
       </h3>
 
       <canvas
@@ -285,14 +278,14 @@ export default function BarcodeScannerZXing({
           minHeight: '80px'
         }}
       >
-        Your browser does not support the canvas element.
+        Tu navegador no soporta el elemento.
       </canvas>
 
       <p style={{
         color: '#9ca3af',
         fontSize: '0.75rem',
       }}>
-        This canvas updates every 0.1 seconds with the focused area.
+        Esto se actualiza cada 0.1 segundos con el área focalizada.
       </p>
         <div style={{
           padding: '1rem',
