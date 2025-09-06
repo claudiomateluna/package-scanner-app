@@ -265,7 +265,7 @@ export default function ScannerView({ session, profile, selection, currentView }
     
     if (!olpnToRegister) { 
       console.log('handleRegister: Campo de escaneo vacío');
-      return toast.error("El campo de escaneo está vacío.");
+      // return toast.error("El campo de escaneo está vacío."); - Comentado para evitar doble notificación
     }
     
     const foundPackage = packages.find(p => p.OLPN === olpnToRegister)
@@ -429,6 +429,7 @@ export default function ScannerView({ session, profile, selection, currentView }
       console.log('handleBarcodeScan: Estableciendo scannedOlpn a:', trimmedCode);
       setScannedOlpn(trimmedCode);
       console.log('handleBarcodeScan: scannedOlpn actualizado');
+      toast.success(`Código escaneado: ${trimmedCode}`);
       
       // Auto-registrar el código escaneado
       if (canScan) {
@@ -484,7 +485,7 @@ export default function ScannerView({ session, profile, selection, currentView }
                       fontSize: '12px'
                     }}
                   >
-                    {useBarcodeScanner ? 'Usar Input Manual' : 'Usar Escáner'}
+                    {useBarcodeScanner ? 'Usar Ingreso Normal' : 'Usar Escáner'}
                   </button>
                 )}
               </div>
