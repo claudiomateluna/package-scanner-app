@@ -12,7 +12,7 @@ interface BarcodeScannerZXingProps {
 
 // Aspect ratio and crop size factor
 const DESIRED_CROP_ASPECT_RATIO = 3 / 2;
-const CROP_SIZE_FACTOR = 0.4;
+const CROP_SIZE_FACTOR = 0.6;
 
 export default function BarcodeScannerZXing({ 
   onScan, 
@@ -141,9 +141,9 @@ export default function BarcodeScannerZXing({
     cropHeight = Math.min(cropHeight, video.videoHeight);
 
     const MIN_CROP_WIDTH = 240;
-    const MAX_CROP_WIDTH = 600;
+    const MAX_CROP_WIDTH = 800;
     const MIN_CROP_HEIGHT = 80;
-    const MAX_CROP_HEIGHT = 400;
+    const MAX_CROP_HEIGHT = 500;
 
     cropWidth = Math.max(MIN_CROP_WIDTH, Math.min(MAX_CROP_WIDTH, cropWidth));
     cropHeight = Math.max(MIN_CROP_HEIGHT, Math.min(MAX_CROP_HEIGHT, cropHeight));
@@ -230,6 +230,7 @@ export default function BarcodeScannerZXing({
         width: '100%',
         maxWidth: '400px',
         overflow: 'hidden',
+        height: '180px'
       }}>
         <video
           ref={videoRef}
