@@ -283,21 +283,22 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   return (
     <div>
       <header style={headerStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <Image 
-            src="/adidas_shp.svg" 
-            alt="Adidas Logo" 
-            width={60}
-            height={60}
-          />
-          <div>
-            <h2 style={{ margin: 0, color: '#233D4D' }}>Recepciones</h2>
-            <p style={{ margin: '5px 0 0', fontSize: '0.9em', color: '#233D4D' }}>
-              Bienvenido {getUserFirstAndLastName().firstName} {getUserFirstAndLastName().lastName}
-            </p>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <Image 
+              src="/adidas_shp.svg" 
+              alt="Adidas Logo" 
+              width={60}
+              height={60}
+            />
+            <div>
+              <h2 style={{ margin: 0, color: '#233D4D' }}>Recepciones</h2>
+              <p style={{ margin: '5px 0 0', fontSize: '0.9em', color: '#233D4D' }}>
+                Bienvenido {getUserFirstAndLastName().firstName} {getUserFirstAndLastName().lastName}
+              </p>
+            </div>
           </div>
-        </div>
-        <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
           {onBack && (
             <button 
               onClick={onBack} 
@@ -345,7 +346,8 @@ export default function AppLayout({ session, profile, onBack, children, currentV
             <LogoutIcon />
           </button>
         </div>
-      </header>
+      </div>
+    </header>
       
       <main style={{padding: '20px', maxWidth: '1000px', margin: 'auto'}}>
         {showPasswordForm ? 
