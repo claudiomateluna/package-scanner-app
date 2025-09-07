@@ -167,9 +167,8 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   const isWarehouseOrAdmin = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator' || profile?.role === 'Store Supervisor';
 
   const headerStyle: CSSProperties = { 
-    display: 'flex', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
+    display: 'flow-root',
+    alignItems: 'center',
     borderBottomWidth: '1px',
     borderBottomStyle: 'solid',
     borderBottomColor: '#555',
