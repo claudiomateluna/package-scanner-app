@@ -470,153 +470,32 @@ export default function ScannerView({ session, profile, selection, currentView }
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: '20px', flexDirection: isMobileOrTablet ? 'column' : 'row' }}>
-        <main style={{ width: isMobileOrTablet ? '100%' : '50%' }}>
-          <h3>Recepción - {selection.local} @ {selection.fecha}</h3>
-          {!canScan && (
-            <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>
-              <strong>Acceso restringido:</strong> Solo los Operadores de tienda pueden registrar paquetes.
-            </div>
-          )}
-          
-          {/* --- Lógica de Escaneo Condicional --- */}
-          {isMobileOrTablet ? (
-            // --- VISTA MÓVIL --- 
-            <div style={{ marginBottom: '20px' }}>
-              <h4>Escáner de Código de Barras</h4>
-              <div><BarcodeScannerZXing/></div>
-            </div>
-          ) : (
-            // --- VISTA ESCRITORIO ---
-            <>
-              {useBarcodeScanner ? (
-                // ESCRITORIO - ESCÁNER ACTIVO
-                <div style={{ marginBottom: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                    <h4>Lector de Código de Barras</h4>
-                    <button
-                      onClick={() => setUseBarcodeScanner(false)}
-                      style={{
-                        padding: '5px 10px',
-                        backgroundColor: '#233D4D',
-                        color: '#CCCCCC',
-                        border: '1px solid #CCCCCC',
-                        borderRadius: '3px',
-                        cursor: 'pointer',
-                        fontSize: '12px'
-                      }}
-                    >
-                      Usar Input Manual
-                    </button>
-                  </div>
-                  <div><BarcodeScannerZXing/></div>
-                </div>
-              ) : (
-                // ESCRITORIO - INPUT MANUAL ACTIVO
-                <div style={{ display: 'flex', gap: '10px', margin: '20px 0' }}>
-                  <input 
-                    type="text" 
-                    placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`} 
-                    value={scannedOlpn} 
-                    onChange={(e) => setScannedOlpn(e.target.value)} 
-                    style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px'}}
-                    onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister(scannedOlpn)}
-                    disabled={!canScan}
-                  />
-                  <button 
-                    onClick={() => handleRegister(scannedOlpn)} 
-                    style={{padding: '10px 20px', backgroundColor: canScan ? '#FE7F2D' : '#cccccc', color: '#233D4D', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '5px', cursor: canScan ? 'pointer' : 'not-allowed'}}
-                    disabled={!canScan}
-                  >
-                    Registrar
-                  </button>
-                  <button 
-                    onClick={() => setUseBarcodeScanner(true)}
-                    style={{padding: '5px', backgroundColor: '#FE7F2D', color: '#233D4D', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
-                    title="Usar escáner de código de barras"
-                  >
-                    <Image 
-                      alt="Código de Barras" 
-                      src="/barcode.svg" 
-                      width={44}
-                      height={34}
-                    />
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-          
-          <h4>Paquetes Esperados ({scanned.size} / {packages.length})</h4>
-          <div className="scroll-container" style={{ 
-            maxHeight: '60vh', 
-            overflowY: 'auto', 
-            borderTopWidth: '1px', 
-            borderTopStyle: 'solid', 
-            borderTopColor: '#555', 
-            borderBottomWidth: '1px', 
-            borderBottomStyle: 'solid', 
-            borderBottomColor: '#555', 
-            borderLeftWidth: '1px', 
-            borderLeftStyle: 'solid', 
-            borderLeftColor: '#555', 
-            borderRightWidth: '1px', 
-            borderRightStyle: 'solid', 
-            borderRightColor: '#555', 
-            borderRadius: '5px'
-          }}>
-            <table style={{width: '100%', borderCollapse: 'collapse'}}>
-              <thead>
-                <tr style={{borderBottom: '1px solid #ccc'}}>
-                  <th style={{padding: '8px', textAlign: 'left', color: '#CCCCCC'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: '150px', color: '#CCCCCC'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#CCCCCC'}}>Unidades</th>
-                </tr>
-              </thead>
-              <tbody>
-                {packages.map(pkg => (
-                  <tr key={pkg.OLPN} style={{ 
-                      backgroundColor: scanned.has(pkg.OLPN) ? '#A1C181' : 'transparent',
-                      color: scanned.has(pkg.OLPN) ? '#233D4D' : '#CCCCCC',
-                      borderBottom: '1px solid #555'
-                    }}>
-                    <td style={{padding: '8px'}}>{pkg.OLPN}</td>
-                    <td style={{padding: '8px'}}>{pkg.DN}</td>
-                    <td style={{padding: '8px'}}>{pkg.Unidades}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </main>
-
-        {/* Columna derecha con Resumen y Progreso por DN */}
-        {!isMobileOrTablet && (
-          <div style={{ width: '50%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Cuadro Resumen */}
-            <div style={{ 
-              backgroundColor: 'rgba(0,0,0,0.2)', 
-              borderRadius: '8px', 
-              padding: '10px', // Cambiado de 20px a 10px
+      <div style={{ display: 'flex', gap: '10px', flexDirection: isMobileOrTablet ? 'column' : 'row' }}>
+        <main style={{ width: isMobileOrTablet ? '100%' : '63%' }}>
+          {/* Cuadro Resumen */}
+            <div id='CuadroResumen' style={{ 
+              backgroundColor: 'rgba(0,0,0,0.2)',
+              borderRadius: '8px',
+              padding: '5px',
               border: '1px solid #CCCCCC',
               display: 'flex',
               flexDirection: 'column'
             }}>
-              <h3 style={{ 
-                margin: '0 0 5px 0', // Cambiado de 15px a 5px
-                color: '#CCCCCC', 
+              <h3 style={{
+                margin: '0 0 5px 0',
+                color: '#CCCCCC',
                 textAlign: 'center',
                 fontSize: '1.2em'
               }}>
-                Resumen - {selection.fecha.split('-').reverse().join('-')}
+                {selection.local} - {selection.fecha}
               </h3>
               
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-around', 
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-around',
                 textAlign: 'center',
                 flexWrap: 'wrap',
-                gap: '5px' // Reducir el espacio entre elementos
+                gap: '5px'
               }}>
                 <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
                     {/* Calcular DN/Facturas escaneadas */}
@@ -711,17 +590,137 @@ export default function ScannerView({ session, profile, selection, currentView }
                   </button>
                 )}
               </div>
+              {/* --- Lógica de Escaneo Condicional --- */}
+          {isMobileOrTablet ? (
+            // --- VISTA MÓVIL --- 
+            <div style={{ marginBottom: '20px' }}>
+              <h4>Escáner de Código de Barras</h4>
+              <div><BarcodeScannerZXing/></div>
             </div>
+          ) : (
+            // --- VISTA ESCRITORIO ---
+            <>
+              {useBarcodeScanner ? (
+                // ESCRITORIO - ESCÁNER ACTIVO
+                <div style={{ marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <h4>Lector de Código de Barras</h4>
+                    <button
+                      onClick={() => setUseBarcodeScanner(false)}
+                      style={{
+                        padding: '5px 10px',
+                        backgroundColor: '#233D4D',
+                        color: '#CCCCCC',
+                        border: '1px solid #CCCCCC',
+                        borderRadius: '3px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                    >
+                      Usar Input Manual
+                    </button>
+                  </div>
+                  <div><BarcodeScannerZXing/></div>
+                </div>
+              ) : (
+                // ESCRITORIO - INPUT MANUAL ACTIVO
+                <div style={{ display: 'flex', gap: '5px', margin: '20px 0 0 0' }}>
+                  <input 
+                    type="text" 
+                    placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`} 
+                    value={scannedOlpn} 
+                    onChange={(e) => setScannedOlpn(e.target.value)} 
+                    style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px'}}
+                    onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister(scannedOlpn)}
+                    disabled={!canScan}
+                  />
+                  <button 
+                    onClick={() => handleRegister(scannedOlpn)} 
+                    style={{padding: '5px', backgroundColor: canScan ? '#FE7F2D' : '#cccccc', color: '#233D4D', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '5px', cursor: canScan ? 'pointer' : 'not-allowed', fontWeight: 'bold'}}
+                    disabled={!canScan}
+                  >
+                    Registrar
+                  </button>
+                  <button 
+                    onClick={() => setUseBarcodeScanner(true)}
+                    style={{padding: '2px', backgroundColor: '#FE7F2D', color: '#233D4D', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
+                    title="Usar escáner de código de barras"
+                  >
+                    <Image 
+                      alt="Código de Barras" 
+                      src="/barcode.svg" 
+                      width={44}
+                      height={34}
+                    />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+            </div>
+          {!canScan && (
+            <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>
+              <strong>Acceso restringido:</strong> Solo los Operadores de tienda pueden registrar paquetes.
+            </div>
+          )}
+
+          <h4>Paquetes Esperados ({scanned.size} / {packages.length})</h4>
+          <div className="scroll-container" style={{ 
+            maxHeight: '50vh', 
+            overflowY: 'auto', 
+            borderTopWidth: '1px', 
+            borderTopStyle: 'solid', 
+            borderTopColor: '#555', 
+            borderBottomWidth: '1px', 
+            borderBottomStyle: 'solid', 
+            borderBottomColor: '#555', 
+            borderLeftWidth: '1px', 
+            borderLeftStyle: 'solid', 
+            borderLeftColor: '#555', 
+            borderRightWidth: '1px', 
+            borderRightStyle: 'solid', 
+            borderRightColor: '#555', 
+            borderRadius: '5px'
+          }}>
+            <table style={{width: '100%', borderCollapse: 'collapse'}}>
+              <thead>
+                <tr style={{borderBottom: '1px solid #ccc'}}>
+                  <th style={{padding: '8px', textAlign: 'left', color: '#CCCCCC'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
+                  <th style={{padding: '8px', textAlign: 'left', width: '150px', color: '#CCCCCC'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
+                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#CCCCCC'}}>Unidades</th>
+                </tr>
+              </thead>
+              <tbody>
+                {packages.map(pkg => (
+                  <tr key={pkg.OLPN} style={{ 
+                      backgroundColor: scanned.has(pkg.OLPN) ? '#A1C181' : 'transparent',
+                      color: scanned.has(pkg.OLPN) ? '#233D4D' : '#CCCCCC',
+                      borderBottom: '1px solid #555'
+                    }}>
+                    <td style={{padding: '8px'}}>{pkg.OLPN}</td>
+                    <td style={{padding: '8px'}}>{pkg.DN}</td>
+                    <td style={{padding: '8px'}}>{pkg.Unidades}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </main>
+
+        {/* Columna derecha con Resumen y Progreso por DN */}
+        {!isMobileOrTablet && (
+          <div id='Derecha' style={{ width: isMobileOrTablet ? '100%' : '37%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            
             
             {/* Progreso por DN */}
-            <div style={{ 
+            <div id='ProgresoPorDN' style={{ 
               backgroundColor: 'rgba(0,0,0,0.2)', 
               borderRadius: '8px', 
               padding: '10px', 
               flex: '1',
               display: 'flex',
               flexDirection: 'column',
-              maxHeight: '50vh' // Añadido max-height: 50vh
+              maxHeight: '85vh'
             }}>
               <h3 style={{ 
                 margin: '0 0 15px 0', 

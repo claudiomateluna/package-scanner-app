@@ -31,10 +31,10 @@ type Profile = ProfileData;
 
 // --- Estilos Reutilizables ---
 const inputStyle: CSSProperties = { 
-  width: '100%', 
-  padding: '10px', 
-  backgroundColor: '#fff', 
-  color: '#000', 
+  width: '100%',
+  padding: '10px',
+  backgroundColor: '#fff',
+  color: '#000',
   borderTopWidth: '1px',
   borderTopStyle: 'solid',
   borderTopColor: '#ccc',
@@ -48,7 +48,8 @@ const inputStyle: CSSProperties = {
   borderRightStyle: 'solid',
   borderRightColor: '#ccc',
   borderRadius: '5px',
-  boxSizing: 'border-box' // Añadido para prevenir desbordamiento
+  boxSizing: 'border-box',
+  margin: '5px'
 };
 
 const buttonStyle: CSSProperties = { 
@@ -602,9 +603,9 @@ export default function AdminView({ profile }: AdminViewProps) {
         <>
           <div style={cardStyle}>
             <h3>Crear Nuevo Usuario</h3>
-            <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <input type="text" placeholder="Nombre" value={firstName} onChange={e => setFirstName(e.target.value)} style={inputStyle} />
-              <input type="text" placeholder="Apellido" value={lastName} onChange={e => setLastName(e.target.value)} style={inputStyle} />
+            <form onSubmit={handleCreateUser} style={{ display: 'block', gap: '10px' }}>
+              <input type="text" placeholder="Nombre" value={firstName} onChange={e => setFirstName(e.target.value)} style={{ width:'50%', padding: '10px', backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px', boxSizing: 'border-box', margin: '5px'}} />
+              <input type="text" placeholder="Apellido" value={lastName} onChange={e => setLastName(e.target.value)} style={{ width:'50%', padding: '10px', backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px', boxSizing: 'border-box', margin: '5px'}} />
               <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle}/>
               <input type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)} required style={inputStyle}/>
               
