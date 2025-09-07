@@ -302,7 +302,7 @@ export default function ScannerView({ session, profile, selection, currentView }
     return (
       <div style={{ textAlign: 'center', padding: '40px' }}>
         <h3>Por favor, selecciona un local y una fecha para continuar</h3>
-        <p>Utiliza el botón "Volver" para regresar a la pantalla de selección</p>
+        <p>Utiliza el botón Volver para regresar a la pantalla de selección</p>
       </div>
     );
   }
@@ -392,7 +392,7 @@ export default function ScannerView({ session, profile, selection, currentView }
       setIsCompletingReception(true);
       
       // Mostrar confirmación
-      if (!window.confirm('¿Estás seguro de que quieres completar esta recepción? Esta acción no se puede deshacer.')) {
+      if (!window.confirm(`¿Estás seguro de que quieres completar esta recepción? Esta acción no se puede deshacer.`)) {
         setIsCompletingReception(false);
         return;
       }
