@@ -71,12 +71,43 @@ export default function ScannerView({ session, profile, selection, currentView }
   const [isReceptionCompleted, setIsReceptionCompleted] = useState(false); // Nuevo estado para verificar si la recepción ya fue completada
   const [isScannerActive, setIsScannerActive] = useState(true); // Nuevo estado para manejar si el escáner está activo
 
-  const isWarehouseOrAdmin = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator';
-  const canScan = profile?.role === 'administrador' || profile?.role === 'Store Operator' || profile?.role === 'Warehouse Operator' || profile?.role === 'Warehouse Supervisor';
-  
+  // Función para detectar si es iPad o Tablet Android
+  const isTabletDevice = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    
+    // Detectar iPad
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+      // Si es iPad, verificar si es portrait o landscape
+      return window.matchMedia('(orientation: portrait)').matches;
+    }
+    
+    // Detectar Android tablet
+    if (/android/i.test(userAgent)) {
+      // Verificar si es un dispositivo táctil pero no un móvil típico
+      if (!/mobile/i.test(userAgent)) {
+        return true;
+      }
+      // Algunas tablets Android se identifican como móviles, verificar por resolución
+      if (window.screen.width >= 768) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+
   // Detectar si es un dispositivo móvil o tablet
   const isMobileOrTablet = isMobileDevice();
   // isIPadDevice, isIPhoneDevice, isAndroidDevice se eliminaron ya que no se usaban
+
+  // Variables para controlar roles y permisos
+  const isWarehouseOrAdmin = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator';
+  const canScan = profile?.role === 'administrador' || profile?.role === 'Store Operator' || profile?.role === 'Warehouse Operator' || profile?.role === 'Warehouse Supervisor';
+
+  const isIPadOrAndroidTablet = isTabletDevice();
+  const showDesktopLayout = !isMobileOrTablet || isIPadOrAndroidTablet;
 
   const fetchData = useCallback(async () => {
     setError(null)
@@ -421,7 +452,7 @@ export default function ScannerView({ session, profile, selection, currentView }
   // Función para manejar el escaneo de códigos de barras
   const handleBarcodeScan = (scannedCode: string) => {
     console.log('handleBarcodeScan: Código escaneado recibido:', scannedCode);
-    console.log('handleBarcodeScan: canScan:', canScan);
+    // console.log('handleBarcodeScan: canScan:', canScan); // Eliminado ya que canScan no está en este contexto
     console.log('handleBarcodeScan: profile.role:', profile?.role);
     
     if (scannedCode && scannedCode.trim() !== '') {
@@ -443,16 +474,65 @@ export default function ScannerView({ session, profile, selection, currentView }
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 10px' }}>
       <div style={{ display: 'flex', gap: '10px', flexDirection: isMobileOrTablet ? 'column' : 'row' }}>
         <main style={{ width: isMobileOrTablet ? '100%' : '50%' }}>
-          <h3 style={{ 
-            fontSize: isMobileOrTablet ? '1.2rem' : '1.5rem',
-            textAlign: 'center',
-            margin: '10px 0',
-            color: '#FE7F2D'
+          {/* Cuadro Resumen - Primer elemento que aparece */}
+          <div style={{ 
+            backgroundColor: 'rgba(0,0,0,0.2)', 
+            borderRadius: '8px', 
+            padding: '10px',
+            border: '1px solid #CCCCCC',
+            display: 'flex',
+            flexDirection: 'column'
           }}>
-            {selection.local} / {selection.fecha.split('-').reverse().join('-')}
-          </h3>
+            <h3 style={{ 
+              margin: '0 0 5px 0',
+              color: '#CCCCCC', 
+              textAlign: 'center',
+              fontSize: '1.2em'
+            }}>
+              {selection.local}
+            </h3>
+            
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-around', 
+              textAlign: 'center',
+              flexWrap: 'wrap',
+              gap: '5px'
+            }}>
+              <div style={{ margin: '5px', minWidth: '80px' }}>
+                <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
+                  {/* Calcular DN/Facturas escaneadas */}
+                  {Array.from(new Set(packages.filter(pkg => scanned.has(pkg.OLPN)).map(pkg => pkg.DN))).length} / {dnProgress.length}
+                </div>
+                <div style={{ fontSize: '0.9em', color: '#CCCCCC' }}>
+                  {isWarehouseOrAdmin ? 'DN' : 'Facturas'}
+                </div>
+              </div>
+              
+              <div style={{ margin: '5px', minWidth: '80px' }}>
+                <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
+                  {scanned.size} / {packages.length}
+                </div>
+                <div style={{ fontSize: '0.9em', color: '#CCCCCC' }}>
+                  {isWarehouseOrAdmin ? 'OLPN' : 'Bultos'}
+                </div>
+              </div>
+              
+              <div style={{ margin: '5px', minWidth: '80px' }}>
+                <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
+                  {/* Calcular total de unidades */}
+                  {packages.reduce((total, pkg) => total + (scanned.has(pkg.OLPN) ? pkg.Unidades : 0), 0)} /{' '}
+                  {packages.reduce((total, pkg) => total + pkg.Unidades, 0)}
+                </div>
+                <div style={{ fontSize: '0.9em', color: '#CCCCCC' }}>
+                  Unidades
+                </div>
+              </div>
+            </div>
+          </div>
+          
           {!canScan && (
-            <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>
+            <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '5px', marginBottom: '15px', marginTop: '15px' }}>
               <strong>Acceso restringido:</strong> Solo los Operadores de tienda pueden registrar paquetes.
             </div>
           )}
@@ -525,91 +605,199 @@ export default function ScannerView({ session, profile, selection, currentView }
               </div>
             </div>
           ) : (
-            /* Input manual para desktop */
-            <div style={{ display: 'flex', gap: '10px', margin: '20px 0' }}>
-              <input 
-                type="text" 
-                placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`} 
-                value={scannedOlpn} 
-                onChange={(e) => setScannedOlpn(e.target.value)} 
-                style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px'}}
-                onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister()}
-                disabled={!canScan}
-              />
-              <button 
-                onClick={handleRegister} 
-                style={{padding: '10px 20px', backgroundColor: canScan ? '#FE7F2D' : '#cccccc', color: '#233D4D', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '5px', cursor: canScan ? 'pointer' : 'not-allowed'}}
-                disabled={!canScan}
-              >
-                Registrar
-              </button>
-              <button 
-                onClick={() => setUseBarcodeScanner(true)}
-                style={{padding: '5px', backgroundColor: '#FE7F2D', color: '#233D4D', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
-                title="Usar escáner de código de barras"
-              >
-                <Image 
-                  alt="Código de Barras" 
-                  src="/barcode.svg" 
-                  width={44}
-                  height={34}
+            /* Input de OLPN con botones - Flotando a la derecha en desktop */
+            <div style={{ 
+              display: isMobileOrTablet ? 'block' : 'flex', 
+              gap: '10px', 
+              margin: '20px 0'
+            }}>
+            {isMobileOrTablet ? (
+              /* Versión móvil: input arriba, botones abajo */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <input 
+                  type="text" 
+                  placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`} 
+                  value={scannedOlpn} 
+                  onChange={(e) => setScannedOlpn(e.target.value)} 
+                  style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px'}}
+                  onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister()}
+                  disabled={!canScan}
                 />
-              </button>
-            </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button 
+                    onClick={handleRegister} 
+                    style={{padding: '10px 20px', backgroundColor: canScan ? '#FE7F2D' : '#cccccc', color: '#233D4D', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '5px', cursor: canScan ? 'pointer' : 'not-allowed', flex: 1}}
+                    disabled={!canScan}
+                  >
+                    Registrar
+                  </button>
+                  <button 
+                    onClick={() => setUseBarcodeScanner(true)}
+                    style={{padding: '5px', backgroundColor: '#FE7F2D', color: '#233D4D', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
+                    title="Usar escáner de código de barras"
+                  >
+                    <Image 
+                      alt="Código de Barras" 
+                      src="/barcode.svg" 
+                      width={44}
+                      height={34}
+                    />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Espacio vacío para empujar el input a la derecha */}
+                <div style={{ width: '50%' }}></div>
+                
+                {/* Input y botones flotando a la derecha */}
+                <div style={{ width: '50%', display: 'flex', gap: '10px' }}>
+                  <input 
+                    type="text" 
+                    placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`} 
+                    value={scannedOlpn} 
+                    onChange={(e) => setScannedOlpn(e.target.value)} 
+                    style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px'}}
+                    onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister()}
+                    disabled={!canScan}
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <button 
+                      onClick={handleRegister} 
+                      style={{padding: '10px 20px', backgroundColor: canScan ? '#FE7F2D' : '#cccccc', color: '#233D4D', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '5px', cursor: canScan ? 'pointer' : 'not-allowed'}}
+                      disabled={!canScan}
+                    >
+                      Registrar
+                    </button>
+                    <button 
+                      onClick={() => setUseBarcodeScanner(true)}
+                      style={{padding: '5px', backgroundColor: '#FE7F2D', color: '#233D4D', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
+                      title="Usar escáner de código de barras"
+                    >
+                      <Image 
+                        alt="Código de Barras" 
+                        src="/barcode.svg" 
+                        width={44}
+                        height={34}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           )}
           
-          <h4 style={{ 
-            fontSize: isMobileOrTablet ? '1rem' : '1.2rem',
-            marginTop: '15px',
-            marginBottom: '10px',
-            color: '#CCCCCC'
+          {/* Div contenedor para paquetes esperados y progreso por OLPN */}
+          <div style={{ 
+            display: isMobileOrTablet ? 'block' : 'flex', 
+            gap: '10px', 
+            marginTop: '20px',
+            ...(isMobileOrTablet ? {} : { height: '60vh' })
           }}>
-            Paquetes Esperados ({scanned.size} / {packages.length})
-          </h4>
-          <div className="scroll-container" style={{ 
-            maxHeight: isMobileOrTablet ? '50vh' : '60vh', 
-            overflowY: 'auto', 
-            borderTopWidth: '1px', 
-            borderTopStyle: 'solid', 
-            borderTopColor: '#555', 
-            borderBottomWidth: '1px', 
-            borderBottomStyle: 'solid', 
-            borderBottomColor: '#555', 
-            borderLeftWidth: '1px', 
-            borderLeftStyle: 'solid', 
-            borderLeftColor: '#555', 
-            borderRightWidth: '1px', 
-            borderRightStyle: 'solid', 
-            borderRightColor: '#555', 
-            borderRadius: '5px',
-            fontSize: isMobileOrTablet ? '0.9rem' : '1rem'
-          }}>
-            <table style={{width: '100%', borderCollapse: 'collapse'}}>
-              <thead>
-                <tr style={{borderBottom: '1px solid #ccc'}}>
-                  <th style={{padding: '8px', textAlign: 'left', color: '#CCCCCC', fontSize: isMobileOrTablet ? '0.85rem' : '1rem'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: isMobileOrTablet ? '100px' : '150px', color: '#CCCCCC', fontSize: isMobileOrTablet ? '0.85rem' : '1rem'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: isMobileOrTablet ? '80px' : '120px', color: '#CCCCCC', fontSize: isMobileOrTablet ? '0.85rem' : '1rem'}}>Unidades</th>
-                </tr>
-              </thead>
-              <tbody>
-                {packages.map(pkg => (
-                  <tr key={pkg.OLPN} style={{ 
-                      backgroundColor: scanned.has(pkg.OLPN) ? '#A1C181' : 'transparent',
-                      color: scanned.has(pkg.OLPN) ? '#233D4D' : '#CCCCCC',
-                      borderBottom: '1px solid #555'
-                    }}>
-                    <td style={{padding: '8px'}}>{pkg.OLPN}</td>
-                    <td style={{padding: '8px'}}>{pkg.DN}</td>
-                    <td style={{padding: '8px'}}>{pkg.Unidades}</td>
-                  </tr>
+            {/* Paquetes Esperados - 60% en desktop */}
+            <div style={{ 
+              width: isMobileOrTablet ? '100%' : '60%',
+              ...(isMobileOrTablet ? {} : { height: '100%', display: 'flex', flexDirection: 'column' })
+            }}>
+              <h4 style={{ 
+                fontSize: isMobileOrTablet ? '1rem' : '1.2rem',
+                marginTop: '15px',
+                marginBottom: '10px',
+                color: '#CCCCCC'
+              }}>
+                Paquetes Esperados ({scanned.size} / {packages.length})
+              </h4>
+              <div className="scroll-container" style={{ 
+                maxHeight: isMobileOrTablet ? '50vh' : '100%', 
+                overflowY: 'auto', 
+                borderTopWidth: '1px', 
+                borderTopStyle: 'solid', 
+                borderTopColor: '#555', 
+                borderBottomWidth: '1px', 
+                borderBottomStyle: 'solid', 
+                borderBottomColor: '#555', 
+                borderLeftWidth: '1px', 
+                borderLeftStyle: 'solid', 
+                borderLeftColor: '#555', 
+                borderRightWidth: '1px', 
+                borderRightStyle: 'solid', 
+                borderRightColor: '#555', 
+                borderRadius: '5px',
+                fontSize: isMobileOrTablet ? '0.9rem' : '1rem',
+                ...(isMobileOrTablet ? {} : { flex: '1' })
+              }}>
+                <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                  <thead>
+                    <tr style={{borderBottom: '1px solid #ccc'}}>
+                      <th style={{padding: '8px', textAlign: 'left', color: '#CCCCCC', fontSize: isMobileOrTablet ? '0.85rem' : '1rem'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
+                      <th style={{padding: '8px', textAlign: 'left', width: isMobileOrTablet ? '100px' : '150px', color: '#CCCCCC', fontSize: isMobileOrTablet ? '0.85rem' : '1rem'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
+                      <th style={{padding: '8px', textAlign: 'left', width: isMobileOrTablet ? '80px' : '120px', color: '#CCCCCC', fontSize: isMobileOrTablet ? '0.85rem' : '1rem'}}>Unidades</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {packages.map(pkg => (
+                      <tr key={pkg.OLPN} style={{ 
+                          backgroundColor: scanned.has(pkg.OLPN) ? '#A1C181' : 'transparent',
+                          color: scanned.has(pkg.OLPN) ? '#233D4D' : '#CCCCCC',
+                          borderBottom: '1px solid #555'
+                        }}>
+                        <td style={{padding: '8px'}}>{pkg.OLPN}</td>
+                        <td style={{padding: '8px'}}>{pkg.DN}</td>
+                        <td style={{padding: '8px'}}>{pkg.Unidades}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            {/* Progreso por OLPN - 40% en desktop */}
+            <div style={{ 
+              width: isMobileOrTablet ? '100%' : '40%',
+              marginTop: isMobileOrTablet ? '20px' : 0
+            }}>
+              <h4 style={{ 
+                fontSize: isMobileOrTablet ? '1rem' : '1.2rem',
+                marginTop: '15px',
+                marginBottom: '10px',
+                color: '#CCCCCC'
+              }}>
+                Progreso por {isWarehouseOrAdmin ? 'DN' : 'Factura'}
+              </h4>
+              <div className="scroll-container" style={{ 
+                maxHeight: isMobileOrTablet ? '50vh' : '60vh', 
+                overflowY: 'auto', 
+                borderTopWidth: '1px', 
+                borderTopStyle: 'solid', 
+                borderTopColor: '#555', 
+                borderBottomWidth: '1px', 
+                borderBottomStyle: 'solid', 
+                borderBottomColor: '#555', 
+                borderLeftWidth: '1px', 
+                borderLeftStyle: 'solid', 
+                borderLeftColor: '#555', 
+                borderRightWidth: '1px', 
+                borderRightStyle: 'solid', 
+                borderRightColor: '#555', 
+                borderRadius: '5px',
+                fontSize: isMobileOrTablet ? '0.9rem' : '1rem'
+              }}>
+                {dnProgress.map(item => (
+                  <DNProgressCard 
+                    key={item.dn}
+                    dn={item.dn}
+                    totalPackages={item.totalPackages}
+                    scannedPackages={item.scannedPackages}
+                    isStoreUser={!isWarehouseOrAdmin}
+                  />
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
           </div>
         </main>
 
-        {/* Columna derecha con Resumen y Progreso por DN */}
+        {/* Columna derecha con Botones de Acción y Progreso por DN (solo en desktop/tablets) */}
         {!isMobileOrTablet && (
           <div style={{ width: '50%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Cuadro Resumen */}
@@ -625,9 +813,9 @@ export default function ScannerView({ session, profile, selection, currentView }
                 margin: '0 0 5px 0',
                 color: '#CCCCCC', 
                 textAlign: 'center',
-                fontSize: isMobileOrTablet ? '1em' : '1.2em'
+                fontSize: '1.2em'
               }}>
-                Resumen - {selection.fecha.split('-').reverse().join('-')}
+                {selection.local}
               </h3>
               
               <div style={{ 

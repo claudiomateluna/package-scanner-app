@@ -254,37 +254,10 @@ export default function AppLayout({ session, profile, onBack, children, currentV
 
   // Obtener nombre y apellido por separado
   const getUserFirstAndLastName = () => {
-    // Primero intentar obtener de profile si está disponible
-    if (profile?.first_name || profile?.last_name) {
-      return {
-        firstName: profile.first_name || '',
-        lastName: profile.last_name || ''
-      };
-    }
-    
-    // Si no, usar user_metadata como respaldo
-    if (user.user_metadata?.first_name && user.user_metadata?.last_name) {
-      return {
-        firstName: user.user_metadata.first_name,
-        lastName: user.user_metadata.last_name
-      };
-    }
-    if (user.user_metadata?.full_name) {
-      const names = user.user_metadata.full_name.split(' ');
-      return {
-        firstName: names[0],
-        lastName: names.length > 1 ? names[names.length - 1] : ''
-      };
-    }
-    if (user.email) {
-      return {
-        firstName: user.email.split('@')[0],
-        lastName: ''
-      };
-    }
+    // console.log('Profile:', profile); // Para debug
     return {
-      firstName: 'Usuario',
-      lastName: ''
+      firstName: profile?.first_name || '',
+      lastName: profile?.last_name || ''
     };
   };
 

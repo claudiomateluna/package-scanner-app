@@ -8,7 +8,7 @@ import AppLayout from './components/AppLayout'
 import CustomLogin from './components/CustomLogin'
 
 // Definimos los tipos de datos que usaremos en este componente padre
-type Profile = { role: string | null; }
+type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
 type Selection = { local: string; fecha: string; }
 
 export default function Home() {
@@ -26,7 +26,7 @@ export default function Home() {
         try {
           const { data: profileData, error } = await supabase
             .from('profiles')
-            .select('role')
+            .select('role, first_name, last_name')
             .eq('id', session.user.id)
             .single();
           
