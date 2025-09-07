@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 import Image from 'next/image'
 
 // --- Tipos de Datos ---
-type Profile = { role: string | null; }
+type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
 type View = 'scanner' | 'admin';
 
 interface Props {
@@ -254,6 +254,15 @@ export default function AppLayout({ session, profile, onBack, children, currentV
 
   // Obtener nombre y apellido por separado
   const getUserFirstAndLastName = () => {
+    // Primero intentar obtener de profile si está disponible
+    if (profile?.first_name || profile?.last_name) {
+      return {
+        firstName: profile.first_name || '',
+        lastName: profile.last_name || ''
+      };
+    }
+    
+    // Si no, usar user_metadata como respaldo
     if (user.user_metadata?.first_name && user.user_metadata?.last_name) {
       return {
         firstName: user.user_metadata.first_name,
@@ -293,7 +302,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
             <div>
               <h2 style={{ margin: 0, color: '#233D4D' }}>Recepciones</h2>
               <p style={{ margin: '0', fontSize: '0.9em', color: '#233D4D' }}>
-                Bienvenido {getUserFirstAndLastName().firstName}{getUserFirstAndLastName().lastName ? ` ${getUserFirstAndLastName().lastName}` : ''}
+                Bienvenido {getUserFirstAndLastName().firstName} {getUserFirstAndLastName().lastName ? ` ${getUserFirstAndLastName().lastName}` : ''}
               </p>
             </div>
           </div>
