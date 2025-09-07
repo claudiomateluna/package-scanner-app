@@ -34,12 +34,14 @@ interface CompletedReceptionData {
   dn_escaneadas: number;
   unidades_esperadas: number;
   unidades_escaneadas: number;
+  unidades_faltantes?: number;
   estado: string;
   detalles: {
     olpn: string;
     dn: string;
     unidades: number;
     escaneado: boolean;
+    faltantes: number;
   }[];
   created_at?: string;
 }
@@ -69,6 +71,9 @@ export default function ScannerView({ session, profile, selection, currentView }
   const [isCompletingReception, setIsCompletingReception] = useState(false);
   const [receptionStartTime, setReceptionStartTime] = useState<string | null>(null);
   const [isReceptionCompleted, setIsReceptionCompleted] = useState(false); // Nuevo estado para verificar si la recepción ya fue completada
+  const [missingUnits, setMissingUnits] = useState<Record<string, number>>({});
+
+  const canEditMissing = profile?.role === 'administrador' || profile?.role === 'Store Operator';
 
   const isWarehouseOrAdmin = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator';
   const canScan = profile?.role === 'administrador' || profile?.role === 'Store Operator' || profile?.role === 'Warehouse Operator' || profile?.role === 'Warehouse Supervisor';
@@ -136,6 +141,21 @@ export default function ScannerView({ session, profile, selection, currentView }
       setLoading(false)
     }
   }, [selection, receptionStartTime, isReceptionCompleted]);
+
+  const handleMissingUnitsChange = (olpn: string, value: string) => {
+    const numericValue = parseInt(value, 10);
+    if (!isNaN(numericValue) && numericValue >= 0) {
+      setMissingUnits(prev => ({
+        ...prev,
+        [olpn]: numericValue,
+      }));
+    } else if (value === '') {
+        setMissingUnits(prev => ({
+            ...prev,
+            [olpn]: 0,
+        }));
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -408,6 +428,7 @@ export default function ScannerView({ session, profile, selection, currentView }
       const totalScannedDNs = scannedDNs.length;
       const totalExpectedUnits = packages.reduce((total, pkg) => total + pkg.Unidades, 0);
       const totalScannedUnits = packages.reduce((total, pkg) => total + (scanned.has(pkg.OLPN) ? pkg.Unidades : 0), 0);
+      const totalMissingUnits = Object.values(missingUnits).reduce((sum, current) => sum + current, 0);
 
       // Obtener la sesión del usuario
       const { data: { session } } = await supabase.auth.getSession();
@@ -426,12 +447,14 @@ export default function ScannerView({ session, profile, selection, currentView }
         dn_escaneadas: totalScannedDNs,
         unidades_esperadas: totalExpectedUnits,
         unidades_escaneadas: totalScannedUnits,
+        unidades_faltantes: totalMissingUnits,
         estado: 'completada',
         detalles: packages.map(pkg => ({
           olpn: pkg.OLPN,
           dn: pkg.DN,
           unidades: pkg.Unidades,
-          escaneado: scanned.has(pkg.OLPN)
+          escaneado: scanned.has(pkg.OLPN),
+          faltantes: missingUnits[pkg.OLPN] || 0,
         }))
       };
 
@@ -688,6 +711,7 @@ export default function ScannerView({ session, profile, selection, currentView }
                   <th style={{padding: '8px', textAlign: 'left', color: '#CCCCCC'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
                   <th style={{padding: '8px', textAlign: 'left', width: '150px', color: '#CCCCCC'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
                   <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#CCCCCC'}}>Unidades</th>
+                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#CCCCCC'}}>Faltantes</th>
                 </tr>
               </thead>
               <tbody>
@@ -700,6 +724,15 @@ export default function ScannerView({ session, profile, selection, currentView }
                     <td style={{padding: '8px'}}>{pkg.OLPN}</td>
                     <td style={{padding: '8px'}}>{pkg.DN}</td>
                     <td style={{padding: '8px'}}>{pkg.Unidades}</td>
+                    <td style={{padding: '8px'}}>
+                      <input
+                        type="number"
+                        value={missingUnits[pkg.OLPN] || ''}
+                        onChange={(e) => handleMissingUnitsChange(pkg.OLPN, e.target.value)}
+                        disabled={!canEditMissing}
+                        style={{ width: '60px', padding: '5px', backgroundColor: canEditMissing ? '#fff' : '#ccc', color: '#000', borderRadius: '3px', border: '1px solid #ccc' }}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
