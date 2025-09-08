@@ -259,7 +259,6 @@ export default function ScannerView({ session, profile, selection, currentView }
     if (barcode && !isRegistering) {
       console.log('Barcode received from scanner:', barcode);
       setScannedOlpn(barcode);
-      handleRegister(barcode);
     }
   };
 
