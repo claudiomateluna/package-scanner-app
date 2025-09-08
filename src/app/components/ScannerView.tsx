@@ -256,10 +256,9 @@ export default function ScannerView({ session, profile, selection, currentView }
   
 
   const handleScan = (barcode: string) => {
-    if (barcode && !isRegistering) {
+    if (barcode) {
       console.log('Barcode received from scanner:', barcode);
       setScannedOlpn(barcode);
-      handleRegister(barcode);
     }
   };
 
@@ -285,8 +284,15 @@ export default function ScannerView({ session, profile, selection, currentView }
   }
 
   const handleRegister = async (olpnToRegister: string) => {
-    // Guard against empty input and concurrent runs
-    if (!olpnToRegister || olpnToRegister.trim() === '' || isRegistering) {
+    // Guard against empty input
+    if (!olpnToRegister || olpnToRegister.trim() === '') {
+      toast.error("El campo de entrada está vacío.");
+      return;
+    }
+
+    // Guard against concurrent runs
+    if (isRegistering) {
+      toast.error("Ya hay un registro en curso. Por favor, espera.");
       return;
     }
     
