@@ -259,6 +259,7 @@ export default function ScannerView({ session, profile, selection, currentView }
     if (barcode && !isRegistering) {
       console.log('Barcode received from scanner:', barcode);
       setScannedOlpn(barcode);
+      handleRegister(barcode);
     }
   };
 
@@ -291,7 +292,7 @@ export default function ScannerView({ session, profile, selection, currentView }
     
     const trimmedOlpn = olpnToRegister.trim();
 
-    // Check for duplicates using the current state
+    // Client-side check for duplicates for immediate feedback
     if (scanned.has(trimmedOlpn)) {
       return toast.error("¡ATENCIÓN! Este bulto ya fue registrado (duplicado).");
     }
@@ -317,16 +318,25 @@ export default function ScannerView({ session, profile, selection, currentView }
       });
       
       if (insertError) {
-        throw insertError;
+        // Check for unique constraint violation from the database
+        if (insertError.code === '23505') {
+          console.log('handleRegister: Bulto ya registrado (duplicado) - DB constraint.');
+          toast.error("¡ATENCIÓN! Este bulto ya fue registrado (duplicado).");
+        } else {
+          // Handle other potential insert errors
+          console.error('handleRegister: Error al insertar:', insertError);
+          toast.error(`Error al registrar: ${insertError.message}`);
+        }
+      } else {
+        // Success
+        console.log('handleRegister: Registro exitoso');
+        setScannedOlpn('');
+        toast.success(`Paquete ${trimmedOlpn} registrado.`);
       }
-      
-      console.log('handleRegister: Registro exitoso');
-      setScannedOlpn('') // Limpiar el input manual
-      toast.success(`Paquete ${trimmedOlpn} registrado.`);
-
     } catch (error) {
-      console.error('handleRegister: Error al registrar:', error);
-      toast.error(`Error al registrar: ${(error as Error).message}`);
+      // This catch block is for unexpected errors in the try block logic itself
+      console.error('handleRegister: Unexpected error:', error);
+      toast.error(`Error inesperado: ${(error as Error).message}`);
     } finally {
       // Release lock
       setIsRegistering(false);
