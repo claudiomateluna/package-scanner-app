@@ -337,6 +337,11 @@ export default function ScannerView({ session, profile, selection, currentView }
       } else {
         // Success
         console.log('handleRegister: Registro exitoso');
+        setScanned(prevScanned => {
+          const newSet = new Set(prevScanned);
+          newSet.add(trimmedOlpn);
+          return newSet;
+        });
         setScannedOlpn('');
         toast.success(`Paquete ${trimmedOlpn} registrado.`);
       }
