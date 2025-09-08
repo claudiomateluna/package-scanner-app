@@ -677,11 +677,43 @@ export default function ScannerView({ session, profile, selection, currentView }
           ) : (
             // --- VISTA ESCRITORIO ---
             <>
-              {useBarcodeScanner ? (
-                // ESCRITORIO - ESCÁNER ACTIVO
-                <div style={{ marginBottom: '20px' }}>
+              {/* Mostrar siempre el input manual y botones en vista de escritorio */}
+              <div style={{ display: 'flex', gap: '5px', margin: '20px 0 0 0' }}>
+                <input 
+                  type="text" 
+                  placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`} 
+                  value={scannedOlpn} 
+                  onChange={(e) => setScannedOlpn(e.target.value)} 
+                  style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px'}}
+                  onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister(scannedOlpn)}
+                  disabled={!canScan}
+                />
+                <button 
+                  onClick={() => handleRegister(scannedOlpn)} 
+                  style={{padding: '5px', backgroundColor: canScan ? '#FE7F2D' : '#cccccc', color: '#233D4D', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '5px', cursor: canScan ? 'pointer' : 'not-allowed', fontWeight: 'bold'}}
+                  disabled={!canScan}
+                >
+                  Registrar
+                </button>
+                <button 
+                  onClick={() => setUseBarcodeScanner(true)}
+                  style={{padding: '2px', backgroundColor: '#FE7F2D', color: '#233D4D', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
+                  title="Usar escáner de código de barras"
+                >
+                  <Image 
+                    alt="Código de Barras" 
+                    src="/barcode.svg" 
+                    width={44}
+                    height={34}
+                  />
+                </button>
+              </div>
+              
+              {/* Mostrar escáner de código de barras cuando esté activo */}
+              {useBarcodeScanner && (
+                <div style={{ marginBottom: '20px', marginTop: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                    <h4>Lector de Código de Barras</h4>
+                    <h4>Escáner de Código de Barras</h4>
                     <button
                       onClick={() => setUseBarcodeScanner(false)}
                       style={{
@@ -698,38 +730,6 @@ export default function ScannerView({ session, profile, selection, currentView }
                     </button>
                   </div>
                   <div><BarcodeScannerZXing/></div>
-                </div>
-              ) : (
-                // ESCRITORIO - INPUT MANUAL ACTIVO
-                <div style={{ display: 'flex', gap: '5px', margin: '20px 0 0 0' }}>
-                  <input 
-                    type="text" 
-                    placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`} 
-                    value={scannedOlpn} 
-                    onChange={(e) => setScannedOlpn(e.target.value)} 
-                    style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px'}}
-                    onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister(scannedOlpn)}
-                    disabled={!canScan}
-                  />
-                  <button 
-                    onClick={() => handleRegister(scannedOlpn)} 
-                    style={{padding: '5px', backgroundColor: canScan ? '#FE7F2D' : '#cccccc', color: '#233D4D', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '5px', cursor: canScan ? 'pointer' : 'not-allowed', fontWeight: 'bold'}}
-                    disabled={!canScan}
-                  >
-                    Registrar
-                  </button>
-                  <button 
-                    onClick={() => setUseBarcodeScanner(true)}
-                    style={{padding: '2px', backgroundColor: '#FE7F2D', color: '#233D4D', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
-                    title="Usar escáner de código de barras"
-                  >
-                    <Image 
-                      alt="Código de Barras" 
-                      src="/barcode.svg" 
-                      width={44}
-                      height={34}
-                    />
-                  </button>
                 </div>
               )}
             </>
