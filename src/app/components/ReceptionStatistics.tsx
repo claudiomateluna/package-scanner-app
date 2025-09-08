@@ -8,6 +8,7 @@ interface ReceptionStats {
   total_receptions: number;
   total_packages: number;
   total_units: number;
+  total_missing_units: number;
   avg_completion_rate: number;
   most_active_local: string;
   recent_activity: {
@@ -103,6 +104,7 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
         const totalReceptions = receptionsData?.length || 0;
         const totalPackages = receptionsData?.reduce((sum, rec) => sum + rec.olpn_escaneadas, 0) || 0;
         const totalUnits = receptionsData?.reduce((sum, rec) => sum + rec.unidades_escaneadas, 0) || 0;
+        const totalMissingUnits = receptionsData?.reduce((sum, rec) => sum + (rec.unidades_faltantes || 0), 0) || 0;
         
         // Calcular tasa de completitud promedio
         const completionRates = receptionsData?.map(rec => 
@@ -145,6 +147,7 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
           total_receptions: totalReceptions,
           total_packages: totalPackages,
           total_units: totalUnits,
+          total_missing_units: totalMissingUnits,
           avg_completion_rate: parseFloat(avgCompletionRate.toFixed(1)),
           most_active_local: mostActiveLocal,
           recent_activity: recentActivity
@@ -270,7 +273,13 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
                 title="Unidades Totales" 
                 value={stats.total_units} 
                 subtitle="Unidades recibidas" 
-                color="#233D4D" 
+                color="#A1C181" 
+              />
+              <StatsCard 
+                title="Unidades Faltantes" 
+                value={stats.total_missing_units} 
+                subtitle="Total en el período" 
+                color="#e63946" 
               />
               <StatsCard 
                 title="Tasa de Completitud" 

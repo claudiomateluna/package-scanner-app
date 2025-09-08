@@ -16,6 +16,7 @@ interface CompletedReception {
   dn_escaneadas: number;
   unidades_esperadas: number;
   unidades_escaneadas: number;
+  unidades_faltantes?: number;
   estado: string;
   detalles: ReceptionDetail[];
   created_at: string;
@@ -26,6 +27,7 @@ interface ReceptionDetail {
   dn: string;
   unidades: number;
   escaneado: boolean;
+  faltantes?: number;
 }
 
 interface ReceptionHistoryProps {
@@ -241,6 +243,17 @@ export default function ReceptionHistory({ onClose }: ReceptionHistoryProps) {
                 </div>
                 <div>Unidades</div>
               </div>
+              <div style={{ 
+                backgroundColor: 'rgba(255,255,255,0.1)', 
+                padding: '15px', 
+                borderRadius: '5px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#e63946' }}>
+                  {selectedReception.unidades_faltantes || 0}
+                </div>
+                <div>Unidades Faltantes</div>
+              </div>
             </div>
           </div>
           
@@ -261,6 +274,7 @@ export default function ReceptionHistory({ onClose }: ReceptionHistoryProps) {
                     <th style={{ padding: '10px', textAlign: 'left' }}>OLPN/Bulto</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>DN/Factura</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>Unidades</th>
+                    <th style={{ padding: '10px', textAlign: 'left' }}>Faltantes</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>Estado</th>
                   </tr>
                 </thead>
@@ -276,6 +290,7 @@ export default function ReceptionHistory({ onClose }: ReceptionHistoryProps) {
                       <td style={{ padding: '8px' }}>{detalle.olpn}</td>
                       <td style={{ padding: '8px' }}>{detalle.dn}</td>
                       <td style={{ padding: '8px' }}>{detalle.unidades}</td>
+                      <td style={{ padding: '8px' }}>{detalle.faltantes || 0}</td>
                       <td style={{ padding: '8px' }}>
                         <span style={{ 
                           backgroundColor: detalle.escaneado ? '#A1C181' : '#FE7F2D', 
@@ -361,6 +376,7 @@ export default function ReceptionHistory({ onClose }: ReceptionHistoryProps) {
                   <th style={{ padding: '12px', textAlign: 'left' }}>OLPN</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>DN</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Unidades</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Faltantes</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Estado</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Acciones</th>
                 </tr>
@@ -374,6 +390,7 @@ export default function ReceptionHistory({ onClose }: ReceptionHistoryProps) {
                     <td style={{ padding: '10px' }}>{reception.olpn_escaneadas}/{reception.olpn_esperadas}</td>
                     <td style={{ padding: '10px' }}>{reception.dn_escaneadas}/{reception.dn_esperadas}</td>
                     <td style={{ padding: '10px' }}>{reception.unidades_escaneadas}/{reception.unidades_esperadas}</td>
+                    <td style={{ padding: '10px' }}>{reception.unidades_faltantes || 0}</td>
                     <td style={{ padding: '10px' }}>
                       <span style={{ 
                         backgroundColor: '#A1C181', 
