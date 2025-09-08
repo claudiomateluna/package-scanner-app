@@ -79,8 +79,6 @@ export default function ScannerView({ session, profile, selection, currentView }
   const isWarehouseOrAdmin = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator';
   const canScan = profile?.role === 'administrador' || profile?.role === 'Store Operator' || profile?.role === 'Warehouse Operator' || profile?.role === 'Warehouse Supervisor';
   
-  // Detectar si es un dispositivo móvil o tablet
-  const isMobileOrTablet = isMobileDevice();
   // Detectar si es un teléfono móvil (para layout vertical)
   const isPhone = isMobilePhone();
   // isIPadDevice, isIPhoneDevice, isAndroidDevice se eliminaron ya que no se usaban
@@ -256,7 +254,7 @@ export default function ScannerView({ session, profile, selection, currentView }
 
   useEffect(() => {
     // Solo ejecutar este efecto si el escáner de código de barras está visible
-    if (!(isMobileOrTablet || useBarcodeScanner)) return;
+    if (!(isPhone || useBarcodeScanner)) return;
 
     let lastKnownBarcode = '';
     const targetNode = document.getElementById('barcode-result-display');
@@ -307,7 +305,7 @@ export default function ScannerView({ session, profile, selection, currentView }
       if (observer) observer.disconnect();
     };
 
-  }, [isMobileOrTablet, useBarcodeScanner]); // Volver a ejecutar si cambia la visibilidad del escáner
+  }, [isPhone, useBarcodeScanner]); // Volver a ejecutar si cambia la visibilidad del escáner
 
   // Si estamos en la vista de administración, no necesitamos cargar datos
   const isAdminView = currentView === 'admin';
@@ -617,7 +615,7 @@ export default function ScannerView({ session, profile, selection, currentView }
                 )}
               </div>
               {/* --- Lógica de Escaneo Condicional --- */}
-          {isMobileOrTablet ? (
+          {isPhone ? (
             // --- VISTA MÓVIL --- 
             <div style={{ marginBottom: '20px' }}>
               <h4>Escáner de Código de Barras</h4>
