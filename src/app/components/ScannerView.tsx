@@ -8,9 +8,10 @@ import ReceptionSummary from './ReceptionSummary';
 import ReceptionHistory from './ReceptionHistory';
 import ReceptionStatistics from './ReceptionStatistics';
 import BarcodeScannerZXing from './BarcodeScannerZXing';
-import { isMobileDevice } from '@/lib/deviceUtils';
+import { isMobileDevice, isMobilePhone } from '@/lib/deviceUtils';
 import Image from 'next/image';
 import './scrollbarStyles.css';
+import './ScannerView.css';
 
 // --- Tipos de Datos ---
 type Profile = { role: string | null; }
@@ -80,6 +81,8 @@ export default function ScannerView({ session, profile, selection, currentView }
   
   // Detectar si es un dispositivo móvil o tablet
   const isMobileOrTablet = isMobileDevice();
+  // Detectar si es un teléfono móvil (para layout vertical)
+  const isPhone = isMobilePhone();
   // isIPadDevice, isIPhoneDevice, isAndroidDevice se eliminaron ya que no se usaban
 
   const fetchData = useCallback(async () => {
@@ -492,9 +495,9 @@ export default function ScannerView({ session, profile, selection, currentView }
   if (error) return <div><p style={{color: 'red'}}><b>Error:</b> {error}</p></div>
 
   return (
-    <div>
-      <div style={{ display: 'flex', gap: '10px', flexDirection: isMobileOrTablet ? 'column' : 'row' }}>
-        <main style={{ width: isMobileOrTablet ? '100%' : '63%' }}>
+    <div className="scanner-view-container">
+      <main style={{ display: 'flex', gap: '10px', flexDirection: isPhone ? 'column' : 'row' }} className="scanner-main-layout">
+        <div id='Izquierda' style={{ width: isPhone ? '100%' : '63%' }}>
           {/* Cuadro Resumen */}
             <div id='CuadroResumen' style={{ 
               backgroundColor: 'rgba(0,0,0,0.2)',
@@ -738,51 +741,85 @@ export default function ScannerView({ session, profile, selection, currentView }
               </tbody>
             </table>
           </div>
-        </main>
+        </div>
 
         {/* Columna derecha con Resumen y Progreso por DN */}
-        {!isMobileOrTablet && (
-          <div id='Derecha' style={{ width: isMobileOrTablet ? '100%' : '37%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            
-            
-            {/* Progreso por DN */}
-            <div id='ProgresoPorDN' style={{ 
-              backgroundColor: 'rgba(0,0,0,0.2)', 
-              borderRadius: '8px', 
-              padding: '10px', 
-              flex: '1',
-              display: 'flex',
-              flexDirection: 'column',
-              maxHeight: '85vh'
+        {!isPhone && (
+        <div id='Derecha' style={{ width: isPhone ? '100%' : '37%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          
+          
+          {/* Progreso por DN */}
+          <div id='ProgresoPorDN' style={{ 
+            backgroundColor: 'rgba(0,0,0,0.2)', 
+            borderRadius: '8px', 
+            padding: '10px', 
+            flex: '1',
+            display: 'flex',
+            flexDirection: 'column',
+            maxHeight: '83vh'
+          }}>
+            <h3 style={{ 
+              margin: '0 0 15px 0', 
+              color: '#CCCCCC', 
+              textAlign: 'center',
+              fontSize: '1.2em'
             }}>
-              <h3 style={{ 
-                margin: '0 0 15px 0', 
-                color: '#CCCCCC', 
-                textAlign: 'center',
-                fontSize: '1.2em'
-              }}>
-                Progreso por {isWarehouseOrAdmin ? 'DN' : 'Factura'}
-              </h3>
-              <div className="scroll-container" style={{ 
-                maxHeight: '100%', 
-                overflowY: 'auto', 
-                paddingRight: '10px',
-                flex: '1'
-              }}>
-                {dnProgress.map(item => (
-                  <DNProgressCard 
-                    key={item.dn}
-                    dn={item.dn}
-                    totalPackages={item.totalPackages}
-                    scannedPackages={item.scannedPackages}
-                    isStoreUser={!isWarehouseOrAdmin}
-                  />
-                ))}
-              </div>
+              Progreso por {isWarehouseOrAdmin ? 'DN' : 'Factura'}
+            </h3>
+            <div className="scroll-container" style={{ 
+              maxHeight: '100%', 
+              overflowY: 'auto', 
+              paddingRight: '10px',
+              flex: '1'
+            }}>
+              {dnProgress.map(item => (
+                <DNProgressCard 
+                  key={item.dn}
+                  dn={item.dn}
+                  totalPackages={item.totalPackages}
+                  scannedPackages={item.scannedPackages}
+                  isStoreUser={!isWarehouseOrAdmin}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+        )}
+        
+        {/* Progreso por DN en dispositivos móviles */}
+        {isPhone && (
+          <div id='ProgresoPorDN' style={{ 
+            backgroundColor: 'rgba(0,0,0,0.2)', 
+            borderRadius: '8px', 
+            padding: '10px',
+            marginTop: '10px'
+          }}>
+            <h3 style={{ 
+              margin: '0 0 15px 0', 
+              color: '#CCCCCC', 
+              textAlign: 'center',
+              fontSize: '1.2em'
+            }}>
+              Progreso por {isWarehouseOrAdmin ? 'DN' : 'Factura'}
+            </h3>
+            <div className="scroll-container" style={{ 
+              maxHeight: '40vh', 
+              overflowY: 'auto', 
+              paddingRight: '10px'
+            }}>
+              {dnProgress.map(item => (
+                <DNProgressCard 
+                  key={item.dn}
+                  dn={item.dn}
+                  totalPackages={item.totalPackages}
+                  scannedPackages={item.scannedPackages}
+                  isStoreUser={!isWarehouseOrAdmin}
+                />
+              ))}
             </div>
           </div>
         )}
-      </div>
+      </main>
       
       {/* Mostrar resumen de recepción si está activo */}
       {showReceptionSummary && completedReceptionData && (

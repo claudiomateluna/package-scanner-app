@@ -175,3 +175,52 @@ body {
   font-size: 9px;
   z-index: 100;
 }
+
+/* Estilos responsivos */
+@media (max-width: 900px) {
+  /* Ajustes generales para dispositivos móviles */
+  #Izquierda, #Derecha {
+    width: 100% !important;
+  }
+  
+  main {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  /* Ajustes para el cuadro de resumen */
+  #CuadroResumen {
+    padding: 10px !important;
+  }
+  
+  /* Ajustes para las tarjetas de progreso */
+  .card {
+    margin-bottom: 10px !important;
+  }
+  
+  /* Ajustes para tablas */
+  table {
+    font-size: 0.9em !important;
+  }
+  
+  th, td {
+    padding: 6px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Ajustes adicionales para pantallas pequeñas */
+  #CuadroResumen h3 {
+    font-size: 1em !important;
+  }
+  
+  .notification-success, .notification-error, .notification-warning {
+    padding: 10px !important;
+    font-size: 0.9em !important;
+  }
+  
+  .primary-button, .secondary-button {
+    padding: 10px 15px !important;
+    font-size: 1em !important;
+  }
+}
