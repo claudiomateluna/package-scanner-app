@@ -73,6 +73,7 @@ export default function ScannerView({ session, profile, selection, currentView }
   const [receptionStartTime, setReceptionStartTime] = useState<string | null>(null);
   const [isReceptionCompleted, setIsReceptionCompleted] = useState(false); // Nuevo estado para verificar si la recepción ya fue completada
   const [missingUnits, setMissingUnits] = useState<Record<string, number>>({});
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const canEditMissing = profile?.role === 'administrador' || profile?.role === 'Store Operator';
 
@@ -255,7 +256,7 @@ export default function ScannerView({ session, profile, selection, currentView }
   
 
   const handleScan = (barcode: string) => {
-    if (barcode) {
+    if (barcode && !isRegistering) {
       console.log('Barcode received from scanner:', barcode);
       setScannedOlpn(barcode);
       handleRegister(barcode);
@@ -284,27 +285,26 @@ export default function ScannerView({ session, profile, selection, currentView }
   }
 
   const handleRegister = async (olpnToRegister: string) => {
-    console.log('handleRegister: Iniciando registro para:', olpnToRegister);
-    
-    if (!olpnToRegister || olpnToRegister.trim() === '') { 
-      console.log('handleRegister: olpnToRegister vacío');
-      return toast.error("El código a registrar está vacío.");
+    // Guard against empty input and concurrent runs
+    if (!olpnToRegister || olpnToRegister.trim() === '' || isRegistering) {
+      return;
     }
     
     const trimmedOlpn = olpnToRegister.trim();
 
-    const foundPackage = packages.find(p => p.OLPN === trimmedOlpn)
-    console.log('handleRegister: foundPackage:', foundPackage);
-    
-    if (!foundPackage) { 
-      console.log('handleRegister: Bulto no encontrado en paquetes esperados');
-      return toast.error("¡ATENCIÓN! Este bulto no corresponde a los paquetes esperados.");
-    }
-    
-    if (scanned.has(trimmedOlpn)) { 
-      console.log('handleRegister: Bulto ya registrado (duplicado)');
+    // Check for duplicates using the current state
+    if (scanned.has(trimmedOlpn)) {
       return toast.error("¡ATENCIÓN! Este bulto ya fue registrado (duplicado).");
     }
+
+    // Check if the package is expected
+    const foundPackage = packages.find(p => p.OLPN === trimmedOlpn);
+    if (!foundPackage) {
+      return toast.error("¡ATENCIÓN! Este bulto no corresponde a los paquetes esperados.");
+    }
+
+    // Set lock
+    setIsRegistering(true);
     
     try {
       console.log('handleRegister: Insertando en recepcion...');
@@ -315,19 +315,22 @@ export default function ScannerView({ session, profile, selection, currentView }
         DN: foundPackage.DN, 
         Unidades: foundPackage.Unidades, 
         ScannedBy: user.email 
-      })
+      });
       
       if (insertError) {
-        console.error('handleRegister: Error al insertar:', insertError);
         throw insertError;
       }
       
       console.log('handleRegister: Registro exitoso');
       setScannedOlpn('') // Limpiar el input manual
-      toast.success(`Paquete ${trimmedOlpn} registrado.`)
+      toast.success(`Paquete ${trimmedOlpn} registrado.`);
+
     } catch (error) {
       console.error('handleRegister: Error al registrar:', error);
-      toast.error(`Error al registrar: ${(error as Error).message}`)
+      toast.error(`Error al registrar: ${(error as Error).message}`);
+    } finally {
+      // Release lock
+      setIsRegistering(false);
     }
   }
 
