@@ -807,7 +807,7 @@ export default function ScannerView({ session, profile, selection, currentView }
             flex: '1',
             display: 'flex',
             flexDirection: 'column',
-            maxHeight: '83vh'
+            maxHeight: '80vh'
           }}>
             <h3 style={{ 
               margin: '0 0 15px 0', 
