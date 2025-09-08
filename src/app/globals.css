@@ -177,7 +177,7 @@ body {
 }
 
 /* Estilos responsivos */
-@media (max-width: 900px) {
+@media (max-width: 720px) {
   /* Ajustes generales para dispositivos móviles */
   #Izquierda, #Derecha {
     width: 100% !important;

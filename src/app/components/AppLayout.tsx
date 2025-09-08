@@ -264,7 +264,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   return (
     <div>
       <header style={headerStyle}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             <Image 
               src="/adidas_shp.svg" 

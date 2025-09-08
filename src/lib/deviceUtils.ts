@@ -50,7 +50,7 @@ export function isMobilePhone() {
   // Detectar Android phone (no tablet)
   if (/android/i.test(userAgent) && !/tablet|ipad/i.test(userAgent)) {
     // Verificar si es un dispositivo con pantalla pequeña (típicamente teléfono)
-    if (window.screen.width <= 900) {
+    if (window.screen.width <= 720) {
       return true;
     }
   }
@@ -63,7 +63,7 @@ export function isMobilePhone() {
   return false;
 }
 
-// Función para detectar si es una tablet o escritorio (800px de ancho)
+// Función para detectar si es una tablet o escritorio (720px de ancho)
 export function isTabletOrDesktop() {
   const userAgent = navigator.userAgent || navigator.vendor || (window as unknown as { opera: string }).opera;
   
@@ -83,7 +83,7 @@ export function isTabletOrDesktop() {
   }
   
   // Para otros casos, verificar el ancho de la pantalla
-  if (window.screen.width > 900) {
+  if (window.screen.width > 720) {
     return true;
   }
   
