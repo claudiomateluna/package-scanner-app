@@ -7,15 +7,12 @@ import { Session } from '@supabase/supabase-js'
 
 type Profile = { role: string | null; local_asignado?: string | null; }
 
-interface LocalData {
-  Local: string;
+// Define the Local type based on the new locales table
+interface Local {
+  id: number;
+  tipo_local: 'FRA' | 'RTL' | 'SKA' | 'WHS';
+  nombre_local: string;
 }
-// LocalData se eliminó ya que no se usaba
-
-interface UserLocal {
-  local_name: string;
-}
-// UserLocal se eliminó ya que no se usaba
 
 interface Props {
   profile: Profile;
@@ -88,7 +85,7 @@ const styles: { [key: string]: CSSProperties } = {
 };
 
 export default function SelectionScreen({ profile, onSelectionComplete, session }: Props) {
-  const [availableLocals, setAvailableLocals] = useState<string[]>([]);
+  const [availableLocals, setAvailableLocals] = useState<Local[]>([]);
   const [selectedLocal, setSelectedLocal] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
@@ -102,10 +99,10 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
       console.log('SelectionScreen: session?.user?.id:', session?.user?.id);
       
       try {
-        // Para usuarios administradores o warehouse, obtener todos los locales de la tabla data
+        // Para usuarios administradores o warehouse, obtener todos los locales de la tabla locales con tipo RTL
         if (profile.role === 'administrador' || profile.role === 'Warehouse Supervisor' || profile.role === 'Warehouse Operator') {
-          console.log('SelectionScreen: Usuario administrador o warehouse, obteniendo todos los locales');
-          const { data, error } = await supabase.from('data').select('Local');
+          console.log('SelectionScreen: Usuario administrador o warehouse, obteniendo todos los locales tipo RTL');
+          const { data, error } = await supabase.from('locales').select('*').eq('tipo_local', 'RTL').order('nombre_local');
           
           if (error) {
             console.error('Error cargando locales:', error);
@@ -114,21 +111,13 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
           }
           
           if (!data || data.length === 0) {
-            console.warn('No se encontraron locales en la tabla data');
+            console.warn('No se encontraron locales tipo RTL en la tabla locales');
             toast.error('No hay locales disponibles en el sistema.');
             return;
           }
           
-          // Extraer y ordenar locales únicos
-          const uniqueLocals = [...new Set(data.map(item => item.Local).filter(local => local))].sort();
-          
-          if (uniqueLocals.length === 0) {
-            toast.error('No hay locales válidos en el sistema.');
-            return;
-          }
-          
-          console.log('SelectionScreen: Locales cargados:', uniqueLocals);
-          setAvailableLocals(uniqueLocals);
+          console.log('SelectionScreen: Locales tipo RTL cargados:', data);
+          setAvailableLocals(data);
           
           // Para usuarios Warehouse, verificar si tienen locales asignados para usar como predeterminado
           if ((profile.role === 'Warehouse Supervisor' || profile.role === 'Warehouse Operator') && session?.user?.id) {
@@ -142,7 +131,8 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
               if (!userLocalsError && userLocalsData && userLocalsData.length > 0) {
                 const assignedLocal = userLocalsData[0].local_name;
                 // Verificar que el local asignado esté en la lista de locales disponibles
-                if (uniqueLocals.includes(assignedLocal)) {
+                const matchingLocal = data.find(local => local.nombre_local === assignedLocal);
+                if (matchingLocal) {
                   console.log('SelectionScreen: Usando local asignado:', assignedLocal);
                   setSelectedLocal(assignedLocal);
                   return;
@@ -154,32 +144,45 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
           }
           
           // Usar el primer local disponible por defecto
-          console.log('SelectionScreen: Usando primer local disponible:', uniqueLocals[0]);
-          setSelectedLocal(uniqueLocals[0]);
+          console.log('SelectionScreen: Usando primer local disponible:', data[0].nombre_local);
+          setSelectedLocal(data[0].nombre_local);
         } 
         // Para usuarios Store, obtener solo sus locales asignados
         else if ((profile.role === 'Store Supervisor' || profile.role === 'Store Operator') && session?.user?.id) {
           console.log('SelectionScreen: Usuario Store, obteniendo locales asignados');
           try {
-            const { data, error } = await supabase
+            const { data: userLocalsData, error: userLocalsError } = await supabase
               .from('user_locals')
               .select('local_name')
               .eq('user_id', session.user.id);
             
-            if (error) {
+            if (userLocalsError) {
               toast.error('No se pudieron cargar los locales asignados.');
               return;
             }
             
-            const locals = [...new Set(data.map(item => item.local_name).filter(local => local))].sort();
-            console.log('SelectionScreen: Locales asignados cargados:', locals);
-            setAvailableLocals(locals);
+            // Obtener los detalles completos de los locales asignados tipo RTL
+            const localNames = userLocalsData.map(item => item.local_name);
+            const { data: localsData, error: localsError } = await supabase
+              .from('locales')
+              .select('*')
+              .eq('tipo_local', 'RTL')
+              .in('nombre_local', localNames)
+              .order('nombre_local');
             
-            if (locals.length > 0) {
-              console.log('SelectionScreen: Usando primer local asignado:', locals[0]);
-              setSelectedLocal(locals[0]);
+            if (localsError) {
+              toast.error('No se pudieron cargar los detalles de los locales asignados.');
+              return;
+            }
+            
+            console.log('SelectionScreen: Locales asignados tipo RTL cargados:', localsData);
+            setAvailableLocals(localsData);
+            
+            if (localsData.length > 0) {
+              console.log('SelectionScreen: Usando primer local asignado:', localsData[0].nombre_local);
+              setSelectedLocal(localsData[0].nombre_local);
             } else {
-              toast.error('No tienes locales asignados. Contacta a un administrador.');
+              toast.error('No tienes locales asignados tipo RTL. Contacta a un administrador.');
             }
           } catch (error: unknown) {
             toast.error('Error al cargar los locales asignados.');
@@ -189,9 +192,21 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
         else {
           console.log('SelectionScreen: Otro tipo de usuario, usando local asignado en perfil');
           if (profile.local_asignado) {
-            console.log('SelectionScreen: Usando local asignado en perfil:', profile.local_asignado);
-            setAvailableLocals([profile.local_asignado]);
-            setSelectedLocal(profile.local_asignado);
+            // Obtener los detalles del local asignado tipo RTL
+            const { data: localData, error: localError } = await supabase
+              .from('locales')
+              .select('*')
+              .eq('tipo_local', 'RTL')
+              .eq('nombre_local', profile.local_asignado)
+              .single();
+            
+            if (!localError && localData) {
+              console.log('SelectionScreen: Usando local asignado en perfil:', profile.local_asignado);
+              setAvailableLocals([localData]);
+              setSelectedLocal(profile.local_asignado);
+            } else {
+              toast.error('No se encontró el local asignado tipo RTL. Contacta a un administrador.');
+            }
           } else {
             toast.error('No tienes un local asignado. Contacta a un administrador.');
           }
@@ -224,7 +239,7 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {isAdminType ? (
             <div>
-              <label htmlFor="local-select" style={styles.label}>Seleccionar Local:</label>
+              <label htmlFor="local-select" style={styles.label}>Seleccionar Local (RTL):</label>
               {availableLocals.length > 0 ? (
                 <select 
                   id="local-select" 
@@ -232,15 +247,19 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
                   onChange={(e) => setSelectedLocal(e.target.value)}
                   style={styles.input}
                 >
-                  {availableLocals.map(local => <option key={local} value={local}>{local}</option>)}
+                  {availableLocals.map(local => (
+                    <option key={local.id} value={local.nombre_local}>
+                      [{local.tipo_local}] {local.nombre_local}
+                    </option>
+                  ))}
                 </select>
               ) : (
-                <p>No se pudieron cargar los locales. Contacta a un administrador.</p>
+                <p>No se pudieron cargar los locales tipo RTL. Contacta a un administrador.</p>
               )}
             </div>
           ) : isStoreType ? (
             <div>
-              <label htmlFor="local-select" style={styles.label}>Locales Asignados:</label>
+              <label htmlFor="local-select" style={styles.label}>Locales Asignados (RTL):</label>
               {availableLocals.length > 0 ? (
                 <select 
                   id="local-select" 
@@ -248,10 +267,14 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
                   onChange={(e) => setSelectedLocal(e.target.value)}
                   style={styles.input}
                 >
-                  {availableLocals.map(local => <option key={local} value={local}>{local}</option>)}
+                  {availableLocals.map(local => (
+                    <option key={local.id} value={local.nombre_local}>
+                      [{local.tipo_local}] {local.nombre_local}
+                    </option>
+                  ))}
                 </select>
               ) : (
-                <p>No tienes locales asignados. Contacta a un administrador.</p>
+                <p>No tienes locales asignados tipo RTL. Contacta a un administrador.</p>
               )}
             </div>
           ) : (
