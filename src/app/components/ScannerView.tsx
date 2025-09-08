@@ -252,60 +252,15 @@ export default function ScannerView({ session, profile, selection, currentView }
     }
   }, [packages, scanned]);
 
-  useEffect(() => {
-    // Solo ejecutar este efecto si el escáner de código de barras está visible
-    if (!(isPhone || useBarcodeScanner)) return;
+  
 
-    let lastKnownBarcode = '';
-    const targetNode = document.getElementById('barcode-result-display');
-
-    if (!targetNode) {
-      // Si el nodo no está listo de inmediato, reintentar después de un breve retraso.
-      // Esto puede suceder debido al renderizado condicional.
-      const timeoutId = setTimeout(() => {
-        const node = document.getElementById('barcode-result-display');
-        if (node) setupObserver(node);
-      }, 500);
-      return () => clearTimeout(timeoutId);
+  const handleScan = (barcode: string) => {
+    if (barcode) {
+      console.log('Barcode received from scanner:', barcode);
+      setScannedOlpn(barcode);
+      handleRegister(barcode);
     }
-
-    const setupObserver = (node: HTMLElement) => {
-      const observer = new MutationObserver(mutations => {
-        mutations.forEach(mutation => {
-          if (mutation.type === 'childList' || mutation.type === 'characterData') {
-            const newText = node.textContent || '';
-            const parts = newText.split(':');
-            const newBarcode = parts[1] ? parts[1].trim() : '';
-
-            if (newBarcode && newBarcode !== lastKnownBarcode) {
-              lastKnownBarcode = newBarcode;
-              console.log('Observer detected new barcode:', newBarcode);
-              setScannedOlpn(newBarcode);
-              // La función handleRegister ya usa el estado `scannedOlpn`, 
-              // pero para asegurar que se use el valor más reciente, lo pasamos directamente.
-              // Primero, modificaremos handleRegister para que acepte un argumento.
-              handleRegister(newBarcode); 
-            }
-          }
-        });
-      });
-
-      observer.observe(node, { 
-        childList: true, 
-        characterData: true, 
-        subtree: true 
-      });
-
-      return observer;
-    }
-
-    const observer = setupObserver(targetNode);
-
-    return () => {
-      if (observer) observer.disconnect();
-    };
-
-  }, [isPhone, useBarcodeScanner]); // Volver a ejecutar si cambia la visibilidad del escáner
+  };
 
   // Si estamos en la vista de administración, no necesitamos cargar datos
   const isAdminView = currentView === 'admin';
@@ -622,9 +577,9 @@ export default function ScannerView({ session, profile, selection, currentView }
               <div style={{ display: 'flex', gap: '5px', margin: '20px 0 0 0' }}>
                 <input 
                   type="text" 
-                  placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`} 
-                  value={scannedOlpn} 
-                  onChange={(e) => setScannedOlpn(e.target.value)} 
+                  placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`}
+                  value={scannedOlpn}
+                  onChange={(e) => setScannedOlpn(e.target.value)}
                   style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px'}}
                   onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister(scannedOlpn)}
                   disabled={!canScan}
@@ -670,7 +625,7 @@ export default function ScannerView({ session, profile, selection, currentView }
                       Usar Input Manual
                     </button>
                   </div>
-                  <div><BarcodeScannerZXing/></div>
+                  <div><BarcodeScannerZXing onScan={handleScan} /></div>
                 </div>
               )}
             </>
@@ -729,7 +684,7 @@ export default function ScannerView({ session, profile, selection, currentView }
                       Usar Input Manual
                     </button>
                   </div>
-                  <div><BarcodeScannerZXing/></div>
+                  <div><BarcodeScannerZXing onScan={handleScan} /></div>
                 </div>
               )}
             </>
