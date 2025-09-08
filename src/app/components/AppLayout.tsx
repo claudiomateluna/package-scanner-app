@@ -5,6 +5,7 @@ import { CSSProperties, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
+import SlidingMenu from './SlidingMenu'
 
 // --- Tipos de Datos ---
 type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
@@ -163,6 +164,7 @@ const ChangePasswordForm = ({ onDone }: { onDone: () => void }) => {
 export default function AppLayout({ session, profile, onBack, children, currentView, setCurrentView }: Props) {
   const { user } = session;
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const isWarehouseOrAdmin = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator' || profile?.role === 'Store Supervisor';
 
@@ -263,72 +265,43 @@ export default function AppLayout({ session, profile, onBack, children, currentV
 
   return (
     <div>
+      {/* Sliding Menu */}
+      <SlidingMenu
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        onBack={onBack}
+        isWarehouseOrAdmin={isWarehouseOrAdmin}
+        currentView={currentView}
+        setCurrentView={setCurrentView}
+        showPasswordForm={showPasswordForm}
+        setShowPasswordForm={setShowPasswordForm}
+      />
+      
       <header style={headerStyle}>
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <Image 
-              src="/adidas_shp.svg" 
-              alt="Adidas Logo" 
-              width={60}
-              height={60}
-            />
+            {/* Menu button that opens the sliding menu */}
+            <div 
+              id="menu-button"
+              onClick={() => setIsMenuOpen(true)}
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            >
+              <Image 
+                src="/adidas_shp.svg" 
+                alt="Adidas Logo" 
+                width={60}
+                height={60}
+              />
+            </div>
             <div>
-              <h2 style={{ margin: 0, color: '#233D4D' }}>Recepciones</h2>
-              <p style={{ margin: '0', fontSize: '0.9em', color: '#233D4D' }}>
+              <h2 style={{ margin: '0', color: '#233D4D', lineHeight: '1' }}>Recepciones</h2>
+              <p style={{ margin: '0', fontSize: '0.9em', color: '#233D4D', lineHeight: '1' }}>
                 Bienvenido {getUserFirstAndLastName().firstName} {getUserFirstAndLastName().lastName ? ` ${getUserFirstAndLastName().lastName}` : ''}
               </p>
             </div>
           </div>
-          <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
-          {onBack && (
-            <button 
-              onClick={onBack} 
-              style={baseButtonStyle}
-            >
-              &larr; Volver
-            </button>
-          )}
-          
-          {isWarehouseOrAdmin && (
-            <>
-              <button 
-                onClick={() => setCurrentView('scanner')} 
-                style={currentView === 'scanner' ? activeScannerButtonStyle : scannerButtonStyle}
-                title="Recepción"
-              >
-                <Image 
-                  src="/barcode.svg" 
-                  alt="Código de Barras" 
-                  width={44}
-                  height={34}
-                />
-              </button>
-              <button 
-                onClick={() => setCurrentView('admin')} 
-                style={currentView === 'admin' ? activeButtonStyle : baseButtonStyle}
-              >
-                Administración
-              </button>
-            </>
-          )}
-
-          <button 
-            onClick={() => setShowPasswordForm(!showPasswordForm)} 
-            style={baseButtonStyle} 
-            title="Cambiar Contraseña"
-          >
-            <KeyIcon />
-          </button>
-          <button 
-            onClick={handleSignOut} 
-            style={baseButtonStyle} 
-            title="Cerrar Sesión"
-          >
-            <LogoutIcon />
-          </button>
         </div>
-      </div>
-    </header>
+      </header>
       
       <main style={{padding: '5px', maxWidth: '800px', margin: 'auto'}}>
         {showPasswordForm ? 
