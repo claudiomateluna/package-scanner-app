@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, CSSProperties } from 'react'
+import { useState, useEffect, CSSProperties, useMemo } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import Papa from 'papaparse'
@@ -129,24 +129,33 @@ function DataUploader() {
 }
 
 // --- Componente para Editar Perfil ---
-function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUserLocal }: { profile: Profile, onSave: () => void, onCancel: () => void, currentUserRole: string, currentUserLocal: string | null }) {
+function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUserLocal, onLocalChange }: { profile: Profile, onSave: () => void, onCancel: () => void, currentUserRole: string, currentUserLocal: string | null, onLocalChange: (local: string, isChecked: boolean) => void }) {
   const [formData, setFormData] = useState(profile);
   const [newPassword, setNewPassword] = useState('');
   const [userLocals, setUserLocals] = useState<string[]>(profile.assigned_locals || []);
   const [allLocals, setAllLocals] = useState<string[]>([]);
   const [loadingLocals, setLoadingLocals] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(''); // For search filter in user editing
   
   // Obtener roles que el usuario actual puede asignar
   const assignableRoles = getAssignableRoles(currentUserRole);
+
+  // Filter all locals based on search term
+  const filteredLocals = useMemo(() => {
+    if (!searchTerm) return allLocals;
+    return allLocals.filter(local => 
+      local.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [allLocals, searchTerm]);
 
   // Cargar locales disponibles
   useEffect(() => {
     async function fetchLocals() {
       setLoadingLocals(true);
-      const { data, error } = await supabase.from('data').select('Local');
+      const { data, error } = await supabase.from('locales').select('nombre_local').order('nombre_local');
       if (!error && data) {
-        const uniqueLocals = [...new Set(data.map(item => item.Local))].sort();
-        setAllLocals(uniqueLocals);
+        const locals = data.map(item => item.nombre_local).sort();
+        setAllLocals(locals);
       }
       setLoadingLocals(false);
     }
@@ -207,14 +216,6 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
     else { 
       const { error } = await response.json(); 
       toast.error(`Error: ${error}`); 
-    }
-  };
-
-  const handleLocalChange = (local: string, isChecked: boolean) => {
-    if (isChecked) {
-      setUserLocals(prev => [...prev, local]);
-    } else {
-      setUserLocals(prev => prev.filter(l => l !== local));
     }
   };
 
@@ -314,39 +315,52 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
             {loadingLocals ? (
               <p>Cargando locales...</p>
             ) : (
-              <div style={{ 
-                maxHeight: '200px', 
-                overflowY: 'auto', 
-                borderTopWidth: '1px', 
-                borderTopStyle: 'solid', 
-                borderTopColor: '#ccc', 
-                borderBottomWidth: '1px', 
-                borderBottomStyle: 'solid', 
-                borderBottomColor: '#ccc', 
-                borderLeftWidth: '1px', 
-                borderLeftStyle: 'solid', 
-                borderLeftColor: '#ccc', 
-                borderRightWidth: '1px', 
-                borderRightStyle: 'solid', 
-                borderRightColor: '#ccc', 
-                padding: '10px', 
-                borderRadius: '5px',
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '10px'
-              }}>
-                {allLocals.map(local => (
-                  <div key={local} style={{ margin: '5px 0' }}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={userLocals.includes(local)}
-                        onChange={(e) => handleLocalChange(local, e.target.checked)}
-                      />
-                      <span style={{ marginLeft: '5px' }}>{local}</span>
-                    </label>
-                  </div>
-                ))}
+              <div>
+                {/* Search input for filtering locals */}
+                <input
+                  type="text"
+                  placeholder="Buscar locales..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{
+                    ...inputStyle,
+                    marginBottom: '10px'
+                  }}
+                />
+                <div style={{ 
+                  maxHeight: '200px', 
+                  overflowY: 'auto', 
+                  borderTopWidth: '1px', 
+                  borderTopStyle: 'solid', 
+                  borderTopColor: '#ccc', 
+                  borderBottomWidth: '1px', 
+                  borderBottomStyle: 'solid', 
+                  borderBottomColor: '#ccc', 
+                  borderLeftWidth: '1px', 
+                  borderLeftStyle: 'solid', 
+                  borderLeftColor: '#ccc', 
+                  borderRightWidth: '1px', 
+                  borderRightStyle: 'solid', 
+                  borderRightColor: '#ccc', 
+                  padding: '10px', 
+                  borderRadius: '5px',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '10px'
+                }}>
+                  {filteredLocals.map(local => (
+                    <div key={local} style={{ margin: '5px 0' }}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={userLocals.includes(local)}
+                          onChange={(e) => onLocalChange(local, e.target.checked)}
+                        />
+                        <span style={{ marginLeft: '5px' }}>{local}</span>
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -374,6 +388,7 @@ export default function AdminView({ profile }: AdminViewProps) {
   const [availableLocals, setAvailableLocals] = useState<string[]>([]);
   const [userLocals, setUserLocals] = useState<string[]>([]);
   const [loadingLocals, setLoadingLocals] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(''); // For search filter in user creation
 
   const userRole = profile?.role;
   const canUpload = userRole === 'administrador' || userRole === 'Warehouse Operator';
@@ -386,6 +401,14 @@ export default function AdminView({ profile }: AdminViewProps) {
   // Obtener roles que el usuario actual puede asignar
   const assignableRoles = getAssignableRoles(userRole || '');
 
+  // Filter available locals based on search term
+  const filteredLocals = useMemo(() => {
+    if (!searchTerm) return availableLocals;
+    return availableLocals.filter(local => 
+      local.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [availableLocals, searchTerm]);
+
   // Cargar locales disponibles
   useEffect(() => {
     async function fetchLocals() {
@@ -393,17 +416,27 @@ export default function AdminView({ profile }: AdminViewProps) {
       
       if (isStoreSupervisor && profile?.id) {
         // Para Store Supervisor, obtener solo sus locales asignados
-        const { data, error } = await supabase.from('user_locals').select('local_name').eq('user_id', profile.id);
-        if (!error && data) {
-          const locals = data.map(item => item.local_name).sort();
-          setAvailableLocals(locals);
+        const { data: userLocalsData, error: userLocalsError } = await supabase.from('user_locals').select('local_name').eq('user_id', profile.id);
+        if (!userLocalsError && userLocalsData) {
+          // Obtener los detalles completos de los locales asignados
+          const localNames = userLocalsData.map(item => item.local_name);
+          const { data: localsData, error: localsError } = await supabase
+            .from('locales')
+            .select('nombre_local')
+            .in('nombre_local', localNames)
+            .order('nombre_local');
+          
+          if (!localsError && localsData) {
+            const locals = localsData.map(item => item.nombre_local).sort();
+            setAvailableLocals(locals);
+          }
         }
       } else if (canManageUsers) {
-        // Para otros usuarios con permisos, obtener todos los locales
-        const { data, error } = await supabase.from('data').select('Local');
+        // Para otros usuarios con permisos, obtener todos los locales de la tabla locales
+        const { data, error } = await supabase.from('locales').select('nombre_local').order('nombre_local');
         if (!error && data) {
-          const uniqueLocals = [...new Set(data.map(item => item.Local))].sort();
-          setAvailableLocals(uniqueLocals);
+          const locals = data.map(item => item.nombre_local).sort();
+          setAvailableLocals(locals);
         }
       }
       
@@ -628,39 +661,52 @@ export default function AdminView({ profile }: AdminViewProps) {
                   {loadingLocals ? (
                     <p>Cargando locales...</p>
                   ) : (
-                    <div style={{ 
-                      maxHeight: '200px', 
-                      overflowY: 'auto', 
-                      borderTopWidth: '1px', 
-                      borderTopStyle: 'solid', 
-                      borderTopColor: '#ccc', 
-                      borderBottomWidth: '1px', 
-                      borderBottomStyle: 'solid', 
-                      borderBottomColor: '#ccc', 
-                      borderLeftWidth: '1px', 
-                      borderLeftStyle: 'solid', 
-                      borderLeftColor: '#ccc', 
-                      borderRightWidth: '1px', 
-                      borderRightStyle: 'solid', 
-                      borderRightColor: '#ccc', 
-                      padding: '10px', 
-                      borderRadius: '5px',
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
-                      gap: '10px'
-                    }}>
-                      {availableLocals.map(local => (
-                        <div key={local} style={{ margin: '5px 0' }}>
-                          <label>
-                            <input
-                              type="checkbox"
-                              checked={userLocals.includes(local)}
-                              onChange={(e) => handleLocalChange(local, e.target.checked)}
-                            />
-                            <span style={{ marginLeft: '5px' }}>{local}</span>
-                          </label>
-                        </div>
-                      ))}
+                    <div>
+                      {/* Search input for filtering locals */}
+                      <input
+                        type="text"
+                        placeholder="Buscar locales..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{
+                          ...inputStyle,
+                          marginBottom: '10px'
+                        }}
+                      />
+                      <div style={{ 
+                        maxHeight: '200px', 
+                        overflowY: 'auto', 
+                        borderTopWidth: '1px', 
+                        borderTopStyle: 'solid', 
+                        borderTopColor: '#ccc', 
+                        borderBottomWidth: '1px', 
+                        borderBottomStyle: 'solid', 
+                        borderBottomColor: '#ccc', 
+                        borderLeftWidth: '1px', 
+                        borderLeftStyle: 'solid', 
+                        borderLeftColor: '#ccc', 
+                        borderRightWidth: '1px', 
+                        borderRightStyle: 'solid', 
+                        borderRightColor: '#ccc', 
+                        padding: '10px', 
+                        borderRadius: '5px',
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '10px'
+                      }}>
+                        {filteredLocals.map(local => (
+                          <div key={local} style={{ margin: '5px 0' }}>
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={userLocals.includes(local)}
+                                onChange={(e) => handleLocalChange(local, e.target.checked)}
+                              />
+                              <span style={{ marginLeft: '5px' }}>{local}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -705,7 +751,7 @@ export default function AdminView({ profile }: AdminViewProps) {
                     </button>
                   )}
                 </div>
-                {editingProfileId === p.id && <EditProfileForm profile={p} onSave={() => { setEditingProfileId(null); fetchProfiles(); }} onCancel={() => setEditingProfileId(null)} currentUserRole={userRole} currentUserLocal={null} />}
+                {editingProfileId === p.id && <EditProfileForm profile={p} onSave={() => { setEditingProfileId(null); fetchProfiles(); }} onCancel={() => setEditingProfileId(null)} currentUserRole={userRole} currentUserLocal={null} onLocalChange={handleLocalChange} />}
               </div>
             ))}
           </div>

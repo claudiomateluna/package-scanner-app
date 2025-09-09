@@ -173,30 +173,30 @@ export default function AppLayout({ session, profile, onBack, children, currentV
     alignItems: 'center',
     borderBottomWidth: '1px',
     borderBottomStyle: 'solid',
-    borderBottomColor: '#555',
+    borderBottomColor: '#dddddd',
     padding: '10px',
     position: 'sticky',
     top: 0,
-    backgroundColor: '#FE7F2D',
+    backgroundColor: '#ffffff',
     zIndex: 10,
-    color: '#233D4D'
+    color: '#000000'
   };
   
   const baseButtonStyle: CSSProperties = { 
     backgroundColor: 'transparent', 
-    color: '#233D4D',
+    color: '#000000',
     borderTopWidth: '1px',
     borderTopStyle: 'solid',
-    borderTopColor: '#233D4D',
+    borderTopColor: '#000000',
     borderBottomWidth: '1px',
     borderBottomStyle: 'solid',
-    borderBottomColor: '#233D4D',
+    borderBottomColor: '#000000',
     borderLeftWidth: '1px',
     borderLeftStyle: 'solid',
-    borderLeftColor: '#233D4D',
+    borderLeftColor: '#000000',
     borderRightWidth: '1px',
     borderRightStyle: 'solid',
-    borderRightColor: '#233D4D',
+    borderRightColor: '#000000',
     padding: '8px 12px', 
     cursor: 'pointer', 
     borderRadius: '5px', 
@@ -206,17 +206,17 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   
   const activeButtonStyle: CSSProperties = { 
     ...baseButtonStyle, 
-    borderTopColor: '#233D4D',
-    borderBottomColor: '#233D4D',
-    borderLeftColor: '#233D4D',
-    borderRightColor: '#233D4D',
-    color: '#233D4D',
-    backgroundColor: 'rgba(35, 61, 77, 0.2)'
+    borderTopColor: '#000000',
+    borderBottomColor: '#000000',
+    borderLeftColor: '#000000',
+    borderRightColor: '#000000',
+    color: '#000000',
+    backgroundColor: 'rgba(0, 0, 0, 0.1)'
   };
   
   const scannerButtonStyle: CSSProperties = {
     backgroundColor: 'transparent',
-    color: '#233D4D',
+    color: '#000000',
     border: 'none',
     padding: '0',
     margin: '0',
@@ -231,7 +231,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   
   const activeScannerButtonStyle: CSSProperties = {
     ...scannerButtonStyle,
-    backgroundColor: 'rgba(35, 61, 77, 0.2)'
+    backgroundColor: 'rgba(0, 0, 0, 0.1)'
   };
 
   const handleSignOut = async () => {
@@ -294,8 +294,8 @@ export default function AppLayout({ session, profile, onBack, children, currentV
               />
             </div>
             <div>
-              <h2 style={{ margin: '0', color: '#233D4D', lineHeight: '1' }}>Recepciones</h2>
-              <p style={{ margin: '0', fontSize: '0.9em', color: '#233D4D', lineHeight: '1' }}>
+              <h2 style={{ margin: '0', color: '#000000', lineHeight: '1' }}>Recepciones</h2>
+              <p style={{ margin: '0', fontSize: '0.9em', color: '#000000', lineHeight: '1' }}>
                 Bienvenido {getUserFirstAndLastName().firstName} {getUserFirstAndLastName().lastName ? ` ${getUserFirstAndLastName().lastName}` : ''}
               </p>
             </div>

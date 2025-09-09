@@ -116,15 +116,19 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
       justifyContent: 'center', 
       alignItems: 'center', 
       height: '100vh',
-      backgroundColor: '#233D4D',
+      backgroundColor: '#FFF',
       position: 'relative'
     }}>
       <div style={{ 
         width: '400px', 
-        backgroundColor: 'rgba(0,0,0,0.2)', 
+        backgroundColor: '#FFF', 
         padding: '40px', 
-        borderRadius: '8px',
-        textAlign: 'center'
+        borderRadius: '4px',
+        textAlign: 'center',
+        borderColor: '#000000',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
       }}>
         {isLocked ? (
           <div className="notification-error">
@@ -145,7 +149,7 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
                   textAlign: 'left', 
                   fontWeight: 'bold', 
                   marginBottom: '5px',
-                  color: '#CCCCCC'
+                  color: '#000000'
                 }}
               >
                 Correo Electrónico
@@ -159,9 +163,9 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
                   width: '100%',
                   padding: '12px',
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  color: '#CCCCCC',
-                  border: '1px solid #CCCCCC',
-                  borderRadius: '5px',
+                  color: '#000000',
+                  border: '1px solid #000',
+                  borderRadius: '4px',
                   fontSize: '1em',
                   boxSizing: 'border-box'
                 }}
@@ -178,7 +182,7 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
                   textAlign: 'left', 
                   fontWeight: 'bold', 
                   marginBottom: '5px',
-                  color: '#CCCCCC'
+                  color: '#000000'
                 }}
               >
                 Contraseña
@@ -192,9 +196,9 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
                   width: '100%',
                   padding: '12px',
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  color: '#CCCCCC',
-                  border: '1px solid #CCCCCC',
-                  borderRadius: '5px',
+                  color: '#000000',
+                  border: '1px solid #000',
+                  borderRadius: '4px',
                   fontSize: '1em',
                   boxSizing: 'border-box'
                 }}
@@ -208,8 +212,8 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
               disabled={loading}
               style={{
                 padding: '12px 20px',
-                backgroundColor: '#FE7F2D',
-                color: '#233D4D',
+                backgroundColor: '#000000',
+                color: '#ffffff',
                 border: 'none',
                 borderRadius: '5px',
                 fontWeight: 'bold',
@@ -267,7 +271,7 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
         
         {loginAttempts > 0 && loginAttempts < 3 && !isLocked && (
           <p style={{ 
-            color: '#FE7F2D', 
+            color: '#000000', 
             fontSize: '0.9em', 
             marginTop: '10px',
             marginBottom: '0'
@@ -278,7 +282,7 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
       </div>
       
       <footer className="footer">
-        Desarrollado por Claudio Mateluna
+        Desarrollado por Claudio Mateluna González <br /> Warehouse Local Tech
       </footer>
       
       <style jsx>{`

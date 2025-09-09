@@ -33,17 +33,18 @@ const styles: { [key: string]: CSSProperties } = {
     width: '100%',
     maxWidth: '500px',
     padding: '30px',
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: '#ffffff',
+    border: '1px solid #dddddd',
     borderRadius: '8px',
   },
   title: {
-    color: '#FE7F2D',
+    color: '#000000',
     textAlign: 'center',
     marginBottom: '30px'
   },
   buttonPrimary: {
-    backgroundColor: '#FE7F2D',
-    color: '#233D4D',
+    backgroundColor: '#000000',
+    color: '#ffffff',
     border: 'none',
     padding: '12px 20px',
     cursor: 'pointer',
@@ -57,20 +58,20 @@ const styles: { [key: string]: CSSProperties } = {
     width: '100%',
     padding: '12px',
     marginTop: '8px',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    color: '#CCCCCC',
+    backgroundColor: '#ffffff',
+    color: '#000000',
     borderTopWidth: '1px',
     borderTopStyle: 'solid',
-    borderTopColor: '#CCCCCC',
+    borderTopColor: '#dddddd',
     borderBottomWidth: '1px',
     borderBottomStyle: 'solid',
-    borderBottomColor: '#CCCCCC',
+    borderBottomColor: '#dddddd',
     borderLeftWidth: '1px',
     borderLeftStyle: 'solid',
-    borderLeftColor: '#CCCCCC',
+    borderLeftColor: '#dddddd',
     borderRightWidth: '1px',
     borderRightStyle: 'solid',
-    borderRightColor: '#CCCCCC',
+    borderRightColor: '#dddddd',
     borderRadius: '5px',
     fontSize: '1em',
     boxSizing: 'border-box' // Añadido para prevenir desbordamiento
@@ -80,7 +81,7 @@ const styles: { [key: string]: CSSProperties } = {
     textAlign: 'left',
     fontWeight: 'bold',
     marginBottom: '5px',
-    color: '#CCCCCC'
+    color: '#000000'
   }
 };
 
@@ -239,7 +240,7 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {isAdminType ? (
             <div>
-              <label htmlFor="local-select" style={styles.label}>Seleccionar Local (RTL):</label>
+              <label htmlFor="local-select" style={styles.label}>Seleccionar Local:</label>
               {availableLocals.length > 0 ? (
                 <select 
                   id="local-select" 
@@ -249,7 +250,7 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
                 >
                   {availableLocals.map(local => (
                     <option key={local.id} value={local.nombre_local}>
-                      [{local.tipo_local}] {local.nombre_local}
+                      {local.nombre_local}
                     </option>
                   ))}
                 </select>

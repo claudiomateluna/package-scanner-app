@@ -1,14 +1,424 @@
+/* Cargar fuentes personalizadas */
+@font-face {
+  font-family: 'TituloPersonalizado';
+  src: url('./fonts/titulo.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CuerpoPersonalizado';
+  src: url('./fonts/cuerpo.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Paleta de colores actualizada */
+:root {
+  --color-background: #ffffff; /* Fondo blanco */
+  --color-text-primary: #000000; /* Texto principal negro */
+  --color-text-secondary: #333333; /* Texto secundario gris oscuro */
+  --color-text-tertiary: #666666; /* Texto terciario gris medio */
+  --color-border: #dddddd; /* Bordes gris claro */
+  --color-border-dark: #999999; /* Bordes gris medio */
+  --color-accent: #000000; /* Color de énfasis negro */
+  --color-accent-hover: #333333; /* Color de énfasis hover gris oscuro */
+  --color-success: #a1c181; /* Verde para éxito */
+  --color-warning: #ff9e00; /* Naranja para advertencias */
+  --color-error: #e63946; /* Rojo para errores */
+  --color-card-background: #ffffff; /* Fondo de tarjetas blanco */
+}
+
 /* Estilos globales para la aplicación */
 
 /* Estilo para el cuerpo de la aplicación */
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: #233D4D;
-  color: #CCCCCC;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
   min-height: 100vh;
+}
+
+/* Estilos para encabezados */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'TituloPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-top: 0;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 1.2rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+  margin-bottom: 0.6rem;
+}
+
+h6 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Estilos para scrollbars personalizados */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-hover);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) var(--color-background);
+}
+
+/* Clase para contenedores con scroll */
+.scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) var(--color-background);
+}
+
+.scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: var(--color-background);
+  border-radius: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-hover);
+}
+
+/* Estilos para inputs y botones */
+.input-field {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  font-size: 1em;
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  box-sizing: border-box;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+.primary-button {
+  padding: 12px 20px;
+  background-color: var(--color-accent); /* Negro */
+  color: var(--color-background); /* Blanco */
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1.1em;
+  font-family: 'TituloPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.primary-button:hover:not(:disabled) {
+  background-color: var(--color-accent-hover); /* Gris oscuro */
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  padding: 12px 20px;
+  background-color: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1.1em;
+  font-family: 'TituloPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.secondary-button:hover:not(:disabled) {
+  background-color: var(--color-card-background);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Estilos para tarjetas */
+.card {
+  position: relative;
+  background-color: var(--color-card-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Animaciones */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Estilos para mensajes de notificación */
+.notification-success {
+  background-color: var(--color-success);
+  color: var(--color-background);
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.notification-error {
+  background-color: var(--color-error);
+  color: var(--color-background);
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.notification-warning {
+  background-color: var(--color-warning);
+  color: var(--color-background);
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Estilos para el pie de página */
+.footer {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  color: var(--color-text-tertiary);
+  font-size: 9px;
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  z-index: 100;
+}
+
+/* Estilos para tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--color-text-primary);
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+th {
+  background-color: var(--color-card-background);
+  font-weight: bold;
+}
+
+tr:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos para enlaces */
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Estilos para selectores */
+select {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  font-size: 1em;
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  box-sizing: border-box;
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para checkboxes y radio buttons */
+input[type="checkbox"], input[type="radio"] {
+  accent-color: var(--color-accent);
+}
+
+/* Estilos para el encabezado */
+.header {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border);
+  padding: 16px;
+}
+
+/* Estilos para el cuadro de selección */
+.selection-box {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px;
+}
+
+/* Estilos responsivos */
+@media (max-width: 720px) {
+  /* Ajustes generales para dispositivos móviles */
+  #Izquierda, #Derecha {
+    width: 100% !important;
+  }
+  
+  main {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  /* Ajustes para el cuadro de resumen */
+  #CuadroResumen {
+    padding: 10px !important;
+  }
+  
+  /* Ajustes para las tarjetas de progreso */
+  .card {
+    margin-bottom: 10px !important;
+  }
+  
+  /* Ajustes para tablas */
+  table {
+    font-size: 0.9em !important;
+  }
+  
+  th, td {
+    padding: 6px !important;
+  }
+  
+  /* Ajustes para encabezados en móviles */
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.7rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Ajustes adicionales para pantallas pequeñas */
+  #CuadroResumen h3 {
+    font-size: 1em !important;
+  }
+  
+  .notification-success, .notification-error, .notification-warning {
+    padding: 10px !important;
+    font-size: 0.9em !important;
+  }
+  
+  .primary-button, .secondary-button {
+    padding: 10px 15px !important;
+    font-size: 1em !important;
+  }
+}
+
+h3 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+  margin-bottom: 0.6rem;
+}
+
+h6 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
 }
 
 /* Estilos para scrollbars personalizados */
@@ -34,13 +444,13 @@ body {
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #FE7F2D #233D4D;
+  scrollbar-color: #000000 #ffffff;
 }
 
 /* Clase para contenedores con scroll */
 .scroll-container {
   scrollbar-width: thin;
-  scrollbar-color: #FE7F2D #233D4D;
+  scrollbar-color: #000000 #ffffff;
 }
 
 .scroll-container::-webkit-scrollbar {
@@ -48,17 +458,17 @@ body {
 }
 
 .scroll-container::-webkit-scrollbar-track {
-  background: #233D4D;
+  background: #ffffff;
   border-radius: 4px;
 }
 
 .scroll-container::-webkit-scrollbar-thumb {
-  background: #FE7F2D;
+  background: #000000;
   border-radius: 4px;
 }
 
 .scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #e06e1d;
+  background: #333333;
 }
 
 /* Estilos para inputs y botones */
@@ -70,6 +480,8 @@ body {
   border: 1px solid #CCCCCC;
   border-radius: 5px;
   font-size: 1em;
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 .input-field:focus {
@@ -86,6 +498,8 @@ body {
   border-radius: 5px;
   font-weight: bold;
   font-size: 1.1em;
+  font-family: 'TituloPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -111,6 +525,8 @@ body {
   border-radius: 5px;
   font-weight: bold;
   font-size: 1.1em;
+  font-family: 'TituloPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -147,6 +563,8 @@ body {
   padding: 15px;
   border-radius: 5px;
   margin-bottom: 15px;
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 .notification-error {
@@ -155,6 +573,8 @@ body {
   padding: 15px;
   border-radius: 5px;
   margin-bottom: 15px;
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 .notification-warning {
@@ -163,6 +583,8 @@ body {
   padding: 15px;
   border-radius: 5px;
   margin-bottom: 15px;
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 /* Estilos para el pie de página */
@@ -173,6 +595,8 @@ body {
   text-align: center;
   color: #000000;
   font-size: 9px;
+  font-family: 'CuerpoPersonalizado', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   z-index: 100;
 }
 
@@ -205,6 +629,19 @@ body {
   
   th, td {
     padding: 6px !important;
+  }
+  
+  /* Ajustes para encabezados en móviles */
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.7rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
   }
 }
 

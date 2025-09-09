@@ -145,7 +145,7 @@ export default function SlidingMenu({
           left: 0,
           width: '280px',
           height: '100%',
-          backgroundColor: '#233D4D',
+          backgroundColor: '#ffffff',
           zIndex: 1000,
           transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 0.3s ease',
@@ -157,11 +157,12 @@ export default function SlidingMenu({
         {/* Menu Header */}
         <div style={{
           padding: '20px',
-          backgroundColor: '#FE7F2D',
-          color: '#233D4D',
+          backgroundColor: '#ffffff',
+          color: '#000000',
           display: 'flex',
           alignItems: 'center',
-          gap: '10px'
+          gap: '10px',
+          borderBottom: '1px solid #dddddd'
         }}>
           <Image 
             src="/adidas_shp.svg" 
@@ -169,7 +170,7 @@ export default function SlidingMenu({
             width={40}
             height={40}
           />
-          <h2 style={{ margin: 0, color: '#233D4D' }}>Recepciones</h2>
+          <h2 style={{ margin: 0, color: '#000000' }}>Recepciones</h2>
         </div>
         
         {/* Menu Items */}
@@ -191,9 +192,9 @@ export default function SlidingMenu({
                 gap: '10px',
                 padding: '15px',
                 backgroundColor: 'transparent',
-                color: '#CCCCCC',
+                color: '#000000',
                 border: 'none',
-                borderBottom: '1px solid #555',
+                borderBottom: '1px solid #dddddd',
                 cursor: 'pointer',
                 textAlign: 'left',
                 fontSize: '16px'
@@ -216,10 +217,10 @@ export default function SlidingMenu({
                   alignItems: 'center',
                   gap: '10px',
                   padding: '15px',
-                  backgroundColor: currentView === 'scanner' ? 'rgba(254, 127, 45, 0.2)' : 'transparent',
-                  color: '#CCCCCC',
+                  backgroundColor: currentView === 'scanner' ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+                  color: '#000000',
                   border: 'none',
-                  borderBottom: '1px solid #555',
+                  borderBottom: '1px solid #dddddd',
                   cursor: 'pointer',
                   textAlign: 'left',
                   fontSize: '16px'
@@ -239,10 +240,10 @@ export default function SlidingMenu({
                   alignItems: 'center',
                   gap: '10px',
                   padding: '15px',
-                  backgroundColor: currentView === 'admin' ? 'rgba(254, 127, 45, 0.2)' : 'transparent',
-                  color: '#CCCCCC',
+                  backgroundColor: currentView === 'admin' ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+                  color: '#000000',
                   border: 'none',
-                  borderBottom: '1px solid #555',
+                  borderBottom: '1px solid #dddddd',
                   cursor: 'pointer',
                   textAlign: 'left',
                   fontSize: '16px'
@@ -265,9 +266,9 @@ export default function SlidingMenu({
               gap: '10px',
               padding: '15px',
               backgroundColor: 'transparent',
-              color: '#CCCCCC',
+              color: '#000000',
               border: 'none',
-              borderBottom: '1px solid #555',
+              borderBottom: '1px solid #dddddd',
               cursor: 'pointer',
               textAlign: 'left',
               fontSize: '16px'
@@ -288,7 +289,7 @@ export default function SlidingMenu({
               gap: '10px',
               padding: '15px',
               backgroundColor: 'transparent',
-              color: '#CCCCCC',
+              color: '#000000',
               border: 'none',
               cursor: 'pointer',
               textAlign: 'left',

@@ -477,16 +477,16 @@ export default function ScannerView({ session, profile, selection, currentView }
         <div id='Izquierda' style={{ width: isPhone ? '100%' : '63%' }}>
           {/* Cuadro Resumen */}
             <div id='CuadroResumen' style={{ 
-              backgroundColor: 'rgba(0,0,0,0.2)',
+              backgroundColor: '#ffffff',
               borderRadius: '8px',
               padding: '5px',
-              border: '1px solid #CCCCCC',
+              border: '1px solid #000000',
               display: 'flex',
               flexDirection: 'column'
             }}>
               <h3 style={{
                 margin: '0 0 5px 0',
-                color: '#CCCCCC',
+                color: '#000000',
                 textAlign: 'center',
                 fontSize: '1.2em'
               }}>
@@ -500,29 +500,30 @@ export default function ScannerView({ session, profile, selection, currentView }
                 flexWrap: 'wrap',
                 gap: '5px'
               }}>
-                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
+                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
+                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
                     {/* Calcular DN/Facturas escaneadas */}
                     {Array.from(new Set(packages.filter(pkg => scanned.has(pkg.OLPN)).map(pkg => pkg.DN))).length} / {dnProgress.length}
                   </div>
-                  <div style={{ fontSize: '0.9em', color: '#CCCCCC' }}>
+                  <div style={{ fontSize: '0.9em', color: '#666666' }}>
                     {isWarehouseOrAdmin ? 'DN' : 'Facturas'}
                   </div>
                 </div>
                 
-                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
+                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
+                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
                     {scanned.size} / {packages.length}
                   </div>
-                  <div style={{ fontSize: '0.9em', color: '#CCCCCC' }}>
+                  <div style={{ fontSize: '0.9em', color: '#666666' }}>
                     {isWarehouseOrAdmin ? 'OLPN' : 'Bultos'}
                   </div>
                 </div>
                 
-                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#FE7F2D' }}>
-                    {/* Calcular total de unidades */}
-                    {packages.reduce((total, pkg) => total + (scanned.has(pkg.OLPN) ? pkg.Unidades : 0), 0)} / 
-                    {packages.reduce((total, pkg) => total + pkg.Unidades, 0)}
+                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
+                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
+                    {packages.filter(pkg => scanned.has(pkg.OLPN)).reduce((sum, pkg) => sum + pkg.Unidades, 0)} / {packages.reduce((sum, pkg) => sum + pkg.Unidades, 0)}
                   </div>
-                  <div style={{ fontSize: '0.9em', color: '#CCCCCC' }}>
+                  <div style={{ fontSize: '0.9em', color: '#666666' }}>
                     Unidades
                   </div>
                 </div>
@@ -543,13 +544,13 @@ export default function ScannerView({ session, profile, selection, currentView }
                     flex: '1',
                     padding: '10px', // Reducir padding
                     borderRadius: '5px',
-                    backgroundColor: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#A1C181' : '#FE7F2D',
-                    color: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#233D4D' : '#233D4D',
+                    backgroundColor: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#A1C181' : (isCompletingReception || isReceptionCompleted ? '#ffffff' : '#ffffff'),
+                    color: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#ffffff' : '#000000',
                     fontWeight: 'bold',
                     fontSize: '1em',
-                    border: 'none',
+                    border: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? 'none' : '1px solid #000000',
                     cursor: packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !isReceptionCompleted ? 'pointer' : 'not-allowed',
-                    opacity: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? 1 : 0.6
+                    opacity: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? 1 : (isCompletingReception || isReceptionCompleted ? 0.6 : 1)
                   }}
                 >
                   {isCompletingReception ? 'Completando...' : (isReceptionCompleted ? 'Recepción Completada' : (packages.length > 0 && scanned.size === packages.length ? 'Recepción Completada' : 'Pendiente'))}
@@ -562,11 +563,11 @@ export default function ScannerView({ session, profile, selection, currentView }
                     flex: '1',
                     padding: '10px',
                     borderRadius: '5px',
-                    backgroundColor: '#233D4D',
-                    color: '#CCCCCC',
+                    backgroundColor: '#000000',
+                    color: '#ffffff',
                     fontWeight: 'bold',
                     fontSize: '1em',
-                    border: '1px solid #CCCCCC',
+                    border: 'none',
                     cursor: 'pointer'
                   }}
                 >
@@ -581,11 +582,11 @@ export default function ScannerView({ session, profile, selection, currentView }
                       flex: '1',
                       padding: '10px',
                       borderRadius: '5px',
-                      backgroundColor: '#233D4D',
-                      color: '#CCCCCC',
+                      backgroundColor: '#000000',
+                      color: '#ffffff',
                       fontWeight: 'bold',
                       fontSize: '1em',
-                      border: '1px solid #CCCCCC',
+                      border: 'none',
                       cursor: 'pointer'
                     }}
                   >
@@ -604,20 +605,20 @@ export default function ScannerView({ session, profile, selection, currentView }
                   placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`}
                   value={scannedOlpn}
                   onChange={(e) => setScannedOlpn(e.target.value)}
-                  style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px'}}
+                  style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#000000', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#000000', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#000000', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#000000', borderRadius: '5px'}}
                   onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister(scannedOlpn)}
                   disabled={!canScan}
                 />
                 <button 
                   onClick={() => handleRegister(scannedOlpn)} 
-                  style={{padding: '5px', backgroundColor: canScan ? '#FE7F2D' : '#cccccc', color: '#233D4D', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '5px', cursor: canScan ? 'pointer' : 'not-allowed', fontWeight: 'bold'}}
+                  style={{padding: '5px', backgroundColor: canScan ? '#000000' : '#cccccc', color: '#FFFFFF', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '5px', cursor: canScan ? 'pointer' : 'not-allowed', fontWeight: 'bold'}}
                   disabled={!canScan}
                 >
                   Registrar
                 </button>
                 <button 
                   onClick={() => setUseBarcodeScanner(true)}
-                  style={{padding: '2px', backgroundColor: '#FE7F2D', color: '#233D4D', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
+                  style={{padding: '2px', backgroundColor: '#FFFFFF', color: '#000000', border: 'none', borderRadius: '4px', cursor: 'pointer', borderColor: '#000000', borderWidth: '1px', borderStyle: 'solid'}}
                   title="Usar escáner de código de barras"
                 >
                   <Image 
@@ -663,20 +664,20 @@ export default function ScannerView({ session, profile, selection, currentView }
                   placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`} 
                   value={scannedOlpn} 
                   onChange={(e) => setScannedOlpn(e.target.value)} 
-                  style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px'}}
+                  style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#000', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#000', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#000', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#000', borderRadius: '4px'}}
                   onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister(scannedOlpn)}
                   disabled={!canScan}
                 />
                 <button 
                   onClick={() => handleRegister(scannedOlpn)} 
-                  style={{padding: '5px', backgroundColor: canScan ? '#FE7F2D' : '#cccccc', color: '#233D4D', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '5px', cursor: canScan ? 'pointer' : 'not-allowed', fontWeight: 'bold'}}
+                  style={{padding: '5px 10px', backgroundColor: canScan ? '#000000' : '#cccccc', color: '#FFFFFF', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '4px', cursor: canScan ? 'pointer' : 'not-allowed', fontWeight: 'bold'}}
                   disabled={!canScan}
                 >
                   Registrar
                 </button>
                 <button 
                   onClick={() => setUseBarcodeScanner(true)}
-                  style={{padding: '2px', backgroundColor: '#FE7F2D', color: '#233D4D', border: 'none', borderRadius: '5px', cursor: 'pointer'}}
+                  style={{padding: '3px 2px 1px 2px', backgroundColor: '#FFFFFF', color: '#000000', border: 'none', borderRadius: '4px', cursor: 'pointer', borderColor: '#000000', borderWidth: '1px', borderStyle: 'solid'}}
                   title="Usar escáner de código de barras"
                 >
                   <Image 
@@ -720,38 +721,38 @@ export default function ScannerView({ session, profile, selection, currentView }
             </div>
           )}
 
-          <h4>Paquetes Esperados ({scanned.size} / {packages.length})</h4>
+          <h4 style={{ color: '#000000' }}>Paquetes Esperados ({scanned.size} / {packages.length})</h4>
           <div className="scroll-container" style={{ 
             maxHeight: '50vh', 
             overflowY: 'auto', 
             borderTopWidth: '1px', 
             borderTopStyle: 'solid', 
-            borderTopColor: '#555', 
+            borderTopColor: '#000000', 
             borderBottomWidth: '1px', 
             borderBottomStyle: 'solid', 
-            borderBottomColor: '#555', 
+            borderBottomColor: '#000000', 
             borderLeftWidth: '1px', 
             borderLeftStyle: 'solid', 
-            borderLeftColor: '#555', 
+            borderLeftColor: '#000000', 
             borderRightWidth: '1px', 
             borderRightStyle: 'solid', 
-            borderRightColor: '#555', 
+            borderRightColor: '#000000', 
             borderRadius: '5px'
           }}>
             <table style={{width: '100%', borderCollapse: 'collapse'}}>
               <thead>
-                <tr style={{borderBottom: '1px solid #ccc'}}>
-                  <th style={{padding: '8px', textAlign: 'left', color: '#CCCCCC'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: '150px', color: '#CCCCCC'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#CCCCCC'}}>Unidades</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#CCCCCC'}}>Faltantes</th>
+                <tr style={{borderBottom: '1px solid #000000'}}>
+                  <th style={{padding: '8px', textAlign: 'left', color: '#000000'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
+                  <th style={{padding: '8px', textAlign: 'left', width: '150px', color: '#000000'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
+                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#000000'}}>Unidades</th>
+                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#000000'}}>Faltantes</th>
                 </tr>
               </thead>
               <tbody>
                 {packages.map(pkg => (
                   <tr key={pkg.OLPN} style={{ 
                       backgroundColor: scanned.has(pkg.OLPN) ? '#A1C181' : 'transparent',
-                      color: scanned.has(pkg.OLPN) ? '#233D4D' : '#CCCCCC',
+                      color: scanned.has(pkg.OLPN) ? '#000000' : '#999999',
                       borderBottom: '1px solid #555'
                     }}>
                     <td style={{padding: '8px'}}>{pkg.OLPN}</td>
@@ -780,17 +781,18 @@ export default function ScannerView({ session, profile, selection, currentView }
           
           {/* Progreso por DN */}
           <div id='ProgresoPorDN' style={{ 
-            backgroundColor: 'rgba(0,0,0,0.2)', 
-            borderRadius: '8px', 
+            backgroundColor: '#ffffff', 
+            borderRadius: '4px', 
             padding: '10px', 
             flex: '1',
             display: 'flex',
             flexDirection: 'column',
-            maxHeight: '80vh'
+            maxHeight: '80vh',
+            border: '1px solid #cccccc'
           }}>
             <h3 style={{ 
               margin: '0 0 15px 0', 
-              color: '#CCCCCC', 
+              color: '#000000', 
               textAlign: 'center',
               fontSize: '1.2em'
             }}>
@@ -819,14 +821,15 @@ export default function ScannerView({ session, profile, selection, currentView }
         {/* Progreso por DN en dispositivos móviles */}
         {isPhone && (
           <div id='ProgresoPorDN' style={{ 
-            backgroundColor: 'rgba(0,0,0,0.2)', 
+            backgroundColor: '#ffffff', 
             borderRadius: '8px', 
             padding: '10px',
-            marginTop: '10px'
+            marginTop: '10px',
+            border: '1px solid #cccccc'
           }}>
             <h3 style={{ 
               margin: '0 0 15px 0', 
-              color: '#CCCCCC', 
+              color: '#000000', 
               textAlign: 'center',
               fontSize: '1.2em'
             }}>

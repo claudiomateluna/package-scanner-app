@@ -172,7 +172,7 @@ export default function BarcodeScannerZXing({
     overlayDiv.style.top = `${(cropY / video.videoHeight) * 100}%`;
     overlayDiv.style.width = `${(cropWidth / video.videoWidth) * 100}%`;
     overlayDiv.style.height = `${(cropHeight / video.videoHeight) * 100}%`;
-    overlayDiv.style.border = '2px solid #FE7F2D';
+    overlayDiv.style.border = '2px solid #000000';
     overlayDiv.style.borderRadius = '0.5rem';
     overlayDiv.style.pointerEvents = 'none';
     overlayDiv.style.boxSizing = 'border-box';
@@ -186,7 +186,7 @@ export default function BarcodeScannerZXing({
       scanLine.style.left = '0';
       scanLine.style.right = '0';
       scanLine.style.height = '2px';
-      scanLine.style.backgroundColor = '#FE7F2D';
+      scanLine.style.backgroundColor = '#000000';
       scanLine.style.boxShadow = '0 0 10px rgba(254, 127, 45, 0.8)';
       scanLine.style.animation = 'scanLineMove 2s ease-in-out infinite';
       scanLineRef.current = scanLine;
