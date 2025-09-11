@@ -125,7 +125,7 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
     }}>
       <div style={{ 
         width: '400px', 
-        backgroundColor: '#FFF', 
+        backgroundColor: '#ffffffbe', 
         padding: '40px', 
         borderRadius: '4px',
         textAlign: 'center',
