@@ -91,7 +91,7 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   const isAdminType = profile.role === 'administrador' || profile.role === 'Warehouse Supervisor' || profile.role === 'Warehouse Operator';
-  const isStoreType = profile.role === 'Store Supervisor' || profile.role === 'Store Operator';
+  const isStoreType = profile.role === 'Store Supervisor' || profile.role === 'Store Operator' || profile.role === 'SKA Operator';
 
   useEffect(() => {
     async function fetchLocals() {
@@ -100,10 +100,10 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
       console.log('SelectionScreen: session?.user?.id:', session?.user?.id);
       
       try {
-        // Para usuarios administradores o warehouse, obtener todos los locales de la tabla locales con tipo RTL
+        // Para usuarios administradores o warehouse, obtener todos los locales de la tabla locales
         if (profile.role === 'administrador' || profile.role === 'Warehouse Supervisor' || profile.role === 'Warehouse Operator') {
-          console.log('SelectionScreen: Usuario administrador o warehouse, obteniendo todos los locales tipo RTL');
-          const { data, error } = await supabase.from('locales').select('*').eq('tipo_local', 'RTL').order('nombre_local');
+          console.log('SelectionScreen: Usuario administrador o warehouse, obteniendo todos los locales');
+          const { data, error } = await supabase.from('locales').select('*').order('tipo_local').order('nombre_local');
           
           if (error) {
             console.error('Error cargando locales:', error);
@@ -112,12 +112,12 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
           }
           
           if (!data || data.length === 0) {
-            console.warn('No se encontraron locales tipo RTL en la tabla locales');
+            console.warn('No se encontraron locales en la tabla locales');
             toast.error('No hay locales disponibles en el sistema.');
             return;
           }
           
-          console.log('SelectionScreen: Locales tipo RTL cargados:', data);
+          console.log('SelectionScreen: Locales cargados:', data);
           setAvailableLocals(data);
           
           // Para usuarios Warehouse, verificar si tienen locales asignados para usar como predeterminado
@@ -148,9 +148,9 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
           console.log('SelectionScreen: Usando primer local disponible:', data[0].nombre_local);
           setSelectedLocal(data[0].nombre_local);
         } 
-        // Para usuarios Store, obtener solo sus locales asignados
-        else if ((profile.role === 'Store Supervisor' || profile.role === 'Store Operator') && session?.user?.id) {
-          console.log('SelectionScreen: Usuario Store, obteniendo locales asignados');
+        // Para usuarios Store y SKA, obtener solo sus locales asignados
+        else if ((profile.role === 'Store Supervisor' || profile.role === 'Store Operator' || profile.role === 'SKA Operator') && session?.user?.id) {
+          console.log('SelectionScreen: Usuario Store o SKA, obteniendo locales asignados');
           try {
             const { data: userLocalsData, error: userLocalsError } = await supabase
               .from('user_locals')
@@ -162,28 +162,37 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
               return;
             }
             
-            // Obtener los detalles completos de los locales asignados tipo RTL
+            // Obtener los detalles completos de los locales asignados
             const localNames = userLocalsData.map(item => item.local_name);
-            const { data: localsData, error: localsError } = await supabase
+            
+            // Para usuarios SKA Operator, filtrar solo locales tipo SKA
+            let query = supabase
               .from('locales')
               .select('*')
-              .eq('tipo_local', 'RTL')
               .in('nombre_local', localNames)
+              .order('tipo_local')
               .order('nombre_local');
+              
+            // Si es SKA Operator, solo mostrar locales tipo SKA
+            if (profile.role === 'SKA Operator') {
+              query = query.eq('tipo_local', 'SKA');
+            }
+            
+            const { data: localsData, error: localsError } = await query;
             
             if (localsError) {
               toast.error('No se pudieron cargar los detalles de los locales asignados.');
               return;
             }
             
-            console.log('SelectionScreen: Locales asignados tipo RTL cargados:', localsData);
+            console.log('SelectionScreen: Locales asignados cargados:', localsData);
             setAvailableLocals(localsData);
             
             if (localsData.length > 0) {
               console.log('SelectionScreen: Usando primer local asignado:', localsData[0].nombre_local);
               setSelectedLocal(localsData[0].nombre_local);
             } else {
-              toast.error('No tienes locales asignados tipo RTL. Contacta a un administrador.');
+              toast.error('No tienes locales asignados. Contacta a un administrador.');
             }
           } catch (error: unknown) {
             toast.error('Error al cargar los locales asignados.');
@@ -193,11 +202,10 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
         else {
           console.log('SelectionScreen: Otro tipo de usuario, usando local asignado en perfil');
           if (profile.local_asignado) {
-            // Obtener los detalles del local asignado tipo RTL
+            // Obtener los detalles del local asignado
             const { data: localData, error: localError } = await supabase
               .from('locales')
               .select('*')
-              .eq('tipo_local', 'RTL')
               .eq('nombre_local', profile.local_asignado)
               .single();
             
@@ -206,7 +214,7 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
               setAvailableLocals([localData]);
               setSelectedLocal(profile.local_asignado);
             } else {
-              toast.error('No se encontró el local asignado tipo RTL. Contacta a un administrador.');
+              toast.error('No se encontró el local asignado. Contacta a un administrador.');
             }
           } else {
             toast.error('No tienes un local asignado. Contacta a un administrador.');
@@ -250,12 +258,12 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
                 >
                   {availableLocals.map(local => (
                     <option key={local.id} value={local.nombre_local}>
-                      {local.nombre_local}
+                      [{local.tipo_local}] {local.nombre_local}
                     </option>
                   ))}
                 </select>
               ) : (
-                <p>No se pudieron cargar los locales tipo RTL. Contacta a un administrador.</p>
+                <p>No se pudieron cargar los locales. Contacta a un administrador.</p>
               )}
             </div>
           ) : isStoreType ? (
@@ -275,7 +283,7 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
                   ))}
                 </select>
               ) : (
-                <p>No tienes locales asignados tipo RTL. Contacta a un administrador.</p>
+                <p>No tienes locales asignados. Contacta a un administrador.</p>
               )}
             </div>
           ) : (

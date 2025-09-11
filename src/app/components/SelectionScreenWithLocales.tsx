@@ -112,17 +112,18 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'FRA' | 'RTL' | 'SKA' | 'WHS'>('ALL');
 
-  const isAdminType = profile.role === 'administrador' || profile.role === 'Warehouse Supervisor' || profile.role === 'Warehouse Operator';
-  const isStoreType = profile.role === 'Store Supervisor' || profile.role === 'Store Operator';
+  // Roles que pueden ver todos los locales sin filtro
+  const canViewAllLocals = profile.role === 'administrador' || profile.role === 'Warehouse Supervisor' || profile.role === 'Warehouse Operator';
+  
+  // Roles que ven solo locales asignados
+  const hasAssignedLocals = profile.role === 'Store Supervisor' || profile.role === 'Store Operator' || profile.role === 'SKA Operator';
 
-  // Apply filter to locals
+  // Apply filter to locals - only show filter buttons for users who can view all locals
   useEffect(() => {
-    if (activeFilter === 'ALL') {
-      setFilteredLocals(availableLocals);
-    } else {
-      setFilteredLocals(availableLocals.filter(local => local.tipo_local === activeFilter));
-    }
-  }, [activeFilter, availableLocals]);
+    // For all users, show all available locals without filtering by type
+    // Except for users with assigned locals, they see only their assigned locals
+    setFilteredLocals(availableLocals);
+  }, [availableLocals]);
 
   useEffect(() => {
     async function fetchLocals() {
@@ -131,9 +132,9 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
       console.log('SelectionScreenWithLocales: session?.user?.id:', session?.user?.id);
       
       try {
-        // Para usuarios administradores o warehouse, obtener todos los locales de la tabla locales
-        if (profile.role === 'administrador' || profile.role === 'Warehouse Supervisor' || profile.role === 'Warehouse Operator') {
-          console.log('SelectionScreenWithLocales: Usuario administrador o warehouse, obteniendo todos los locales');
+        // Para usuarios que pueden ver todos los locales, obtener todos los locales de la tabla locales
+        if (canViewAllLocals) {
+          console.log('SelectionScreenWithLocales: Usuario puede ver todos los locales, obteniendo todos los locales');
           const { data, error } = await supabase.from('locales').select('*').order('tipo_local').order('nombre_local');
           
           if (error) {
@@ -179,9 +180,9 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
           console.log('SelectionScreenWithLocales: Usando primer local disponible:', data[0].nombre_local);
           setSelectedLocal(data[0].nombre_local);
         } 
-        // Para usuarios Store, obtener solo sus locales asignados
-        else if ((profile.role === 'Store Supervisor' || profile.role === 'Store Operator') && session?.user?.id) {
-          console.log('SelectionScreenWithLocales: Usuario Store, obteniendo locales asignados');
+        // Para usuarios con locales asignados, obtener solo sus locales asignados
+        else if (hasAssignedLocals && session?.user?.id) {
+          console.log('SelectionScreenWithLocales: Usuario con locales asignados, obteniendo locales asignados');
           try {
             const { data: userLocalsData, error: userLocalsError } = await supabase
               .from('user_locals')
@@ -249,7 +250,7 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
     }
     
     fetchLocals();
-  }, [profile.role, profile.local_asignado, session?.user?.id]);
+  }, [profile.role, profile.local_asignado, session?.user?.id, canViewAllLocals, hasAssignedLocals]);
 
   const handleSubmit = () => {
     if (!selectedLocal) {
@@ -263,74 +264,25 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
     onSelectionComplete({ local: selectedLocal, fecha: selectedDate });
   };
 
-  // Filter buttons component
-  const FilterButtons = () => (
-    <div style={styles.filterContainer}>
-      <button 
-        onClick={() => setActiveFilter('ALL')}
-        style={{
-          ...styles.filterButton,
-          ...(activeFilter === 'ALL' ? styles.activeFilterButton : {})
-        }}
-      >
-        Todos
-      </button>
-      <button 
-        onClick={() => setActiveFilter('FRA')}
-        style={{
-          ...styles.filterButton,
-          ...(activeFilter === 'FRA' ? styles.activeFilterButton : {})
-        }}
-      >
-        Franquicias (FRA)
-      </button>
-      <button 
-        onClick={() => setActiveFilter('RTL')}
-        style={{
-          ...styles.filterButton,
-          ...(activeFilter === 'RTL' ? styles.activeFilterButton : {})
-        }}
-      >
-        Retail (RTL)
-      </button>
-      <button 
-        onClick={() => setActiveFilter('SKA')}
-        style={{
-          ...styles.filterButton,
-          ...(activeFilter === 'SKA' ? styles.activeFilterButton : {})
-        }}
-      >
-        Skape (SKA)
-      </button>
-      <button 
-        onClick={() => setActiveFilter('WHS')}
-        style={{
-          ...styles.filterButton,
-          ...(activeFilter === 'WHS' ? styles.activeFilterButton : {})
-        }}
-      >
-        Wholesale (WHS)
-      </button>
-    </div>
-  );
+  // Filter buttons component - removed as per requirements
+  const FilterButtons = () => null;
 
   return (
     <div style={styles.centeringWrapper}>
       <div style={styles.formContainer}>
         <h2 style={styles.title}>Seleccionar Sesión de Trabajo</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {isAdminType ? (
+          {canViewAllLocals ? (
             <div>
               <label htmlFor="local-select" style={styles.label}>Seleccionar Local:</label>
-              <FilterButtons />
-              {filteredLocals.length > 0 ? (
+              {availableLocals.length > 0 ? (
                 <select 
                   id="local-select" 
                   value={selectedLocal}
                   onChange={(e) => setSelectedLocal(e.target.value)}
                   style={styles.input}
                 >
-                  {filteredLocals.map(local => (
+                  {availableLocals.map(local => (
                     <option key={local.id} value={local.nombre_local}>
                       [{local.tipo_local}] {local.nombre_local}
                     </option>
@@ -340,7 +292,7 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
                 <p>No se pudieron cargar los locales. Contacta a un administrador.</p>
               )}
             </div>
-          ) : isStoreType ? (
+          ) : hasAssignedLocals ? (
             <div>
               <label htmlFor="local-select" style={styles.label}>Locales Asignados:</label>
               {availableLocals.length > 0 ? (

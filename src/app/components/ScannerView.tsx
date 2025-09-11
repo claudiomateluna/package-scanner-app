@@ -8,6 +8,7 @@ import ReceptionSummary from './ReceptionSummary';
 import ReceptionHistory from './ReceptionHistory';
 import ReceptionStatistics from './ReceptionStatistics';
 import BarcodeScannerZXing from './BarcodeScannerZXing';
+import MissingReportForm from './MissingReportForm';
 import { isMobileDevice, isMobilePhone } from '@/lib/deviceUtils';
 import Image from 'next/image';
 import './scrollbarStyles.css';
@@ -74,6 +75,8 @@ export default function ScannerView({ session, profile, selection, currentView }
   const [isReceptionCompleted, setIsReceptionCompleted] = useState(false); // Nuevo estado para verificar si la recepción ya fue completada
   const [missingUnits, setMissingUnits] = useState<Record<string, number>>({});
   const [isRegistering, setIsRegistering] = useState(false);
+  const [showMissingReportForm, setShowMissingReportForm] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
 
   const canEditMissing = profile?.role === 'administrador' || profile?.role === 'Store Operator';
 
@@ -144,20 +147,7 @@ export default function ScannerView({ session, profile, selection, currentView }
     }
   }, [selection, receptionStartTime, isReceptionCompleted]);
 
-  const handleMissingUnitsChange = (olpn: string, value: string) => {
-    const numericValue = parseInt(value, 10);
-    if (!isNaN(numericValue) && numericValue >= 0) {
-      setMissingUnits(prev => ({
-        ...prev,
-        [olpn]: numericValue,
-      }));
-    } else if (value === '') {
-        setMissingUnits(prev => ({
-            ...prev,
-            [olpn]: 0,
-        }));
-    }
-  };
+  // handleMissingUnitsChange function removed as we're now using the MissingReportForm
 
   useEffect(() => {
     setLoading(true);
@@ -715,11 +705,7 @@ export default function ScannerView({ session, profile, selection, currentView }
             </>
           )}
             </div>
-          {!canScan && (
-            <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '5px', marginBottom: '15px' }}>
-              <strong>Acceso restringido:</strong> Solo los Operadores de tienda pueden registrar paquetes.
-            </div>
-          )}
+          
 
           <h4 style={{ color: '#000000' }}>Paquetes Esperados ({scanned.size} / {packages.length})</h4>
           <div className="scroll-container" style={{ 
@@ -745,7 +731,7 @@ export default function ScannerView({ session, profile, selection, currentView }
                   <th style={{padding: '8px', textAlign: 'left', color: '#000000'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
                   <th style={{padding: '8px', textAlign: 'left', width: '150px', color: '#000000'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
                   <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#000000'}}>Unidades</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#000000'}}>Faltantes</th>
+                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#000000'}}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -759,13 +745,23 @@ export default function ScannerView({ session, profile, selection, currentView }
                     <td style={{padding: '8px'}}>{pkg.DN}</td>
                     <td style={{padding: '8px'}}>{pkg.Unidades}</td>
                     <td style={{padding: '8px'}}>
-                      <input
-                        type="number"
-                        value={missingUnits[pkg.OLPN] || ''}
-                        onChange={(e) => handleMissingUnitsChange(pkg.OLPN, e.target.value)}
-                        disabled={!canEditMissing}
-                        style={{ width: '60px', padding: '5px', backgroundColor: canEditMissing ? '#fff' : '#ccc', color: '#000', borderRadius: '3px', border: '1px solid #ccc' }}
-                      />
+                      <button
+                        onClick={() => {
+                          setSelectedPackage(pkg);
+                          setShowMissingReportForm(true);
+                        }}
+                        style={{ 
+                          padding: '5px 10px', 
+                          backgroundColor: '#000000', 
+                          color: '#fff', 
+                          border: 'none', 
+                          borderRadius: '3px', 
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        Reportar
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -873,6 +869,19 @@ export default function ScannerView({ session, profile, selection, currentView }
       {showReceptionStatistics && (
         <ReceptionStatistics 
           onClose={handleCloseReceptionStatistics}
+        />
+      )}
+      
+      {/* Mostrar formulario de reporte de faltantes/sobrantes si está activo */}
+      {showMissingReportForm && selectedPackage && (
+        <MissingReportForm
+          packageData={selectedPackage}
+          session={session}
+          onClose={() => setShowMissingReportForm(false)}
+          onReportSaved={() => {
+            // Refresh or update any necessary data
+            console.log('Report saved successfully');
+          }}
         />
       )}
     </div>

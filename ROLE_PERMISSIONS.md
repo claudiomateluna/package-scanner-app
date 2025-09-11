@@ -42,6 +42,13 @@ La aplicación utiliza una jerarquía de roles basada en niveles numéricos dond
 - Puede ver datos de su local asignado
 - Acceso muy limitado
 
+### SKA Operator (nivel 6)
+- Puede operar en tienda SKA
+- Puede escanear paquetes
+- Puede ver datos de su local asignado (solo locales SKA)
+- Puede crear y editar reportes de faltantes/sobrantes
+- Acceso limitado a funciones de reporte
+
 ## Cambios Recientes
 
 ### Acceso a Administración para Store Supervisor
