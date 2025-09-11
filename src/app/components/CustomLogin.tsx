@@ -117,6 +117,10 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
       alignItems: 'center', 
       height: '100vh',
       backgroundColor: '#FFF',
+      backgroundImage: 'url("/bkgrn.jpg")',
+      backgroundPosition: 'center',
+      backgroundSize: 'cover',
+      backgroundRepeat: 'no-repeat',
       position: 'relative'
     }}>
       <div style={{ 

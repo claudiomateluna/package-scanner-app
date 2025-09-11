@@ -468,11 +468,12 @@ export default function ScannerView({ session, profile, selection, currentView }
           {/* Cuadro Resumen */}
             <div id='CuadroResumen' style={{ 
               backgroundColor: '#ffffff',
-              borderRadius: '8px',
+              borderRadius: '4px',
               padding: '5px',
               border: '1px solid #000000',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
             }}>
               <h3 style={{
                 margin: '0 0 5px 0',

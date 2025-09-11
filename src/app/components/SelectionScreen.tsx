@@ -278,7 +278,7 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
                 >
                   {availableLocals.map(local => (
                     <option key={local.id} value={local.nombre_local}>
-                      [{local.tipo_local}] {local.nombre_local}
+                      {local.nombre_local}
                     </option>
                   ))}
                 </select>
