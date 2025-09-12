@@ -531,6 +531,23 @@ export default function ScannerView({ session, profile, selection, currentView }
   if (loading) return <div>Cargando datos para {selection.local} en fecha {selection.fecha}...</div>
   if (error) return <div><p style={{color: 'red'}}><b>Error:</b> {error}</p></div>
 
+  const getTableHeaders = () => {
+    switch (profile?.role) {
+      case 'Warehouse Operator':
+      case 'Warehouse Supervisor':
+      case 'Administrador':
+        return { col1: 'OLPN', col2: 'DN' };
+      case 'Store Operator':
+      case 'Store Supervisor':
+        return { col1: 'Bulto', col2: 'Factura' };
+      case 'SKA Operator':
+        return { col1: 'Correlativo del B2B', col2: 'OC' };
+      default:
+        return { col1: 'OLPN', col2: 'DN' };
+    }
+  };
+  const tableHeaders = getTableHeaders();
+
   return (
     <div className="scanner-view-container">
       <main style={{ display: 'flex', gap: '10px', flexDirection: isPhone ? 'column' : 'row' }} className="scanner-main-layout">
@@ -817,8 +834,8 @@ export default function ScannerView({ session, profile, selection, currentView }
             <table style={{width: '100%', borderCollapse: 'collapse'}}>
               <thead>
                 <tr style={{borderBottom: '1px solid #000000'}}>
-                  <th style={{padding: '8px', textAlign: 'center', color: '#000000'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
-                  <th style={{padding: '8px', textAlign: 'center', width: '150px', color: '#000000'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
+                  <th style={{padding: '8px', textAlign: 'center', color: '#000000'}}>{tableHeaders.col1}</th>
+                  <th style={{padding: '8px', textAlign: 'center', width: '150px', color: '#000000'}}>{tableHeaders.col2}</th>
                   <th style={{padding: '8px', textAlign: 'center', width: '120px', color: '#000000'}}>Unidades</th>
                   <th style={{padding: '8px', textAlign: 'center', width: '120px', color: '#000000'}}>Acciones</th>
                 </tr>
