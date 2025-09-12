@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { Session } from '@supabase/supabase-js'
 import toast from 'react-hot-toast';
@@ -77,6 +77,9 @@ export default function ScannerView({ session, profile, selection, currentView }
   const [isRegistering, setIsRegistering] = useState(false);
   const [showMissingReportForm, setShowMissingReportForm] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+  const [packageSearchTerm, setPackageSearchTerm] = useState(''); // For package search filter
+  const [filteredPackages, setFilteredPackages] = useState<Package[]>([]); // Filtered packages for display
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const canEditMissing = profile?.role === 'administrador' || profile?.role === 'Store Operator';
 
@@ -86,6 +89,35 @@ export default function ScannerView({ session, profile, selection, currentView }
   // Detectar si es un teléfono móvil (para layout vertical)
   const isPhone = isMobilePhone();
   // isIPadDevice, isIPhoneDevice, isAndroidDevice se eliminaron ya que no se usaban
+
+  // Debounced search for packages
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      if (!packageSearchTerm) {
+        setFilteredPackages(packages);
+        return;
+      }
+
+      const term = packageSearchTerm.toLowerCase();
+      const filtered = packages.filter(pkg => {
+        const olpn = pkg.OLPN.toLowerCase();
+        const dn = pkg.DN.toLowerCase();
+        return olpn.includes(term) || dn.includes(term);
+      });
+
+      setFilteredPackages(filtered);
+    }, 250);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [packageSearchTerm, packages]);
 
   const fetchData = useCallback(async () => {
     setError(null)
@@ -223,6 +255,8 @@ export default function ScannerView({ session, profile, selection, currentView }
   }, [fetchData]);
 
   useEffect(() => {
+    setFilteredPackages(packages);
+    
     if (packages.length === 0 && scanned.size === 0) {
       setDnProgress([]);
     } else {
@@ -709,6 +743,24 @@ export default function ScannerView({ session, profile, selection, currentView }
           
 
           <h4 style={{ color: '#000000' }}>Paquetes Esperados ({scanned.size} / {packages.length})</h4>
+          {/* Search input for packages */}
+          <div style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
+            <input
+              type="text"
+              placeholder={`Buscar por ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'} o ${isWarehouseOrAdmin ? 'DN' : 'Factura'}...`}
+              value={packageSearchTerm}
+              onChange={(e) => setPackageSearchTerm(e.target.value)}
+              style={{fontSize: '1em', padding: '8px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#000000', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#000000', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#000000', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#000000', borderRadius: '5px'}}
+            />
+            {packageSearchTerm && (
+              <button 
+                onClick={() => setPackageSearchTerm('')} 
+                style={{padding: '8px 12px', backgroundColor: '#000000', color: '#FFFFFF', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold'}}
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
           <div className="scroll-container" style={{ 
             maxHeight: '50vh', 
             overflowY: 'auto', 
@@ -736,7 +788,7 @@ export default function ScannerView({ session, profile, selection, currentView }
                 </tr>
               </thead>
               <tbody>
-                {packages.map(pkg => (
+                {filteredPackages.map(pkg => (
                   <tr key={pkg.OLPN} style={{ 
                       backgroundColor: scanned.has(pkg.OLPN) ? '#A1C181' : 'transparent',
                       color: scanned.has(pkg.OLPN) ? '#000000' : '#999999',

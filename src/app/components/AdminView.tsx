@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, CSSProperties, useMemo } from 'react'
+import { useState, useEffect, CSSProperties, useMemo, useRef, ReactNode } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import Papa from 'papaparse'
 import { canUserManageRole, getAssignableRoles } from '@/lib/roleHierarchy'
+import LocalesView from './LocalesView'
 
 // --- Tipos de Datos ---
 type ProfileFromProps = { role: string | null; id: string; }
@@ -54,8 +55,8 @@ const inputStyle: CSSProperties = {
 
 const buttonStyle: CSSProperties = { 
   padding: '10px 15px', 
-  backgroundColor: '#FE7F2D', 
-  color: '#233D4D', 
+  backgroundColor: '#000', 
+  color: '#FFF', 
   border: 'none', 
   borderRadius: '5px', 
   cursor: 'pointer' 
@@ -136,6 +137,7 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
   const [allLocals, setAllLocals] = useState<string[]>([]);
   const [loadingLocals, setLoadingLocals] = useState(true);
   const [searchTerm, setSearchTerm] = useState(''); // For search filter in user editing
+  const [errors, setErrors] = useState<Record<string, string>>({}); // For inline validations
   
   // Obtener roles que el usuario actual puede asignar
   const assignableRoles = getAssignableRoles(currentUserRole);
@@ -147,6 +149,42 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
       local.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [allLocals, searchTerm]);
+
+  // Validate form fields
+  const validateField = (name: string, value: string) => {
+    switch (name) {
+      case 'email':
+        if (!value) return 'El email es requerido';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Email inválido';
+        return '';
+      case 'first_name':
+        if (!value) return 'El nombre es requerido';
+        if (value.length < 2) return 'El nombre debe tener al menos 2 caracteres';
+        return '';
+      case 'last_name':
+        if (!value) return 'El apellido es requerido';
+        if (value.length < 2) return 'El apellido debe tener al menos 2 caracteres';
+        return '';
+      case 'password':
+        if (value && value.length < 6) return 'La contraseña debe tener al menos 6 caracteres';
+        return '';
+      default:
+        return '';
+    }
+  };
+
+  const handleFieldChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
 
   // Cargar locales disponibles
   useEffect(() => {
@@ -178,6 +216,21 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
     // Verificar si el usuario actual puede gestionar al usuario objetivo
     if (!canUserManageRole(currentUserRole, profile.role || '', currentUserLocal, profile.local_asignado || null)) {
       toast.error('No tienes permisos para editar usuarios con ese rol');
+      return;
+    }
+    
+    // Validar todos los campos
+    const newErrors: Record<string, string> = {};
+    newErrors.email = validateField('email', formData.email || '');
+    newErrors.first_name = validateField('first_name', formData.first_name || '');
+    newErrors.last_name = validateField('last_name', formData.last_name || '');
+    newErrors.password = validateField('password', newPassword);
+    
+    // Check if there are any errors
+    const hasErrors = Object.values(newErrors).some(error => error !== '');
+    if (hasErrors) {
+      setErrors(newErrors);
+      toast.error('Por favor, corrige los errores en el formulario');
       return;
     }
     
@@ -265,52 +318,92 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
       marginTop: '8px' 
     }}>
       <h4>Editando Perfil</h4>
-      <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        <label>Email: 
-          <input 
-            type="email" 
-            value={formData.email || ''} 
-            onChange={e => setFormData({...formData, email: e.target.value})} 
-            style={inputStyle} 
-          />
-        </label>
-        <label>Nombre: 
-          <input 
-            type="text" 
-            value={formData.first_name || ''} 
-            onChange={e => setFormData({...formData, first_name: e.target.value})} 
-            style={inputStyle} 
-          />
-        </label>
-        <label>Apellido: 
-          <input 
-            type="text" 
-            value={formData.last_name || ''} 
-            onChange={e => setFormData({...formData, last_name: e.target.value})} 
-            style={inputStyle} 
-          />
-        </label>
-        <label>Nueva Contraseña (dejar en blanco para no cambiar): 
-          <input 
-            type="password" 
-            value={newPassword} 
-            onChange={e => setNewPassword(e.target.value)} 
-            style={inputStyle} 
-          />
-        </label>
-        <label>Rol: 
-          <select 
-            value={formData.role || ''} 
-            onChange={e => setFormData({...formData, role: e.target.value})} 
-            style={inputStyle}
-          >
-            {assignableRoles.map(r => <option key={r} value={r}>{r}</option>)}
-          </select>
-        </label>
+      <form onSubmit={handleUpdate} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+        <div>
+          <label>Email: 
+            <input 
+              type="email" 
+              value={formData.email || ''} 
+              onChange={e => handleFieldChange('email', e.target.value)} 
+              style={{
+                ...inputStyle,
+                borderColor: errors.email ? '#e63946' : '#ccc'
+              }} 
+            />
+            {errors.email && <div style={{ color: '#e63946', fontSize: '0.8em', marginTop: '5px' }}>{errors.email}</div>}
+          </label>
+        </div>
+        
+        <div>
+          <label>Nombre: 
+            <input 
+              type="text" 
+              value={formData.first_name || ''} 
+              onChange={e => handleFieldChange('first_name', e.target.value)} 
+              style={{
+                ...inputStyle,
+                borderColor: errors.first_name ? '#e63946' : '#ccc'
+              }} 
+            />
+            {errors.first_name && <div style={{ color: '#e63946', fontSize: '0.8em', marginTop: '5px' }}>{errors.first_name}</div>}
+          </label>
+        </div>
+        
+        <div>
+          <label>Apellido: 
+            <input 
+              type="text" 
+              value={formData.last_name || ''} 
+              onChange={e => handleFieldChange('last_name', e.target.value)} 
+              style={{
+                ...inputStyle,
+                borderColor: errors.last_name ? '#e63946' : '#ccc'
+              }} 
+            />
+            {errors.last_name && <div style={{ color: '#e63946', fontSize: '0.8em', marginTop: '5px' }}>{errors.last_name}</div>}
+          </label>
+        </div>
+        
+        <div>
+          <label>Nueva Contraseña (dejar en blanco para no cambiar): 
+            <input 
+              type="password" 
+              value={newPassword} 
+              onChange={e => {
+                setNewPassword(e.target.value);
+                // Clear error when user starts typing
+                if (errors.password) {
+                  setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.password;
+                    return newErrors;
+                  });
+                }
+              }} 
+              style={{
+                ...inputStyle,
+                borderColor: errors.password ? '#e63946' : '#ccc'
+              }} 
+            />
+            {errors.password && <div style={{ color: '#e63946', fontSize: '0.8em', marginTop: '5px' }}>{errors.password}</div>}
+          </label>
+        </div>
+        
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label>Rol: 
+            <select 
+              value={formData.role || ''} 
+              onChange={e => setFormData({...formData, role: e.target.value})} 
+              style={inputStyle}
+            >
+              {assignableRoles.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </label>
+        </div>
         
         {/* Selección de múltiples locales para Store Supervisor y Store Operator */}
         {(formData.role === 'Store Supervisor' || formData.role === 'Store Operator' || formData.role === 'Warehouse Supervisor' || formData.role === 'Warehouse Operator') && (
-          <div>
+          <div style={{ gridColumn: '1 / -1' }}>
             <label>Locales asignados:</label>
             {loadingLocals ? (
               <p>Cargando locales...</p>
@@ -332,16 +425,16 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
                   overflowY: 'auto', 
                   borderTopWidth: '1px', 
                   borderTopStyle: 'solid', 
-                  borderTopColor: '#ccc', 
+                  borderTopColor: '#000', 
                   borderBottomWidth: '1px', 
                   borderBottomStyle: 'solid', 
-                  borderBottomColor: '#ccc', 
+                  borderBottomColor: '#000', 
                   borderLeftWidth: '1px', 
                   borderLeftStyle: 'solid', 
-                  borderLeftColor: '#ccc', 
+                  borderLeftColor: '#000', 
                   borderRightWidth: '1px', 
                   borderRightStyle: 'solid', 
-                  borderRightColor: '#ccc', 
+                  borderRightColor: '#000', 
                   padding: '10px', 
                   borderRadius: '5px',
                   display: 'grid',
@@ -366,9 +459,9 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
           </div>
         )}
         
-        <div>
+        <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
           <button type="submit" style={buttonStyle}>Guardar Cambios</button>
-          <button type="button" onClick={onCancel} style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', color: '#ccc', marginLeft: '8px'}}>Cancelar</button>
+          <button type="button" onClick={onCancel} style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', color: '#ccc'}}>Cancelar</button>
         </div>
       </form>
     </div>
@@ -389,17 +482,24 @@ export default function AdminView({ profile }: AdminViewProps) {
   const [userLocals, setUserLocals] = useState<string[]>([]);
   const [loadingLocals, setLoadingLocals] = useState(true);
   const [searchTerm, setSearchTerm] = useState(''); // For search filter in user creation
+  const [userSearchTerm, setUserSearchTerm] = useState(''); // For user search filter
+  const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]); // Filtered profiles for display
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const userRole = profile?.role;
   const canUpload = userRole === 'administrador' || userRole === 'Warehouse Operator';
   const canManageUsers = userRole === 'administrador' || userRole === 'Warehouse Supervisor' || userRole === 'Store Supervisor' || userRole === 'Warehouse Operator';
   const canDeleteUsers = userRole === 'administrador' || userRole === 'Warehouse Supervisor' || userRole === 'Store Supervisor';
+  const canManageLocales = userRole === 'administrador' || userRole === 'Warehouse Supervisor' || userRole === 'Warehouse Operator';
   
   // Verificar si es Store Supervisor
   const isStoreSupervisor = userRole === 'Store Supervisor';
   
   // Obtener roles que el usuario actual puede asignar
   const assignableRoles = getAssignableRoles(userRole || '');
+
+  // Tabs state
+  const [activeTab, setActiveTab] = useState<'users' | 'locales'>('users');
 
   // Filter available locals based on search term
   const filteredLocals = useMemo(() => {
@@ -408,6 +508,48 @@ export default function AdminView({ profile }: AdminViewProps) {
       local.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [availableLocals, searchTerm]);
+
+  // Debounced search for users
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      if (!userSearchTerm) {
+        setFilteredProfiles(profiles);
+        return;
+      }
+
+      const term = userSearchTerm.toLowerCase();
+      const filtered = profiles.filter(profile => {
+        const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+        const email = profile.email?.toLowerCase() || '';
+        const locals = profile.assigned_locals?.join(' ').toLowerCase() || '';
+        return fullName.includes(term) || email.includes(term) || locals.includes(term);
+      });
+
+      setFilteredProfiles(filtered);
+    }, 250);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [userSearchTerm, profiles]);
+
+  // Highlight search terms in text
+  const highlightText = (text: string | null | undefined, searchTerm: string) => {
+    if (!text || !searchTerm) return text || '';
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    const parts = text.split(regex);
+    
+    return parts.map((part, index) => 
+      regex.test(part) ? <mark key={index} style={{ backgroundColor: '#000', color: '#FFF' }}>{part}</mark> : part
+    );
+  };
 
   // Cargar locales disponibles
   useEffect(() => {
@@ -498,6 +640,10 @@ export default function AdminView({ profile }: AdminViewProps) {
       setLoading(false)
     } 
   }, [canManageUsers])
+
+  useEffect(() => {
+    setFilteredProfiles(profiles);
+  }, [profiles]);
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -629,34 +775,133 @@ export default function AdminView({ profile }: AdminViewProps) {
 
   return (
     <div>
-      <h2>Panel de Administración</h2>
-      {canUpload && <DataUploader />}
+      {/* Pulse animation for loading indicator */}
+      <style>{`
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.5; }
+          100% { opacity: 1; }
+        }
+      `}</style>
       
-      {canManageUsers && (
+      <h2>Panel de Administración</h2>
+      
+      {/* Tabs */}
+      <div style={{ 
+        display: 'flex', 
+        borderBottom: '1px solid #000',
+        marginBottom: '20px'
+      }}>
+        <button
+          onClick={() => setActiveTab('users')}
+          style={{
+            ...buttonStyle,
+            backgroundColor: activeTab === 'users' ? '#000' : 'transparent',
+            color: activeTab === 'users' ? '#FFF' : '#000',
+            borderBottom: activeTab === 'users' ? '3px solid #000' : 'none',
+            borderRadius: '5px 5px 0 0',
+            marginRight: '5px'
+          }}
+        >
+          Usuarios
+        </button>
+        {canManageLocales && (
+          <button
+            onClick={() => setActiveTab('locales')}
+            style={{
+              ...buttonStyle,
+              backgroundColor: activeTab === 'locales' ? '#000' : 'transparent',
+              color: activeTab === 'locales' ? '#FFF' : '#000',
+              borderBottom: activeTab === 'locales' ? '3px solid #000' : 'none',
+              borderRadius: '5px 5px 0 0'
+            }}
+          >
+            Locales
+          </button>
+        )}
+      </div>
+      
+      {/* Tab Content */}
+      {activeTab === 'users' ? (
         <>
+          {canUpload && <DataUploader />}
+          
+          {canManageUsers && (
+            <>
           <div style={cardStyle}>
             <h3>Crear Nuevo Usuario</h3>
-            <form onSubmit={handleCreateUser} style={{ display: 'block', gap: '10px' }}>
-              <input type="text" placeholder="Nombre" value={firstName} onChange={e => setFirstName(e.target.value)} style={{ width:'50%', padding: '10px', backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px', boxSizing: 'border-box', margin: '5px'}} />
-              <input type="text" placeholder="Apellido" value={lastName} onChange={e => setLastName(e.target.value)} style={{ width:'50%', padding: '10px', backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', borderRadius: '5px', boxSizing: 'border-box', margin: '5px'}} />
-              <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle}/>
-              <input type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)} required style={inputStyle}/>
+            <form onSubmit={handleCreateUser} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div>
+                <label>Nombre: 
+                  <input 
+                    type="text" 
+                    placeholder="Nombre" 
+                    value={firstName} 
+                    onChange={e => setFirstName(e.target.value)} 
+                    style={inputStyle} 
+                    required
+                  />
+                </label>
+              </div>
               
-              {/* Selector de rol limitado por jerarquía */}
-              <select 
-                value={role} 
-                onChange={e => setRole(e.target.value)} 
-                required 
-                style={inputStyle}
-              >
-                {assignableRoles.map(r => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
+              <div>
+                <label>Apellido: 
+                  <input 
+                    type="text" 
+                    placeholder="Apellido" 
+                    value={lastName} 
+                    onChange={e => setLastName(e.target.value)} 
+                    style={inputStyle} 
+                    required
+                  />
+                </label>
+              </div>
+              
+              <div>
+                <label>Email: 
+                  <input 
+                    type="email" 
+                    placeholder="Email" 
+                    value={email} 
+                    onChange={e => setEmail(e.target.value)} 
+                    required 
+                    style={inputStyle}
+                  />
+                </label>
+              </div>
+              
+              <div>
+                <label>Contraseña: 
+                  <input 
+                    type="password" 
+                    placeholder="Contraseña" 
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)} 
+                    required 
+                    style={inputStyle}
+                  />
+                </label>
+              </div>
+              
+              <div style={{ gridColumn: '1 / -1' }}>
+                {/* Selector de rol limitado por jerarquía */}
+                <label>Rol:
+                  <select 
+                    value={role} 
+                    onChange={e => setRole(e.target.value)} 
+                    required 
+                    style={inputStyle}
+                  >
+                    {assignableRoles.map(r => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
               
               {/* Selección de múltiples locales para Store Supervisor y Store Operator */}
               {(role === 'Store Supervisor' || role === 'Store Operator' || role === 'Warehouse Supervisor' || role === 'Warehouse Operator') && (
-                <div>
+                <div style={{ gridColumn: '1 / -1' }}>
                   <label>Locales asignados:</label>
                   {loadingLocals ? (
                     <p>Cargando locales...</p>
@@ -712,51 +957,176 @@ export default function AdminView({ profile }: AdminViewProps) {
                 </div>
               )}
               
-              <button type="submit" style={buttonStyle}>Crear Usuario</button>
+              <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end' }}>
+                <button type="submit" style={buttonStyle}>Crear Usuario</button>
+              </div>
             </form>
           </div>
 
           <h3 style={{ marginTop: '24px' }}>Usuarios Existentes</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {profiles.map(p => (
+          {/* Search input for users */}
+          <div style={{ marginBottom: '15px', display: 'flex', gap: '10px' }}>
+            <input
+              type="text"
+              placeholder="Buscar usuarios por nombre, email o local..."
+              value={userSearchTerm}
+              onChange={(e) => setUserSearchTerm(e.target.value)}
+              style={inputStyle}
+            />
+            {userSearchTerm && (
+              <button 
+                onClick={() => setUserSearchTerm('')} 
+                style={{...buttonStyle, padding: '10px 15px'}}
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
+          
+          {/* Users grid */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
+            gap: '20px',
+            marginTop: '20px'
+          }}>
+            {filteredProfiles.map(p => (
               <div key={p.id} style={{ 
                 borderTopWidth: '1px',
                 borderTopStyle: 'solid',
-                borderTopColor: '#555',
+                borderTopColor: '#000',
                 borderBottomWidth: '1px',
                 borderBottomStyle: 'solid',
-                borderBottomColor: '#555',
+                borderBottomColor: '#000',
                 borderLeftWidth: '1px',
                 borderLeftStyle: 'solid',
-                borderLeftColor: '#555',
+                borderLeftColor: '#000',
                 borderRightWidth: '1px',
                 borderRightStyle: 'solid',
-                borderRightColor: '#555',
-                padding: '12px', 
-                borderRadius: '8px' 
+                borderRightColor: '#000',
+                padding: '16px', 
+                borderRadius: '8px',
+                backgroundColor: '#FFF',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
               }}>
-                <p><b>Email:</b> {p.email || 'Email no disponible'}</p>
-                <p><b>Nombre:</b> {p.first_name || 'N/A'} {p.last_name || 'N/A'}</p>
-                <p><b>Rol:</b> {p.role}</p>
-                <p><b>Locales:</b> {p.assigned_locals && p.assigned_locals.length > 0 ? p.assigned_locals.join(', ') : 'N/A'}</p>
-                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                  <button onClick={() => setEditingProfileId(p.id)} style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', color: '#ccc'}}>Editar</button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <h4 style={{ margin: '0 0 10px 0', color: '#000' }}>
+                      {highlightText(p.first_name, userSearchTerm) || 'N/A'} {highlightText(p.last_name, userSearchTerm) || 'N/A'}
+                    </h4>
+                    <p style={{ margin: '5px 0', color: '#000' }}>
+                      <strong>Email:</strong> {highlightText(p.email, userSearchTerm) || 'Email no disponible'}
+                    </p>
+                    <p style={{ margin: '5px 0', color: '#000' }}>
+                      <strong>Rol:</strong> <span style={{ 
+                        padding: '2px 6px', 
+                        borderRadius: '4px', 
+                        backgroundColor: p.role === 'administrador' ? '#e63946' : 
+                                       p.role === 'Warehouse Supervisor' ? '#457b9d' : 
+                                       p.role === 'Warehouse Operator' ? '#8ac926' : 
+                                       p.role === 'Store Supervisor' ? '#ff9e00' : 
+                                       '#9d4edd',
+                        color: '#fff'
+                      }}>{highlightText(p.role, userSearchTerm)}</span>
+                    </p>
+                    <p style={{ margin: '5px 0', color: '#000' }}>
+                      <strong>Locales:</strong> {p.assigned_locals && p.assigned_locals.length > 0 ? 
+                        p.assigned_locals.map(local => highlightText(local, userSearchTerm)).reduce((prev, curr, idx) => idx === 0 ? [curr] : [...prev, ', ', curr], [] as ReactNode[]) : 'N/A'}
+                    </p>
+                  </div>
+                  {editingProfileId === p.id && (
+                    <div style={{ 
+                      width: '20px', 
+                      height: '20px', 
+                      borderRadius: '50%', 
+                      backgroundColor: '#000',
+                      animation: 'pulse 1.5s infinite'
+                    }} />
+                  )}
+                </div>
+                
+                <div style={{ 
+                  display: 'flex', 
+                  gap: '10px', 
+                  marginTop: '15px',
+                  flexWrap: 'wrap'
+                }}>
+                  <button 
+                    onClick={() => setEditingProfileId(p.id)} 
+                    style={{
+                      ...buttonStyle, 
+                      backgroundColor: 'transparent', 
+                      borderTopWidth: '1px', 
+                      borderTopStyle: 'solid', 
+                      borderTopColor: '#000', 
+                      borderBottomWidth: '1px', 
+                      borderBottomStyle: 'solid', 
+                      borderBottomColor: '#000', 
+                      borderLeftWidth: '1px', 
+                      borderLeftStyle: 'solid', 
+                      borderLeftColor: '#000', 
+                      borderRightWidth: '1px', 
+                      borderRightStyle: 'solid', 
+                      borderRightColor: '#000', 
+                      color: '#000',
+                      padding: '8px 12px',
+                      fontSize: '0.9em'
+                    }}
+                  >
+                    Editar
+                  </button>
                   {canDeleteUsers && 
                    canUserManageRole(userRole || '', p.role || '', null, p.local_asignado || null) && (
                     <button 
                       onClick={() => handleDeleteUser(p.id, p.email || 'Usuario', p.role || '', p.local_asignado || null)} 
-                      style={{...buttonStyle, backgroundColor: '#e63946', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#e63946', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#e63946', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#e63946', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#e63946', color: '#fff'}}
+                      style={{
+                        ...buttonStyle, 
+                        backgroundColor: '#e63946', 
+                        borderTopWidth: '1px', 
+                        borderTopStyle: 'solid', 
+                        borderTopColor: '#e63946', 
+                        borderBottomWidth: '1px', 
+                        borderBottomStyle: 'solid', 
+                        borderBottomColor: '#e63946', 
+                        borderLeftWidth: '1px', 
+                        borderLeftStyle: 'solid', 
+                        borderLeftColor: '#e63946', 
+                        borderRightWidth: '1px', 
+                        borderRightStyle: 'solid', 
+                        borderRightColor: '#e63946', 
+                        color: '#fff',
+                        padding: '8px 12px',
+                        fontSize: '0.9em'
+                      }}
                     >
                       Eliminar
                     </button>
                   )}
                 </div>
-                {editingProfileId === p.id && <EditProfileForm profile={p} onSave={() => { setEditingProfileId(null); fetchProfiles(); }} onCancel={() => setEditingProfileId(null)} currentUserRole={userRole} currentUserLocal={null} onLocalChange={handleLocalChange} />}
+                
+                {editingProfileId === p.id && (
+                  <EditProfileForm 
+                    profile={p} 
+                    onSave={() => { 
+                      setEditingProfileId(null); 
+                      fetchProfiles(); 
+                    }} 
+                    onCancel={() => setEditingProfileId(null)} 
+                    currentUserRole={userRole} 
+                    currentUserLocal={null} 
+                    onLocalChange={handleLocalChange} 
+                  />
+                )}
               </div>
             ))}
           </div>
         </>
       )}
-    </div>
+    </>
+  ) : (
+    /* Locales Tab */
+    <LocalesView profile={profile} />
+  )}
+</div>
   )
 }
