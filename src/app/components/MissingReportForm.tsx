@@ -821,7 +821,7 @@ const MissingReportForm = ({ packageData, session, onClose, onReportSaved }: Pro
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>{formData.id ? 'Editar Reporte' : 'Nuevo Reporte de Faltante/Sobrante'}</h2>
+          <h2>{formData.id ? (formData.ticket_id ? `Editar Reporte ${formData.ticket_id}` : 'Editar Reporte') : 'Nuevo Reporte de Faltante/Sobrante'}</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
         

@@ -79,6 +79,7 @@ export default function ScannerView({ session, profile, selection, currentView }
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [packageSearchTerm, setPackageSearchTerm] = useState(''); // For package search filter
   const [filteredPackages, setFilteredPackages] = useState<Package[]>([]); // Filtered packages for display
+  const [existingReports, setExistingReports] = useState<Record<string, string>>({}); // Track existing reports by OLPN -> ticket_id
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const canEditMissing = profile?.role === 'administrador' || profile?.role === 'Store Operator';
@@ -256,6 +257,41 @@ export default function ScannerView({ session, profile, selection, currentView }
 
   useEffect(() => {
     setFilteredPackages(packages);
+    
+    // Check for existing reports for each package
+    const checkExistingReports = async () => {
+      if (packages.length > 0) {
+        try {
+          // Get all unique OLPNs
+          const olpns = packages.map(pkg => pkg.OLPN);
+          
+          // Query for existing reports
+          const { data: existingReportsData, error } = await supabase
+            .from('faltantes')
+            .select('olpn, ticket_id')
+            .in('olpn', olpns);
+          
+          if (error) {
+            console.error('Error checking for existing reports:', error);
+            return;
+          }
+          
+          // Create a map of OLPN -> ticket_id
+          const reportsMap: Record<string, string> = {};
+          existingReportsData.forEach(report => {
+            reportsMap[report.olpn] = report.ticket_id;
+          });
+          
+          setExistingReports(reportsMap);
+        } catch (error) {
+          console.error('Error checking for existing reports:', error);
+        }
+      } else {
+        setExistingReports({});
+      }
+    };
+    
+    checkExistingReports();
     
     if (packages.length === 0 && scanned.size === 0) {
       setDnProgress([]);
@@ -776,15 +812,15 @@ export default function ScannerView({ session, profile, selection, currentView }
             borderRightWidth: '1px', 
             borderRightStyle: 'solid', 
             borderRightColor: '#000000', 
-            borderRadius: '5px'
+            borderRadius: '4px'
           }}>
             <table style={{width: '100%', borderCollapse: 'collapse'}}>
               <thead>
                 <tr style={{borderBottom: '1px solid #000000'}}>
-                  <th style={{padding: '8px', textAlign: 'left', color: '#000000'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: '150px', color: '#000000'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#000000'}}>Unidades</th>
-                  <th style={{padding: '8px', textAlign: 'left', width: '120px', color: '#000000'}}>Acciones</th>
+                  <th style={{padding: '8px', textAlign: 'center', color: '#000000'}}>{isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}</th>
+                  <th style={{padding: '8px', textAlign: 'center', width: '150px', color: '#000000'}}>{isWarehouseOrAdmin ? 'DN' : 'Factura'}</th>
+                  <th style={{padding: '8px', textAlign: 'center', width: '120px', color: '#000000'}}>Unidades</th>
+                  <th style={{padding: '8px', textAlign: 'center', width: '120px', color: '#000000'}}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -794,17 +830,18 @@ export default function ScannerView({ session, profile, selection, currentView }
                       color: scanned.has(pkg.OLPN) ? '#000000' : '#999999',
                       borderBottom: '1px solid #555'
                     }}>
-                    <td style={{padding: '8px'}}>{pkg.OLPN}</td>
-                    <td style={{padding: '8px'}}>{pkg.DN}</td>
-                    <td style={{padding: '8px'}}>{pkg.Unidades}</td>
-                    <td style={{padding: '8px'}}>
+                    <td style={{padding: '8px', textAlign: 'center'}}>{pkg.OLPN}</td>
+                    <td style={{padding: '8px', textAlign: 'center'}}>{pkg.DN}</td>
+                    <td style={{padding: '8px', textAlign: 'center'}}>{pkg.Unidades}</td>
+                    <td style={{padding: '8px', textAlign: 'center'}}>
                       <button
                         onClick={() => {
                           setSelectedPackage(pkg);
                           setShowMissingReportForm(true);
                         }}
-                        style={{ 
-                          padding: '5px 10px', 
+                        style={{
+                          fontFamily: 'CuerpoPersonalizado',
+                          padding: '5px 5px', 
                           backgroundColor: '#000000', 
                           color: '#fff', 
                           border: 'none', 
@@ -813,7 +850,7 @@ export default function ScannerView({ session, profile, selection, currentView }
                           fontSize: '12px'
                         }}
                       >
-                        Reportar
+                        {existingReports[pkg.OLPN] || 'Reportar'}
                       </button>
                     </td>
                   </tr>
