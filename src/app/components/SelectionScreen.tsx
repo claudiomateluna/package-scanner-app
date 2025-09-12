@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, CSSProperties } from 'react'
+import { useState, useEffect, CSSProperties, useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import { Session } from '@supabase/supabase-js'
@@ -89,9 +89,45 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
   const [availableLocals, setAvailableLocals] = useState<Local[]>([]);
   const [selectedLocal, setSelectedLocal] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [searchTerm, setSearchTerm] = useState(''); // For search filter
+  const [filteredLocals, setFilteredLocals] = useState<Local[]>([]); // Filtered locals for display
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isAdminType = profile.role === 'administrador' || profile.role === 'Warehouse Supervisor' || profile.role === 'Warehouse Operator';
   const isStoreType = profile.role === 'Store Supervisor' || profile.role === 'Store Operator' || profile.role === 'SKA Operator';
+
+  // Debounced search for locals
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      if (!searchTerm) {
+        setFilteredLocals(availableLocals);
+        return;
+      }
+
+      const term = searchTerm.toLowerCase();
+      const filtered = availableLocals.filter(local => 
+        local.nombre_local.toLowerCase().includes(term) || 
+        local.tipo_local.toLowerCase().includes(term)
+      );
+
+      setFilteredLocals(filtered);
+    }, 250);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchTerm, availableLocals]);
+
+  // Initialize filtered locals when available locals change
+  useEffect(() => {
+    setFilteredLocals(availableLocals);
+  }, [availableLocals]);
 
   useEffect(() => {
     async function fetchLocals() {
@@ -249,6 +285,17 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
           {isAdminType ? (
             <div>
               <label htmlFor="local-select" style={styles.label}>Seleccionar Local:</label>
+              {/* Search input for filtering locals */}
+              <input
+                type="text"
+                placeholder="Buscar locales por nombre o tipo..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  ...styles.input,
+                  marginBottom: '10px'
+                }}
+              />
               {availableLocals.length > 0 ? (
                 <select 
                   id="local-select" 
@@ -256,7 +303,7 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
                   onChange={(e) => setSelectedLocal(e.target.value)}
                   style={styles.input}
                 >
-                  {availableLocals.map(local => (
+                  {filteredLocals.map(local => (
                     <option key={local.id} value={local.nombre_local}>
                       [{local.tipo_local}] {local.nombre_local}
                     </option>
@@ -269,6 +316,17 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
           ) : isStoreType ? (
             <div>
               <label htmlFor="local-select" style={styles.label}>Locales Asignados (RTL):</label>
+              {/* Search input for filtering locals */}
+              <input
+                type="text"
+                placeholder="Buscar locales..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  ...styles.input,
+                  marginBottom: '10px'
+                }}
+              />
               {availableLocals.length > 0 ? (
                 <select 
                   id="local-select" 
@@ -276,7 +334,7 @@ export default function SelectionScreen({ profile, onSelectionComplete, session 
                   onChange={(e) => setSelectedLocal(e.target.value)}
                   style={styles.input}
                 >
-                  {availableLocals.map(local => (
+                  {filteredLocals.map(local => (
                     <option key={local.id} value={local.nombre_local}>
                       {local.nombre_local}
                     </option>

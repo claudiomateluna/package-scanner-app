@@ -428,17 +428,17 @@ h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: #233D4D;
+  background: #ffffff;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #FE7F2D;
+  background: #000000;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #e06e1d;
+  background: #000000;
 }
 
 /* Firefox */
@@ -486,14 +486,14 @@ h6 {
 
 .input-field:focus {
   outline: none;
-  border-color: #FE7F2D;
+  border-color: #000000;
   box-shadow: 0 0 0 2px rgba(254, 127, 45, 0.2);
 }
 
 .primary-button {
   padding: 12px 20px;
-  background-color: #FE7F2D;
-  color: #233D4D;
+  background-color: #000000;
+  color: #ffffff;
   border: none;
   border-radius: 5px;
   font-weight: bold;
@@ -509,7 +509,7 @@ h6 {
 }
 
 .primary-button:hover:not(:disabled) {
-  background-color: #e06e1d;
+  background-color: #000000;
 }
 
 .primary-button:disabled {
@@ -520,8 +520,8 @@ h6 {
 .secondary-button {
   padding: 12px 20px;
   background-color: transparent;
-  color: #CCCCCC;
-  border: 1px solid #CCCCCC;
+  color: #000000;
+  border: 1px solid #000000;
   border-radius: 5px;
   font-weight: bold;
   font-size: 1.1em;
@@ -537,8 +537,8 @@ h6 {
 
 .secondary-button:hover:not(:disabled) {
   background-color: rgba(255, 255, 255, 0.1);
-  border-color: #FE7F2D;
-  color: #FE7F2D;
+  border-color: #000000;
+  color: #000000;
 }
 
 /* Estilos para tarjetas */
