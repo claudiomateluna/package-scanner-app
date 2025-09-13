@@ -320,7 +320,7 @@ export default function ReceptionHistory({ onClose }: ReceptionHistoryProps) {
       left: 0, 
       right: 0, 
       bottom: 0, 
-      backgroundColor: 'rgba(0,0,0,0.8)', 
+      backgroundColor: 'rgba(255,255,255,0.8)', 
       display: 'flex', 
       justifyContent: 'center', 
       alignItems: 'center',
@@ -328,23 +328,23 @@ export default function ReceptionHistory({ onClose }: ReceptionHistoryProps) {
       padding: '20px'
     }}>
       <div style={{ 
-        backgroundColor: '#233D4D', 
+        backgroundColor: '#FFF', 
         padding: '30px', 
         borderRadius: '8px',
         maxWidth: '900px',
         width: '100%',
         maxHeight: '90vh',
         overflowY: 'auto',
-        color: '#CCCCCC'
+        color: '#000'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0, color: '#FE7F2D' }}>Historial de Recepciones</h2>
+          <h2 style={{ margin: 0, color: '#000' }}>Historial de Recepciones</h2>
           <button 
             onClick={onClose}
             style={{
               backgroundColor: 'transparent',
               border: '1px solid #CCCCCC',
-              color: '#CCCCCC',
+              color: '#000',
               borderRadius: '5px',
               padding: '8px 15px',
               cursor: 'pointer',
@@ -364,7 +364,7 @@ export default function ReceptionHistory({ onClose }: ReceptionHistoryProps) {
           <div style={{ 
             maxHeight: '600px', 
             overflowY: 'auto',
-            border: '1px solid #CCCCCC',
+            border: '1px solid #000',
             borderRadius: '5px'
           }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -433,8 +433,8 @@ export default function ReceptionHistory({ onClose }: ReceptionHistoryProps) {
           <button
             onClick={onClose}
             style={{
-              backgroundColor: '#FE7F2D',
-              color: '#233D4D',
+              backgroundColor: '#000',
+              color: '#FFF',
               border: 'none',
               padding: '12px 30px',
               borderRadius: '5px',

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabaseClient';
 import toast from 'react-hot-toast';
 import { Session } from '@supabase/supabase-js';
 import Image from 'next/image';
+import ToggleSwitch from './ToggleSwitch';
 
 // Define Faltante type matching the one in FaltantesAdminView
 interface Faltante {
@@ -102,7 +103,7 @@ export default function FaltanteRow({ item, session, profile, onImageClick, onUp
     }
   };
 
-  const tdStyle = { padding: '8px', border: '1px solid #ddd', verticalAlign: 'top' };
+  const tdStyle = { padding: '5px', border: '1px solid #000', verticalAlign: 'middle' };
 
   return (
     <tr>
@@ -141,7 +142,7 @@ export default function FaltanteRow({ item, session, profile, onImageClick, onUp
         )}
       </td>
       <td style={tdStyle}>
-        <input type="checkbox" checked={item.gestionado} onChange={(e) => handleGestionadoChange(e.target.checked)} />
+        <ToggleSwitch checked={item.gestionado} onChange={handleGestionadoChange} />
       </td>
       <td style={tdStyle}>
         {isEditing ? (
@@ -158,11 +159,11 @@ export default function FaltanteRow({ item, session, profile, onImageClick, onUp
       <td style={tdStyle}>
         {isEditing ? (
           <div style={{ display: 'flex', gap: '5px' }}>
-            <button onClick={handleSave}>Guardar</button>
-            <button onClick={handleCancel}>Cancelar</button>
+            <button onClick={handleSave} style={{fontFamily: 'CuerpoPersonalizado', padding:'10px 12px', background:'#000', color:'white', borderRadius: '4px', border:'1px solid #000'}}>Guardar</button>
+            <button onClick={handleCancel} style={{fontFamily: 'CuerpoPersonalizado', padding:'10px 12px', background:'#FFF', color:'#000', borderRadius: '4px', border:'1px solid #000'}}>Cancelar</button>
           </div>
         ) : (
-          <button onClick={() => setIsEditing(true)}>Editar</button>
+          <button onClick={() => setIsEditing(true)} style={{fontFamily: 'CuerpoPersonalizado', padding:'10px 12px', background:'#000', color:'white', borderRadius: '4px', border:'none'}}>Editar</button>
         )}
       </td>
     </tr>

@@ -27,15 +27,15 @@ interface StatsCardProps {
 function StatsCard({ title, value, subtitle, color }: StatsCardProps) {
   return (
     <div style={{ 
-      backgroundColor: 'rgba(0,0,0,0.2)', 
-      borderRadius: '8px', 
-      padding: '20px', 
+      backgroundColor: 'rgba(250, 250, 250, 1)', 
+      borderRadius: '4px', 
+      padding: '10px', 
       textAlign: 'center',
-      border: '1px solid #CCCCCC'
+      border: '1px solid #000'
     }}>
       <h3 style={{ 
         margin: '0 0 10px 0', 
-        color: '#CCCCCC', 
+        color: '#000',
         fontSize: '1em'
       }}>
         {title}
@@ -50,7 +50,7 @@ function StatsCard({ title, value, subtitle, color }: StatsCardProps) {
       </div>
       <div style={{ 
         fontSize: '0.9em', 
-        color: '#CCCCCC'
+        color: '#000'
       }}>
         {subtitle}
       </div>
@@ -171,18 +171,18 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
         left: 0, 
         right: 0, 
         bottom: 0, 
-        backgroundColor: 'rgba(0,0,0,0.8)', 
+        backgroundColor: 'rgba(255,255,255,0.4)', 
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center',
         zIndex: 1000
       }}>
         <div style={{ 
-          backgroundColor: '#233D4D', 
+          backgroundColor: '#FFF', 
           padding: '40px', 
           borderRadius: '8px',
           textAlign: 'center',
-          color: '#CCCCCC'
+          color: '#000'
         }}>
           <h2>Cargando estadísticas...</h2>
         </div>
@@ -197,7 +197,7 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
       left: 0, 
       right: 0, 
       bottom: 0, 
-      backgroundColor: 'rgba(0,0,0,0.8)', 
+      backgroundColor: 'rgba(255,255,255,0.4)', 
       display: 'flex', 
       justifyContent: 'center', 
       alignItems: 'center',
@@ -205,27 +205,27 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
       padding: '20px'
     }}>
       <div style={{ 
-        backgroundColor: '#233D4D', 
+        backgroundColor: '#FFF', 
         padding: '30px', 
         borderRadius: '8px',
         maxWidth: '1000px',
         width: '100%',
         maxHeight: '90vh',
         overflowY: 'auto',
-        color: '#CCCCCC'
+        color: '#000'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0, color: '#FE7F2D' }}>Estadísticas de Recepciones</h2>
+          <h2 style={{ margin: 0, color: '#000' }}>Estadísticas de Recepciones</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <select 
               value={period}
               onChange={(e) => setPeriod(e.target.value as 'week' | 'month' | 'year')}
               style={{
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                color: '#CCCCCC',
-                border: '1px solid #CCCCCC',
-                borderRadius: '3px',
-                padding: '5px 10px'
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                color: '#000',
+                border: '1px solid #000',
+                borderRadius: '4px',
+                padding: '10px 10px'
               }}
             >
               <option value="week">Última semana</option>
@@ -236,9 +236,9 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
               onClick={onClose}
               style={{
                 backgroundColor: 'transparent',
-                border: '1px solid #CCCCCC',
-                color: '#CCCCCC',
-                borderRadius: '5px',
+                border: '1px solid #000',
+                color: '#000',
+                borderRadius: '4px',
                 padding: '8px 15px',
                 cursor: 'pointer',
                 fontSize: '1.2em'
@@ -254,26 +254,26 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-              gap: '20px', 
-              marginBottom: '30px' 
+              gap: '10px', 
+              marginBottom: '10px'
             }}>
               <StatsCard 
                 title="Recepciones Completadas" 
                 value={stats.total_receptions} 
                 subtitle="Total en el período" 
-                color="#FE7F2D" 
+                color="#A1C181" 
               />
               <StatsCard 
-                title="Paquetes Procesados" 
-                value={stats.total_packages} 
-                subtitle="Total escaneados" 
-                color="#A1C181" 
+                title="Paquetes Procesados"
+                value={stats.total_packages}
+                subtitle="Total escaneados"
+                color="#FE7F2D"
               />
               <StatsCard 
                 title="Unidades Totales" 
-                value={stats.total_units} 
-                subtitle="Unidades recibidas" 
-                color="#A1C181" 
+                value={stats.total_units}
+                subtitle="Unidades recibidas"
+                color="#A1C181"
               />
               <StatsCard 
                 title="Unidades Faltantes" 
@@ -285,26 +285,26 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
                 title="Tasa de Completitud" 
                 value={`${stats.avg_completion_rate}%`} 
                 subtitle="Promedio" 
-                color="#FE7F2D" 
+                color="#000" 
               />
             </div>
             
-            <div style={{ marginBottom: '30px' }}>
+            <div style={{ marginBottom: '10px' }}>
               <h3 style={{ 
-                color: '#FE7F2D', 
-                borderBottom: '1px solid #CCCCCC', 
+                color: '#000', 
+                borderBottom: '1px solid #000', 
                 paddingBottom: '10px',
-                marginBottom: '20px'
+                marginBottom: '10px'
               }}>
                 Local Más Activo
               </h3>
               <div style={{ 
                 backgroundColor: 'rgba(255,255,255,0.1)', 
-                padding: '20px', 
-                borderRadius: '8px',
+                padding: '10px', 
+                borderRadius: '4px',
                 textAlign: 'center'
               }}>
-                <div style={{ fontSize: '2.5em', fontWeight: 'bold', color: '#FE7F2D' }}>
+                <div style={{ fontSize: '2.5em', fontWeight: 'bold', color: '#000' }}>
                   {stats.most_active_local}
                 </div>
                 <div style={{ fontSize: '1.2em', marginTop: '10px' }}>
@@ -315,29 +315,29 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
             
             <div>
               <h3 style={{ 
-                color: '#FE7F2D', 
-                borderBottom: '1px solid #CCCCCC', 
+                color: '#000', 
+                borderBottom: '1px solid #000', 
                 paddingBottom: '10px',
-                marginBottom: '20px'
+                marginBottom: '10px'
               }}>
                 Actividad Reciente (Últimos 7 días)
               </h3>
               <div style={{ 
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
-                gap: '15px'
+                gap: '10px'
               }}>
                 {stats.recent_activity.map((activity, index) => (
                   <div 
                     key={index} 
                     style={{ 
                       backgroundColor: 'rgba(255,255,255,0.1)', 
-                      padding: '15px', 
-                      borderRadius: '5px',
+                      padding: '10px', 
+                      borderRadius: '4px',
                       textAlign: 'center'
                     }}
                   >
-                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#FE7F2D' }}>
+                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#000' }}>
                       {activity.receptions}
                     </div>
                     <div style={{ fontSize: '0.9em', marginTop: '5px' }}>
@@ -358,11 +358,11 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
           <button
             onClick={onClose}
             style={{
-              backgroundColor: '#FE7F2D',
-              color: '#233D4D',
+              backgroundColor: '#000',
+              color: '#FFF',
               border: 'none',
-              padding: '12px 30px',
-              borderRadius: '5px',
+              padding: '12px 20px',
+              borderRadius: '4px',
               cursor: 'pointer',
               fontWeight: 'bold',
               fontSize: '1.1em'

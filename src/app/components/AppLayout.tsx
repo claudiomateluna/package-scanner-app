@@ -209,6 +209,12 @@ export default function AppLayout({ session, profile, onBack, children, currentV
     };
   };
 
+  const mainStyle: CSSProperties = {
+    padding: '5px',
+    margin: 'auto',
+    maxWidth: currentView === 'faltantes' ? '100%' : '800px',
+  };
+
   return (
     <div>
       {/* Sliding Menu */}
@@ -251,7 +257,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
         </div>
       </header>
       
-      <main style={{padding: '5px', maxWidth: '800px', margin: 'auto'}}>
+      <main style={mainStyle}>
         {showPasswordForm ? 
           <ChangePasswordForm onDone={() => setShowPasswordForm(false)} /> : 
           children

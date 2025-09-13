@@ -154,7 +154,7 @@ export default function FaltantesAdminView({ session, profile }: Props) {
           <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white' }}>
             <tr>
               {[ 'Ticket', 'OLPN / B2B', 'DN', 'Reporte', 'Local', 'Tipo', 'Fecha', 'Factura', 'Producto', 'Talla', 'Cant', 'Peso', 'Estado Bulto', 'Foto OLPN', 'Foto Bulto', 'Creado Por', 'Fecha Reporte', 'Últ. Act', 'Responsabilidad', 'Gestionado', 'Comentarios', 'Acciones' ].map(header => (
-                <th key={header} style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>{header}</th>
+                <th key={header} style={{ padding: '5px', border: '1px solid #FFF', textAlign: 'left', backgroundColor: '#000', color: 'white', borderTopLeftRadius: '4px', borderTopRightRadius: '4px',WebkitBorderTopRightRadius: '4px' }}>{header}</th>
               ))}
             </tr>
           </thead>
