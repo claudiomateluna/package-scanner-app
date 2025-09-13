@@ -6,6 +6,7 @@ import ScannerView from './components/ScannerView'
 import SelectionScreen from './components/SelectionScreen'
 import AppLayout from './components/AppLayout'
 import CustomLogin from './components/CustomLogin'
+import FaltantesAdminView from './components/FaltantesAdminView'
 
 // Definimos los tipos de datos que usaremos en este componente padre
 type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
@@ -16,7 +17,7 @@ export default function Home() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [selection, setSelection] = useState<Selection | null>(null)
   const [loading, setLoading] = useState(true)
-  const [currentView, setCurrentView] = useState<'scanner' | 'admin'>('scanner'); // Estado para la vista (scanner o admin)
+  const [currentView, setCurrentView] = useState<'scanner' | 'admin' | 'faltantes'>('scanner'); // Estado para la vista
 
   useEffect(() => {
     setLoading(true);
@@ -79,7 +80,9 @@ export default function Home() {
       currentView={currentView}
       setCurrentView={setCurrentView}
     >
-      {!selection && currentView === 'scanner' ? (
+      {currentView === 'faltantes' ? (
+        <FaltantesAdminView session={session} profile={profile} />
+      ) : !selection && currentView === 'scanner' ? (
         <SelectionScreen profile={profile} onSelectionComplete={handleSelectionComplete} session={session} />
       ) : (
         <ScannerView 

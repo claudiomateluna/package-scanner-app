@@ -1,7 +1,6 @@
-// SlidingMenu.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
@@ -18,6 +17,17 @@ const ScannerIcon = () => (
 const AdminIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+  </svg>
+);
+
+const FaltantesIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="8" y1="6" x2="21" y2="6"></line>
+    <line x1="8" y1="12" x2="21" y2="12"></line>
+    <line x1="8" y1="18" x2="21" y2="18"></line>
+    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+    <line x1="3" y1="18" x2="3.01" y2="18"></line>
   </svg>
 );
 
@@ -47,10 +57,12 @@ interface SlidingMenuProps {
   onClose: () => void;
   onBack?: () => void;
   isWarehouseOrAdmin: boolean;
-  currentView: 'scanner' | 'admin';
-  setCurrentView: (view: 'scanner' | 'admin') => void;
+  canViewFaltantesAdmin: boolean;
+  currentView: 'scanner' | 'admin' | 'faltantes';
+  setCurrentView: (view: 'scanner' | 'admin' | 'faltantes') => void;
   showPasswordForm: boolean;
   setShowPasswordForm: (show: boolean) => void;
+  faltantesCount: number;
 }
 
 export default function SlidingMenu({
@@ -58,10 +70,12 @@ export default function SlidingMenu({
   onClose,
   onBack,
   isWarehouseOrAdmin,
+  canViewFaltantesAdmin,
   currentView,
   setCurrentView,
   showPasswordForm,
-  setShowPasswordForm
+  setShowPasswordForm,
+  faltantesCount
 }: SlidingMenuProps) {
   const router = useRouter();
 
@@ -205,54 +219,90 @@ export default function SlidingMenu({
             </button>
           )}
           
+          <button 
+            onClick={() => {
+              setCurrentView('scanner');
+              onClose();
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '15px',
+              backgroundColor: currentView === 'scanner' ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+              color: '#000000',
+              border: 'none',
+              borderBottom: '1px solid #dddddd',
+              cursor: 'pointer',
+              textAlign: 'left',
+              fontSize: '16px'
+            }}
+          >
+            <ScannerIcon />
+            <span>Recepción</span>
+          </button>
+
           {isWarehouseOrAdmin && (
-            <>
-              <button 
-                onClick={() => {
-                  setCurrentView('scanner');
-                  onClose();
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '15px',
-                  backgroundColor: currentView === 'scanner' ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
-                  color: '#000000',
-                  border: 'none',
-                  borderBottom: '1px solid #dddddd',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  fontSize: '16px'
-                }}
-              >
-                <ScannerIcon />
-                <span>Recepción</span>
-              </button>
-              
-              <button 
-                onClick={() => {
-                  setCurrentView('admin');
-                  onClose();
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '15px',
-                  backgroundColor: currentView === 'admin' ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
-                  color: '#000000',
-                  border: 'none',
-                  borderBottom: '1px solid #dddddd',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  fontSize: '16px'
-                }}
-              >
-                <AdminIcon />
-                <span>Administración</span>
-              </button>
-            </>
+            <button 
+              onClick={() => {
+                setCurrentView('admin');
+                onClose();
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '15px',
+                backgroundColor: currentView === 'admin' ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+                color: '#000000',
+                border: 'none',
+                borderBottom: '1px solid #dddddd',
+                cursor: 'pointer',
+                textAlign: 'left',
+                fontSize: '16px'
+              }}
+            >
+              <AdminIcon />
+              <span>Administración</span>
+            </button>
+          )}
+
+          {canViewFaltantesAdmin && (
+            <button 
+              onClick={() => {
+                setCurrentView('faltantes');
+                onClose();
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '15px',
+                backgroundColor: currentView === 'faltantes' ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+                color: '#000000',
+                border: 'none',
+                borderBottom: '1px solid #dddddd',
+                cursor: 'pointer',
+                textAlign: 'left',
+                fontSize: '16px'
+              }}
+            >
+              <FaltantesIcon />
+              <span>Administración de Faltantes</span>
+              {faltantesCount > 0 && (
+                <span style={{
+                  marginLeft: 'auto',
+                  backgroundColor: '#d9534f',
+                  color: 'white',
+                  borderRadius: '10px',
+                  padding: '2px 8px',
+                  fontSize: '12px',
+                  fontWeight: 'bold'
+                }}>
+                  {faltantesCount}
+                </span>
+              )}
+            </button>
           )}
           
           <button 

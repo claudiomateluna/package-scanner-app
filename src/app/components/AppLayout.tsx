@@ -1,7 +1,7 @@
 'use client'
 
 import { Session } from '@supabase/supabase-js'
-import { CSSProperties, useState } from 'react'
+import { CSSProperties, useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
@@ -9,7 +9,7 @@ import SlidingMenu from './SlidingMenu'
 
 // --- Tipos de Datos ---
 type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
-type View = 'scanner' | 'admin';
+type View = 'scanner' | 'admin' | 'faltantes';
 
 interface Props {
   session: Session;
@@ -19,21 +19,6 @@ interface Props {
   currentView: View;
   setCurrentView: (view: View) => void;
 }
-
-// --- Iconos SVG como Componentes ---
-const KeyIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-  </svg>
-);
-
-const LogoutIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-    <polyline points="16 17 21 12 16 7"/>
-    <line x1="21" y1="12" x2="9" y2="12"/>
-  </svg>
-);
 
 // --- Componente del Formulario de Contraseña ---
 const ChangePasswordForm = ({ onDone }: { onDone: () => void }) => {
@@ -162,11 +147,45 @@ const ChangePasswordForm = ({ onDone }: { onDone: () => void }) => {
 
 // --- Componente Principal del Layout ---
 export default function AppLayout({ session, profile, onBack, children, currentView, setCurrentView }: Props) {
-  const { user } = session;
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [faltantesCount, setFaltantesCount] = useState(0);
 
   const isWarehouseOrAdmin = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator' || profile?.role === 'Store Supervisor';
+  const canViewFaltantesAdmin = ['administrador', 'admnistrador', 'warehouse supervisor', 'warehouse operator'].includes(profile?.role?.toLowerCase() || '');
+
+  useEffect(() => {
+    const fetchFaltantesCount = async () => {
+        if (canViewFaltantesAdmin) {
+            try {
+                const { count, error } = await supabase
+                    .from('faltantes')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('gestionado', false);
+
+                if (error) {
+                    console.error('Error fetching faltantes count:', JSON.stringify(error, null, 2));
+                } else {
+                    setFaltantesCount(count || 0);
+                }
+            } catch (error) {
+                console.error('Error in fetchFaltantesCount:', error);
+            }
+        }
+    };
+
+    fetchFaltantesCount();
+
+    const channel = supabase.channel('faltantes-count')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'faltantes' }, () => {
+            fetchFaltantesCount();
+        })
+        .subscribe();
+
+    return () => {
+        supabase.removeChannel(channel);
+    };
+  }, [canViewFaltantesAdmin]);
 
   const headerStyle: CSSProperties = { 
     display: 'flow-root',
@@ -182,81 +201,8 @@ export default function AppLayout({ session, profile, onBack, children, currentV
     color: '#000000'
   };
   
-  const baseButtonStyle: CSSProperties = { 
-    backgroundColor: 'transparent', 
-    color: '#000000',
-    borderTopWidth: '1px',
-    borderTopStyle: 'solid',
-    borderTopColor: '#000000',
-    borderBottomWidth: '1px',
-    borderBottomStyle: 'solid',
-    borderBottomColor: '#000000',
-    borderLeftWidth: '1px',
-    borderLeftStyle: 'solid',
-    borderLeftColor: '#000000',
-    borderRightWidth: '1px',
-    borderRightStyle: 'solid',
-    borderRightColor: '#000000',
-    padding: '8px 12px', 
-    cursor: 'pointer', 
-    borderRadius: '5px', 
-    display: 'flex', 
-    alignItems: 'center' 
-  };
-  
-  const activeButtonStyle: CSSProperties = { 
-    ...baseButtonStyle, 
-    borderTopColor: '#000000',
-    borderBottomColor: '#000000',
-    borderLeftColor: '#000000',
-    borderRightColor: '#000000',
-    color: '#000000',
-    backgroundColor: 'rgba(0, 0, 0, 0.1)'
-  };
-  
-  const scannerButtonStyle: CSSProperties = {
-    backgroundColor: 'transparent',
-    color: '#000000',
-    border: 'none',
-    padding: '0',
-    margin: '0',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '40px',
-    height: '40px',
-    borderRadius: '5px'
-  };
-  
-  const activeScannerButtonStyle: CSSProperties = {
-    ...scannerButtonStyle,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)'
-  };
-
-  const handleSignOut = async () => {
-    console.log('Attempting to sign out');
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error);
-        toast.error('Error al cerrar sesión: ' + error.message);
-      } else {
-        console.log('Sign out successful');
-        toast.success('Sesión cerrada correctamente');
-      }
-    } catch (error) {
-      console.error('Unexpected error during sign out:', error);
-      toast.error('Error inesperado al cerrar sesión');
-    }
-  };
-
-  // Obtener el nombre del usuario
-  // getUserDisplayName se eliminó ya que no se usaba
-
   // Obtener nombre y apellido por separado
   const getUserFirstAndLastName = () => {
-    // console.log('Profile:', profile); // Para debug
     return {
       firstName: profile?.first_name || '',
       lastName: profile?.last_name || ''
@@ -271,10 +217,12 @@ export default function AppLayout({ session, profile, onBack, children, currentV
         onClose={() => setIsMenuOpen(false)}
         onBack={onBack}
         isWarehouseOrAdmin={isWarehouseOrAdmin}
+        canViewFaltantesAdmin={canViewFaltantesAdmin}
         currentView={currentView}
         setCurrentView={setCurrentView}
         showPasswordForm={showPasswordForm}
         setShowPasswordForm={setShowPasswordForm}
+        faltantesCount={faltantesCount}
       />
       
       <header style={headerStyle}>

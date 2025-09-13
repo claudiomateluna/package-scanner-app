@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  images: {
+    domains: ['gkqebmqtmjeinjuoivvu.supabase.co'],
+  },
   
   // Configuración de encabezados para controlar cache
   async headers() {
