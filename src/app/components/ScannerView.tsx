@@ -547,12 +547,14 @@ export default function ScannerView({ session, profile, selection, currentView }
     }
   };
   const tableHeaders = getTableHeaders();
+  const isSkaOperator = profile?.role === 'SKA Operator';
 
   return (
     <div className="scanner-view-container">
       <main style={{ display: 'flex', gap: '10px', flexDirection: isPhone ? 'column' : 'row' }} className="scanner-main-layout">
-        <div id='Izquierda' style={{ width: isPhone ? '100%' : '63%' }}>
+        <div id='Izquierda' style={{ width: isPhone || isSkaOperator ? '100%' : '63%' }}>
           {/* Cuadro Resumen */}
+          {!isSkaOperator && (
             <div id='CuadroResumen' style={{ 
               backgroundColor: '#ffffff',
               borderRadius: '4px',
@@ -562,100 +564,81 @@ export default function ScannerView({ session, profile, selection, currentView }
               flexDirection: 'column',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
             }}>
-              <h3 style={{
-                margin: '0 0 5px 0',
-                color: '#000000',
-                textAlign: 'center',
-                fontSize: '1.2em'
-              }}>
-                {selection.local} - {selection.fecha}
-              </h3>
-              
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-around',
-                textAlign: 'center',
-                flexWrap: 'wrap',
-                gap: '5px'
-              }}>
-                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
-                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
-                    {/* Calcular DN/Facturas escaneadas */}
-                    {Array.from(new Set(packages.filter(pkg => scanned.has(pkg.OLPN)).map(pkg => pkg.DN))).length} / {dnProgress.length}
+                <h3 style={{
+                  margin: '0 0 5px 0',
+                  color: '#000000',
+                  textAlign: 'center',
+                  fontSize: '1.2em'
+                }}>
+                  {selection.local} - {selection.fecha}
+                </h3>
+                
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-around',
+                  textAlign: 'center',
+                  flexWrap: 'wrap',
+                  gap: '5px'
+                }}>
+                  <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
+                    <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
+                      {/* Calcular DN/Facturas escaneadas */}
+                      {Array.from(new Set(packages.filter(pkg => scanned.has(pkg.OLPN)).map(pkg => pkg.DN))).length} / {dnProgress.length}
+                    </div>
+                    <div style={{ fontSize: '0.9em', color: '#666666' }}>
+                      {isWarehouseOrAdmin ? 'DN' : 'Facturas'}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.9em', color: '#666666' }}>
-                    {isWarehouseOrAdmin ? 'DN' : 'Facturas'}
+                  
+                  <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
+                    <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
+                      {scanned.size} / {packages.length}
+                    </div>
+                    <div style={{ fontSize: '0.9em', color: '#666666' }}>
+                      {isWarehouseOrAdmin ? 'OLPN' : 'Bultos'}
+                    </div>
+                  </div>
+                  
+                  <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
+                    <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
+                      {packages.filter(pkg => scanned.has(pkg.OLPN)).reduce((sum, pkg) => sum + pkg.Unidades, 0)} / {packages.reduce((sum, pkg) => sum + pkg.Unidades, 0)}
+                    </div>
+                    <div style={{ fontSize: '0.9em', color: '#666666' }}>
+                      Unidades
+                    </div>
                   </div>
                 </div>
                 
-                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
-                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
-                    {scanned.size} / {packages.length}
-                  </div>
-                  <div style={{ fontSize: '0.9em', color: '#666666' }}>
-                    {isWarehouseOrAdmin ? 'OLPN' : 'Bultos'}
-                  </div>
-                </div>
-                
-                <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
-                  <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
-                    {packages.filter(pkg => scanned.has(pkg.OLPN)).reduce((sum, pkg) => sum + pkg.Unidades, 0)} / {packages.reduce((sum, pkg) => sum + pkg.Unidades, 0)}
-                  </div>
-                  <div style={{ fontSize: '0.9em', color: '#666666' }}>
-                    Unidades
-                  </div>
-                </div>
-              </div>
-              
-              {/* Botones de acción */}
-              <div style={{ 
-                display: 'flex', 
-                gap: '10px', 
-                marginTop: '10px',
-                flexWrap: 'wrap'
-              }}>
-                {/* Botón de Recepción Completada */}
-                <button 
-                  onClick={handleReceptionCompleted}
-                  disabled={!(packages.length > 0 && scanned.size === packages.length) || isCompletingReception || isReceptionCompleted}
-                  style={{ 
-                    flex: '1',
-                    padding: '10px', // Reducir padding
-                    borderRadius: '5px',
-                    backgroundColor: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#A1C181' : (isCompletingReception || isReceptionCompleted ? '#ffffff' : '#ffffff'),
-                    color: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#ffffff' : '#000000',
-                    fontWeight: 'bold',
-                    fontSize: '1em',
-                    border: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? 'none' : '1px solid #000000',
-                    cursor: packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !isReceptionCompleted ? 'pointer' : 'not-allowed',
-                    opacity: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? 1 : (isCompletingReception || isReceptionCompleted ? 0.6 : 1)
-                  }}
-                >
-                  {isCompletingReception ? 'Completando...' : (isReceptionCompleted ? 'Recepción Completada' : (packages.length > 0 && scanned.size === packages.length ? 'Recepción Completada' : 'Pendiente'))}
-                </button>
-                
-                {/* Botón de Historial */}
-                <button 
-                  onClick={handleShowReceptionHistory}
-                  style={{ 
-                    flex: '1',
-                    padding: '10px',
-                    borderRadius: '5px',
-                    backgroundColor: '#000000',
-                    color: '#ffffff',
-                    fontWeight: 'bold',
-                    fontSize: '1em',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Historial
-                </button>
-                
-                {/* Botón de Estadísticas - Visible para todos excepto Store Operator */}
-                {profile?.role !== 'Store Operator' && (
+                {/* Botones de acción */}
+                <div style={{ 
+                  display: 'flex', 
+                  gap: '10px', 
+                  marginTop: '10px',
+                  flexWrap: 'wrap'
+                }}>
+                  {/* Botón de Recepción Completada */}
                   <button 
-                    onClick={handleShowReceptionStatistics}
+                    onClick={handleReceptionCompleted}
+                    disabled={!(packages.length > 0 && scanned.size === packages.length) || isCompletingReception || isReceptionCompleted}
+                    style={{ 
+                      flex: '1',
+                      padding: '10px', // Reducir padding
+                      borderRadius: '5px',
+                      backgroundColor: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#A1C181' : (isCompletingReception || isReceptionCompleted ? '#ffffff' : '#ffffff'),
+                      color: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#ffffff' : '#000000',
+                      fontWeight: 'bold',
+                      fontSize: '1em',
+                      border: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? 'none' : '1px solid #000000',
+                      cursor: packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !isReceptionCompleted ? 'pointer' : 'not-allowed',
+                      opacity: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? 1 : (isCompletingReception || isReceptionCompleted ? 0.6 : 1)
+                    }}
+                  >
+                    {isCompletingReception ? 'Completando...' : (isReceptionCompleted ? 'Recepción Completada' : (packages.length > 0 && scanned.size === packages.length ? 'Recepción Completada' : 'Pendiente'))}
+                  </button>
+                  
+                  {/* Botón de Historial */}
+                  <button 
+                    onClick={handleShowReceptionHistory}
                     style={{ 
                       flex: '1',
                       padding: '10px',
@@ -668,10 +651,30 @@ export default function ScannerView({ session, profile, selection, currentView }
                       cursor: 'pointer'
                     }}
                   >
-                    Estadísticas
+                    Historial
                   </button>
-                )}
-              </div>
+                  
+                  {/* Botón de Estadísticas - Visible para todos excepto Store Operator */}
+                  {profile?.role !== 'Store Operator' && (
+                    <button 
+                      onClick={handleShowReceptionStatistics}
+                      style={{ 
+                        flex: '1',
+                        padding: '10px',
+                        borderRadius: '5px',
+                        backgroundColor: '#000000',
+                        color: '#ffffff',
+                        fontWeight: 'bold',
+                        fontSize: '1em',
+                        border: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Estadísticas
+                    </button>
+                  )}
+                </div>
+
               {/* --- Lógica de Escaneo Condicional --- */}
           {isPhone ? (
             // --- VISTA MÓVIL --- 
@@ -680,7 +683,7 @@ export default function ScannerView({ session, profile, selection, currentView }
               <div style={{ display: 'flex', gap: '5px', margin: '20px 0 0 0' }}>
                 <input 
                   type="text" 
-                  placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`}
+                  placeholder={`Escanear ${tableHeaders.col1}...`}
                   value={scannedOlpn}
                   onChange={(e) => setScannedOlpn(e.target.value)}
                   style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#000000', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#000000', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#000000', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#000000', borderRadius: '5px'}}
@@ -739,7 +742,7 @@ export default function ScannerView({ session, profile, selection, currentView }
               <div style={{ display: 'flex', gap: '5px', margin: '20px 0 0 0' }}>
                 <input 
                   type="text" 
-                  placeholder={`Escanear ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'}...`} 
+                  placeholder={`Escanear ${tableHeaders.col1}...`} 
                   value={scannedOlpn} 
                   onChange={(e) => setScannedOlpn(e.target.value)} 
                   style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#000', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#000', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#000', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#000', borderRadius: '4px'}}
@@ -793,6 +796,7 @@ export default function ScannerView({ session, profile, selection, currentView }
             </>
           )}
             </div>
+          )}
           
 
           <h4 style={{ color: '#000000' }}>Paquetes Esperados ({scanned.size} / {packages.length})</h4>
@@ -800,7 +804,7 @@ export default function ScannerView({ session, profile, selection, currentView }
           <div style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
             <input
               type="text"
-              placeholder={`Buscar por ${isWarehouseOrAdmin ? 'OLPN' : 'Bulto'} o ${isWarehouseOrAdmin ? 'DN' : 'Factura'}...`}
+              placeholder={`Buscar por ${tableHeaders.col1} o ${tableHeaders.col2}...`}
               value={packageSearchTerm}
               onChange={(e) => setPackageSearchTerm(e.target.value)}
               style={{fontSize: '1em', padding: '8px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#000000', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#000000', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#000000', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#000000', borderRadius: '5px'}}
@@ -878,7 +882,7 @@ export default function ScannerView({ session, profile, selection, currentView }
         </div>
 
         {/* Columna derecha con Resumen y Progreso por DN */}
-        {!isPhone && (
+        {!isSkaOperator && !isPhone && (
         <div id='Derecha' style={{ width: isPhone ? '100%' : '37%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           
           
@@ -922,7 +926,7 @@ export default function ScannerView({ session, profile, selection, currentView }
         )}
         
         {/* Progreso por DN en dispositivos móviles */}
-        {isPhone && (
+        {!isSkaOperator && isPhone && (
           <div id='ProgresoPorDN' style={{ 
             backgroundColor: '#ffffff', 
             borderRadius: '8px', 
