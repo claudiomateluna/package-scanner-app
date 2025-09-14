@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { Session } from '@supabase/supabase-js'
 import ScannerView from './components/ScannerView'
-import SelectionScreen from './components/SelectionScreen'
+import SelectionScreenWithLocales from './components/SelectionScreenWithLocales'
 import AppLayout from './components/AppLayout'
 import CustomLogin from './components/CustomLogin'
 import FaltantesAdminView from './components/FaltantesAdminView'
+import RechazosView from './components/RechazosView'
 
 // Definimos los tipos de datos que usaremos en este componente padre
 type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
@@ -17,7 +18,8 @@ export default function Home() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [selection, setSelection] = useState<Selection | null>(null)
   const [loading, setLoading] = useState(true)
-  const [currentView, setCurrentView] = useState<'scanner' | 'admin' | 'faltantes'>('scanner'); // Estado para la vista
+  const [currentView, setCurrentView] = useState<'scanner' | 'admin' | 'faltantes' | 'rechazos'>('scanner'); // Estado para la vista
+  const [selectedPackage, setSelectedPackage] = useState<{ OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; } | null>(null); // Estado para el paquete seleccionado
 
   useEffect(() => {
     setLoading(true);
@@ -62,6 +64,11 @@ export default function Home() {
     setCurrentView('scanner'); // Resetea la vista al volver a la selección
   }
 
+  const handleNavigateToRechazos = (packageData: { OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; }) => {
+    setSelectedPackage(packageData);
+    setCurrentView('rechazos');
+  }
+
   if (loading) {
     return <div style={{textAlign: 'center', paddingTop: '40px'}}>Cargando sesión...</div>
   }
@@ -82,14 +89,18 @@ export default function Home() {
     >
       {currentView === 'faltantes' ? (
         <FaltantesAdminView session={session} profile={profile} />
+      ) : currentView === 'rechazos' ? (
+        <RechazosView session={session} profile={profile} packageData={selectedPackage || undefined} />
       ) : !selection && currentView === 'scanner' ? (
-        <SelectionScreen profile={profile} onSelectionComplete={handleSelectionComplete} session={session} />
+        <SelectionScreenWithLocales profile={profile} onSelectionComplete={handleSelectionComplete} session={session} setCurrentView={setCurrentView} />
       ) : (
         <ScannerView 
           session={session} 
           profile={profile} 
           selection={selection || { local: '', fecha: '' }} 
           currentView={currentView} 
+          setCurrentView={setCurrentView}
+          navigateToRechazos={handleNavigateToRechazos}
         />
       )}
     </AppLayout>

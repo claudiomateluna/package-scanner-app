@@ -11,6 +11,7 @@ import BarcodeScannerZXing from './BarcodeScannerZXing';
 import MissingReportForm from './MissingReportForm';
 import { isMobileDevice, isMobilePhone } from '@/lib/deviceUtils';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import './scrollbarStyles.css';
 import './ScannerView.css';
 
@@ -53,11 +54,14 @@ interface Props {
   profile: Profile;
   selection: Selection;
   currentView: string; // Recibe la vista actual como prop
+  setCurrentView: (view: 'scanner' | 'admin' | 'faltantes' | 'rechazos') => void;
+  navigateToRechazos: (packageData: { OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; }) => void;
 }
 
 // fetchWithTimeout se eliminó ya que no se usaba
 
-export default function ScannerView({ session, profile, selection, currentView }: Props) {
+export default function ScannerView({ session, profile, selection, currentView, setCurrentView, navigateToRechazos }: Props) {
+  const router = useRouter();
   const { user } = session
   const [packages, setPackages] = useState<Package[]>([])
   const [scanned, setScanned] = useState<Set<string>>(new Set())
@@ -855,24 +859,44 @@ export default function ScannerView({ session, profile, selection, currentView }
                     <td style={{padding: '8px', textAlign: 'center'}}>{pkg.DN}</td>
                     <td style={{padding: '8px', textAlign: 'center'}}>{pkg.Unidades}</td>
                     <td style={{padding: '8px', textAlign: 'center'}}>
-                      <button
-                        onClick={() => {
-                          setSelectedPackage(pkg);
-                          setShowMissingReportForm(true);
-                        }}
-                        style={{
-                          fontFamily: 'CuerpoPersonalizado',
-                          padding: '5px 5px', 
-                          backgroundColor: '#000000', 
-                          color: '#fff', 
-                          border: 'none', 
-                          borderRadius: '3px', 
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        {existingReports[pkg.OLPN] || 'Reportar'}
-                      </button>
+                      <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+                        <button
+                          onClick={() => {
+                            setSelectedPackage(pkg);
+                            setShowMissingReportForm(true);
+                          }}
+                          style={{
+                            fontFamily: 'CuerpoPersonalizado',
+                            padding: '5px 5px', 
+                            backgroundColor: '#000000', 
+                            color: '#fff', 
+                            border: 'none', 
+                            borderRadius: '3px', 
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          {existingReports[pkg.OLPN] || 'F/S'}
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Navigate to Rechazos view with package data
+                            navigateToRechazos(pkg);
+                          }}
+                          style={{
+                            fontFamily: 'CuerpoPersonalizado',
+                            padding: '5px 5px', 
+                            backgroundColor: '#FE7F2D', 
+                            color: '#fff', 
+                            border: 'none', 
+                            borderRadius: '3px', 
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          Rechazo
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

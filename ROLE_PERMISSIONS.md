@@ -9,6 +9,7 @@ La aplicación utiliza una jerarquía de roles basada en niveles numéricos dond
 3. **Warehouse Operator** (nivel 3) - Opera en almacén
 4. **Store Supervisor** (nivel 4) - Gestiona operaciones de tienda
 5. **Store Operator** (nivel 5) - Opera en tienda
+6. **SKA Operator** (nivel 6) - Opera en tiendas SKA
 
 ## Permisos por Rol
 
@@ -47,6 +48,7 @@ La aplicación utiliza una jerarquía de roles basada en niveles numéricos dond
 - Puede escanear paquetes
 - Puede ver datos de su local asignado (solo locales SKA)
 - Puede crear y editar reportes de faltantes/sobrantes
+- Puede crear y editar reportes de rechazos
 - Acceso limitado a funciones de reporte
 
 ## Cambios Recientes
@@ -58,6 +60,16 @@ Se ha actualizado el sistema para permitir que los usuarios con rol **Store Supe
 2. **Pantalla de Administración**: Acceso completo a funciones de gestión de usuarios
 3. **Gestión de Usuarios**: Puede crear, editar y eliminar usuarios de nivel 5 (Store Operator)
 4. **Asignación de Locales**: Puede asignar locales a usuarios que gestiona
+
+### Nueva Funcionalidad: Gestión de Rechazos
+Se ha implementado un nuevo sistema de gestión de rechazos con las siguientes características:
+
+1. **Botón de Gestión de Rechazos**: Visible en el menú principal para todos los usuarios
+2. **Pestañas según permisos**:
+   - **Ingresar Rechazo**: Visible para SKA Operator, Store Operator, Store Supervisor y Administrador
+   - **Administración**: Visible para Warehouse Operator, Warehouse Supervisor y Administrador
+3. **Integración con SelectionScreen**: Botón "Reportar Rechazo" debajo de "Continuar"
+4. **Integración con ScannerView**: Opción "Rechazo" en el selector de tipo de reporte
 
 ## Funcionalidades Específicas
 
@@ -124,5 +136,11 @@ Se ha actualizado el sistema para permitir que los usuarios con rol **Store Supe
 - **Cuadro resumen**: Información clara y concisa
 - **Indicadores de progreso**: Visualización mejorada
 - **Botones táctiles**: Tamaño y espaciado optimizados
+
+### 5. Nueva Funcionalidad de Rechazos
+- **Gestión completa de rechazos**: Formulario de ingreso, panel de administración y estadísticas
+- **Generación automática de ticket ID**: Prefijo REC con contador incremental
+- **Integración con flujos existentes**: Acceso desde menú, SelectionScreen y ScannerView
+- **Control de permisos por rol**: Diferentes vistas según el rol del usuario
 
 Esta documentación refleja la configuración actual del sistema de permisos y roles, asegurando que todos los usuarios tengan la experiencia adecuada según su nivel de acceso y responsabilidades.

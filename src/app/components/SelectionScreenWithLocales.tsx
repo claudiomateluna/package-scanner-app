@@ -5,6 +5,7 @@ import { useState, useEffect, CSSProperties } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import { Session } from '@supabase/supabase-js'
+import { useRouter } from 'next/navigation'
 
 type Profile = { role: string | null; local_asignado?: string | null; }
 
@@ -19,6 +20,7 @@ interface Props {
   profile: Profile;
   onSelectionComplete: (selection: { local: string; fecha: string; }) => void;
   session: Session;
+  setCurrentView?: (view: 'scanner' | 'admin' | 'faltantes' | 'rechazos') => void;
 }
 
 // --- Estilos para este componente específico ---
@@ -105,7 +107,8 @@ const styles: { [key: string]: CSSProperties } = {
   }
 };
 
-export default function SelectionScreenWithLocales({ profile, onSelectionComplete, session }: Props) {
+export default function SelectionScreenWithLocales({ profile, onSelectionComplete, session, setCurrentView }: Props) {
+  const router = useRouter();
   const [availableLocals, setAvailableLocals] = useState<Local[]>([]);
   const [filteredLocals, setFilteredLocals] = useState<Local[]>([]);
   const [selectedLocal, setSelectedLocal] = useState('');
@@ -331,6 +334,19 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
 
           <button onClick={handleSubmit} style={styles.buttonPrimary}>
             Continuar
+          </button>
+          
+          {/* Botón Reportar Rechazo - Visible para todos los usuarios */}
+          <button 
+            onClick={() => setCurrentView && setCurrentView('rechazos')}
+            style={{
+              ...styles.buttonPrimary,
+              backgroundColor: '#233D4D',
+              color: '#CCCCCC',
+              border: '1px solid #CCCCCC'
+            }}
+          >
+            Reportar Rechazo
           </button>
         </div>
       </div>

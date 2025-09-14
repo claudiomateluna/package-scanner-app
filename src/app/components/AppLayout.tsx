@@ -9,7 +9,7 @@ import SlidingMenu from './SlidingMenu'
 
 // --- Tipos de Datos ---
 type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
-type View = 'scanner' | 'admin' | 'faltantes';
+type View = 'scanner' | 'admin' | 'faltantes' | 'rechazos';
 
 interface Props {
   session: Session;
