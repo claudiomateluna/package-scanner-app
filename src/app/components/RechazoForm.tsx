@@ -194,33 +194,56 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
     setLoading(true);
     setError('');
     
+    console.log('Starting rechazo submission...');
+    
     try {
       // Generate ticket ID
+      console.log('Generating ticket ID...');
       const ticketResponse = await fetch('/api/rechazos/ticket', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'same-origin' // Ensure cookies are sent with the request
       });
       
+      console.log('Ticket ID response status:', ticketResponse.status);
+      console.log('Ticket ID response headers:', [...ticketResponse.headers.entries()]);
+      
       if (!ticketResponse.ok) {
-        throw new Error('Failed to generate ticket ID');
+        const errorText = await ticketResponse.text();
+        console.error('Failed to generate ticket ID. Status:', ticketResponse.status);
+        console.error('Response text:', errorText);
+        const errorData = errorText ? JSON.parse(errorText) : { error: 'Unknown error' };
+        throw new Error(`Failed to generate ticket ID: ${ticketResponse.status} ${errorData.error || errorData.message || 'Unknown error'}`);
       }
       
-      const { ticketId } = await ticketResponse.json();
+      const ticketData = await ticketResponse.json();
+      console.log('Ticket ID generated:', ticketData);
+      
+      if (ticketData.error) {
+        throw new Error(`Error generating ticket ID: ${ticketData.error}${ticketData.details ? ` - ${ticketData.details}` : ''}`);
+      }
+      
+      const ticketId = ticketData.ticketId;
       
       // Auto-fill cliente_final if empty
       const finalData = {
         ticket_id: ticketId,
         ...rechazoData,
+        responsabilidad: rechazoData.responsabilidad || null,
+        responsabilidad_area: rechazoData.responsabilidad_area || null,
         cliente_final: rechazoData.cliente_final || rechazoData.nombre_local,
         created_by_user_id: session.user.id,
         created_by_user_name: session.user.user_metadata?.full_name || session.user.email
       };
       
+      console.log('Final data prepared:', finalData);
+      
       // Upload image if provided
       let imageUrl = null;
       if (rechazoData.foto_rechazado) {
+        console.log('Uploading image...');
         const fileExt = rechazoData.foto_rechazado.name.split('.').pop();
         const fileName = `${session.user.id}-${Date.now()}.${fileExt}`;
         
@@ -229,6 +252,7 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
           .upload(fileName, rechazoData.foto_rechazado);
           
         if (uploadError) {
+          console.error('Error uploading image:', uploadError);
           throw new Error(`Error uploading image: ${uploadError.message}`);
         }
         
@@ -238,9 +262,11 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
           .getPublicUrl(fileName);
           
         imageUrl = publicUrl;
+        console.log('Image uploaded. Public URL:', imageUrl);
       }
       
       // Save to database
+      console.log('Saving to database...');
       const { data, error } = await supabase
         .from('rechazos')
         .insert([
@@ -251,16 +277,32 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
         ])
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Database insert error:', error);
+        throw error;
+      }
+      
+      console.log('Database insert successful. Data:', data);
       
       // Get the ticket ID from the response
       if (data && data[0]) {
+        console.log('Setting ticket ID and showing confirmation');
         setTicketId(data[0].ticket_id);
         setShowConfirmation(true);
+      } else {
+        throw new Error('No data returned from database insert');
       }
     } catch (err) {
       console.error('Error saving rechazo:', err);
-      setError('Error al guardar el rechazo. Por favor, intente nuevamente.');
+      // Log more detailed error information
+      if (err instanceof Error) {
+        console.error('Error name:', err.name);
+        console.error('Error message:', err.message);
+        console.error('Error stack:', err.stack);
+        setError(`Error al guardar el rechazo: ${err.message}. Por favor, intente nuevamente.`);
+      } else {
+        setError(`Error al guardar el rechazo: ${String(err)}. Por favor, intente nuevamente.`);
+      }
     } finally {
       setLoading(false);
     }

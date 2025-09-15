@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node scripts/clean-cache.js && next dev",
+        "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "clean": "node scripts/clean-cache.js",
+    "clean": "node scripts/clean.js",
     "dev:clean": "node scripts/clean-cache.js && next dev"
   },
   "dependencies": {

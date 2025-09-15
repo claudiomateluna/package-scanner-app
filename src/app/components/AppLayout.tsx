@@ -212,7 +212,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   const mainStyle: CSSProperties = {
     padding: '5px',
     margin: 'auto',
-    maxWidth: currentView === 'faltantes' ? '100%' : '800px',
+    maxWidth: currentView === 'faltantes' || currentView === 'rechazos' ? '100%' : '800px',
   };
 
   return (
@@ -232,7 +232,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
       />
       
       <header style={headerStyle}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ maxWidth: currentView === 'faltantes' || currentView === 'rechazos' ? '100%' : '800px', margin: '0 auto', padding: '0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             {/* Menu button that opens the sliding menu */}
             <div 

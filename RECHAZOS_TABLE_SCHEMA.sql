@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS rechazos (
   tipo_local VARCHAR(50),
   cliente_final VARCHAR(255),
   motivo TEXT NOT NULL,
-  responsabilidad VARCHAR(20) CHECK (responsabilidad IN ('Customer', 'Transporte', 'Cliente', 'CD')),
-  responsabilidad_area VARCHAR(20) CHECK (responsabilidad_area IN ('Shipping', 'QA', 'Planning', 'Picking', 'VAS', 'Consolidación')),
+  responsabilidad VARCHAR(20) NULL CHECK (responsabilidad IN ('Customer', 'Transporte', 'Cliente', 'CD')),
+  responsabilidad_area VARCHAR(20) NULL CHECK (responsabilidad_area IN ('Shipping', 'QA', 'Planning', 'Picking', 'VAS', 'Consolidación')),
   unidades_rechazadas INTEGER,
   unidades_totales INTEGER,
   bultos_rechazados INTEGER,
@@ -45,16 +45,16 @@ CREATE INDEX IF NOT EXISTS idx_rechazos_transporte ON rechazos(transporte);
 
 -- Function to format month in Spanish
 CREATE OR REPLACE FUNCTION format_month_spanish(date_val DATE)
-RETURNS TEXT AS $$
+RETURNS TEXT AS '
 DECLARE
   month_names TEXT[] := ARRAY[
-    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ''enero'', ''febrero'', ''marzo'', ''abril'', ''mayo'', ''junio'',
+    ''julio'', ''agosto'', ''septiembre'', ''octubre'', ''noviembre'', ''diciembre''
   ];
 BEGIN
-  RETURN month_names[EXTRACT(MONTH FROM date_val)] || ' ' || EXTRACT(YEAR FROM date_val);
+  RETURN month_names[EXTRACT(MONTH FROM date_val)] || '' '' || EXTRACT(YEAR FROM date_val);
 END;
-$$ LANGUAGE plpgsql;
+' LANGUAGE plpgsql;
 
 -- Table for ticket counters (similar to faltantes implementation)
 CREATE TABLE IF NOT EXISTS ticket_counters_rechazos (
@@ -68,8 +68,8 @@ VALUES ('REC', 0)
 ON CONFLICT (prefix) DO NOTHING;
 
 -- Function to generate next ticket ID
-CREATE OR REPLACE FUNCTION get_next_ticket_id(prefix TEXT)
-RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION get_next_ticket_id(p_prefix TEXT)
+RETURNS TEXT AS '
 DECLARE
   next_id BIGINT;
   formatted_id TEXT;
@@ -77,22 +77,22 @@ BEGIN
   -- Increment the counter for the given prefix
   UPDATE ticket_counters_rechazos 
   SET counter = counter + 1 
-  WHERE prefix = $1
+  WHERE prefix = p_prefix
   RETURNING counter INTO next_id;
   
   -- If no row was updated, insert it
   IF NOT FOUND THEN
     INSERT INTO ticket_counters_rechazos (prefix, counter) 
-    VALUES ($1, 1)
+    VALUES (p_prefix, 1)
     RETURNING counter INTO next_id;
   END IF;
   
   -- Format the ID with leading zeros (9 digits)
-  formatted_id := $1 || LPAD(next_id::TEXT, 9, '0');
+  formatted_id := p_prefix || LPAD(next_id::TEXT, 9, ''0'');
   
   RETURN formatted_id;
 END;
-$$ LANGUAGE plpgsql;
+' LANGUAGE plpgsql;
 
 -- RLS Policies
 -- Enable RLS

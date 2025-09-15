@@ -60,6 +60,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showStatistics, setShowStatistics] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Fetch rechazos data
   useEffect(() => {
@@ -232,7 +233,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
   }
 
   return (
-    <div>
+    <div style={{ width: '100%', padding: '5px', boxSizing: 'border-box' }}>
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -240,7 +241,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
         marginBottom: '20px',
         flexWrap: 'wrap'
       }}>
-        <h2 style={{ color: '#233D4D' }}>Administración de Rechazos</h2>
+        <h2 style={{ color: '#000' }}>Administración de Rechazos</h2>
         <button 
           onClick={() => setShowStatistics(true)}
           style={{
@@ -256,15 +257,15 @@ export default function RechazosAdminView({ session, profile }: Props) {
         </button>
       </div>
       
-      {/* Search and Filters */}
+      {/* Simple Search */}
       <div style={{ 
         backgroundColor: '#f5f5f5', 
         padding: '15px', 
-        borderRadius: '8px', 
+        borderRadius: '4px', 
         marginBottom: '20px' 
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
-          <div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1', minWidth: '250px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Buscar
             </label>
@@ -272,15 +273,43 @@ export default function RechazosAdminView({ session, profile }: Props) {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar..."
+              placeholder="Buscar en todos los campos..."
               style={{
-                width: '100%',
+                width: '99%',
                 padding: '8px',
-                border: '1px solid #ccc',
+                border: '1px solid #000',
                 borderRadius: '4px'
               }}
             />
           </div>
+          
+          <button 
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: showAdvancedFilters ? '#000' : '#000',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              alignSelf: 'flex-end',
+              height: '36px'
+            }}
+          >
+            {showAdvancedFilters ? 'Ocultar Filtros' : 'Búsqueda Avanzada'}
+          </button>
+        </div>
+        
+        {/* Advanced Filters - Collapsible */}
+        {showAdvancedFilters && (
+          <div style={{ 
+            marginTop: '15px', 
+            paddingTop: '15px', 
+            borderTop: '1px solid #000',
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
+            gap: '10px' 
+          }}>
           
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -294,7 +323,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
               style={{
                 width: '100%',
                 padding: '8px',
-                border: '1px solid #ccc',
+                border: '1px solid #000',
                 borderRadius: '4px'
               }}
             />
@@ -312,7 +341,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
               style={{
                 width: '100%',
                 padding: '8px',
-                border: '1px solid #ccc',
+                border: '1px solid #000',
                 borderRadius: '4px'
               }}
             />
@@ -329,7 +358,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
               style={{
                 width: '100%',
                 padding: '8px',
-                border: '1px solid #ccc',
+                border: '1px solid #000',
                 borderRadius: '4px'
               }}
             >
@@ -351,7 +380,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
               style={{
                 width: '100%',
                 padding: '8px',
-                border: '1px solid #ccc',
+                border: '1px solid #000',
                 borderRadius: '4px'
               }}
             >
@@ -373,7 +402,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
               style={{
                 width: '100%',
                 padding: '8px',
-                border: '1px solid #ccc',
+                border: '1px solid #000',
                 borderRadius: '4px'
               }}
             >
@@ -395,7 +424,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
               style={{
                 width: '100%',
                 padding: '8px',
-                border: '1px solid #ccc',
+                border: '1px solid #000',
                 borderRadius: '4px'
               }}
             >
@@ -417,7 +446,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
               style={{
                 width: '100%',
                 padding: '8px',
-                border: '1px solid #ccc',
+                border: '1px solid #000',
                 borderRadius: '4px'
               }}
             >
@@ -428,25 +457,42 @@ export default function RechazosAdminView({ session, profile }: Props) {
             </select>
           </div>
         </div>
+        )}
       </div>
       
-      {/* Rechazos Table */}
-      <div style={{ overflowX: 'auto' }}>
+      {/* Rechazos Table - Full Width */}
+      <div style={{ width: '100%', overflowX: 'auto' }}>
         <table style={{ 
+          fontFamily: 'CuerpoPersonalizado',
           width: '100%', 
           borderCollapse: 'collapse',
           backgroundColor: 'white',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}>
           <thead>
-            <tr style={{ backgroundColor: '#233D4D', color: 'white' }}>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Ticket</th>
+            <tr style={{ backgroundColor: '#233D4D', color: 'black' }}>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Ticket ID</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Tipo Rechazo</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Ruta</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Mes</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>Fecha</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Hora</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Folio</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>OC</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>Cliente</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Tipo</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>OC/Folio</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Tipo Local</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Cliente Final</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>Motivo</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Responsabilidad</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Área</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Unid. Rech.</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Unid. Tot.</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Bultos Rech.</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Bultos Tot.</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Transporte</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>Foto</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Creado por</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>Actualizado</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>Acciones</th>
             </tr>
           </thead>
@@ -455,22 +501,8 @@ export default function RechazosAdminView({ session, profile }: Props) {
               <tr key={rechazo.id} style={{ borderBottom: '1px solid #eee' }}>
                 {editingId === rechazo.id ? (
                   <>
+                    {/* Editing mode - show input fields for editable columns */}
                     <td style={{ padding: '12px' }}>{rechazo.ticket_id}</td>
-                    <td style={{ padding: '12px' }}>{formatDate(rechazo.fecha)}</td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="text"
-                        name="nombre_local"
-                        value={editData.nombre_local || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #ccc',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
                     <td style={{ padding: '12px' }}>
                       <select
                         name="tipo_rechazo"
@@ -479,7 +511,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
                         style={{
                           width: '100%',
                           padding: '4px',
-                          border: '1px solid #ccc',
+                          border: '1px solid #000',
                           borderRadius: '4px'
                         }}
                       >
@@ -490,13 +522,99 @@ export default function RechazosAdminView({ session, profile }: Props) {
                     <td style={{ padding: '12px' }}>
                       <input
                         type="text"
+                        name="ruta"
+                        value={editData.ruta || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px' }}>{formatMonthInSpanish(rechazo.mes)}</td>
+                    <td style={{ padding: '12px' }}>
+                      <input
+                        type="date"
+                        name="fecha"
+                        value={editData.fecha || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <input
+                        type="time"
+                        name="hora"
+                        value={editData.hora || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <input
+                        type="text"
+                        name="folio"
+                        value={editData.folio || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <input
+                        type="text"
                         name="oc"
                         value={editData.oc || ''}
                         onChange={handleEditChange}
                         style={{
                           width: '100%',
                           padding: '4px',
-                          border: '1px solid #ccc',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <input
+                        type="text"
+                        name="nombre_local"
+                        value={editData.nombre_local || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px' }}>{rechazo.tipo_local}</td>
+                    <td style={{ padding: '12px' }}>
+                      <input
+                        type="text"
+                        name="cliente_final"
+                        value={editData.cliente_final || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
                           borderRadius: '4px'
                         }}
                       />
@@ -510,7 +628,117 @@ export default function RechazosAdminView({ session, profile }: Props) {
                         style={{
                           width: '100%',
                           padding: '4px',
-                          border: '1px solid #ccc',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <select
+                        name="responsabilidad"
+                        value={editData.responsabilidad || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        <option value="">Seleccionar</option>
+                        <option value="Customer">Customer</option>
+                        <option value="Transporte">Transporte</option>
+                        <option value="Cliente">Cliente</option>
+                        <option value="CD">CD</option>
+                      </select>
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <select
+                        name="responsabilidad_area"
+                        value={editData.responsabilidad_area || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        <option value="">Seleccionar</option>
+                        <option value="Shipping">Shipping</option>
+                        <option value="QA">QA</option>
+                        <option value="Planning">Planning</option>
+                        <option value="Picking">Picking</option>
+                        <option value="VAS">VAS</option>
+                        <option value="Consolidación">Consolidación</option>
+                      </select>
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <input
+                        type="number"
+                        name="unidades_rechazadas"
+                        value={editData.unidades_rechazadas || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <input
+                        type="number"
+                        name="unidades_totales"
+                        value={editData.unidades_totales || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <input
+                        type="number"
+                        name="bultos_rechazados"
+                        value={editData.bultos_rechazados || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <input
+                        type="number"
+                        name="bultos_totales"
+                        value={editData.bultos_totales || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <input
+                        type="text"
+                        name="transporte"
+                        value={editData.transporte || ''}
+                        onChange={handleEditChange}
+                        style={{
+                          width: '100%',
+                          padding: '4px',
+                          border: '1px solid #000',
                           borderRadius: '4px'
                         }}
                       />
@@ -525,6 +753,8 @@ export default function RechazosAdminView({ session, profile }: Props) {
                         />
                       )}
                     </td>
+                    <td style={{ padding: '12px' }}>{rechazo.created_by_user_name}</td>
+                    <td style={{ padding: '12px' }}>{formatDate(rechazo.updated_at)}</td>
                     <td style={{ padding: '12px' }}>
                       <button
                         onClick={saveEdit}
@@ -544,7 +774,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
                         onClick={cancelEditing}
                         style={{
                           padding: '6px 12px',
-                          backgroundColor: '#ccc',
+                          backgroundColor: '#FFF',
                           color: 'black',
                           border: 'none',
                           borderRadius: '4px',
@@ -557,12 +787,26 @@ export default function RechazosAdminView({ session, profile }: Props) {
                   </>
                 ) : (
                   <>
+                    {/* View mode - show data */}
                     <td style={{ padding: '12px' }}>{rechazo.ticket_id}</td>
-                    <td style={{ padding: '12px' }}>{formatDate(rechazo.fecha)}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.nombre_local}</td>
                     <td style={{ padding: '12px' }}>{rechazo.tipo_rechazo}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.oc} / {rechazo.folio}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.motivo.substring(0, 50)}...</td>
+                    <td style={{ padding: '12px' }}>{rechazo.ruta}</td>
+                    <td style={{ padding: '12px' }}>{formatMonthInSpanish(rechazo.mes)}</td>
+                    <td style={{ padding: '12px' }}>{formatDate(rechazo.fecha)}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.hora}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.folio}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.oc}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.nombre_local}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.tipo_local}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.cliente_final}</td>
+                    <td style={{ padding: '12px' }} title={rechazo.motivo}>{rechazo.motivo.substring(0, 50)}{rechazo.motivo.length > 50 ? '...' : ''}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.responsabilidad}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.responsabilidad_area}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.unidades_rechazadas}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.unidades_totales}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.bultos_rechazados}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.bultos_totales}</td>
+                    <td style={{ padding: '12px' }}>{rechazo.transporte}</td>
                     <td style={{ padding: '12px' }}>
                       {rechazo.foto_rechazado && (
                         <img 
@@ -573,12 +817,14 @@ export default function RechazosAdminView({ session, profile }: Props) {
                         />
                       )}
                     </td>
+                    <td style={{ padding: '12px' }}>{rechazo.created_by_user_name}</td>
+                    <td style={{ padding: '12px' }}>{formatDate(rechazo.updated_at)}</td>
                     <td style={{ padding: '12px' }}>
                       <button
                         onClick={() => startEditing(rechazo)}
                         style={{
                           padding: '6px 12px',
-                          backgroundColor: '#FE7F2D',
+                          backgroundColor: '#000',
                           color: 'white',
                           border: 'none',
                           borderRadius: '4px',

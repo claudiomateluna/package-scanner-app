@@ -14,7 +14,7 @@ interface Props {
 
 // Helper para normalizar roles
 const normalizeRole = (role: string | null) => {
-  if (role === 'admnistrador') return 'Administrador';
+  if (role === 'admnistrador') return 'administrador';
   return role;
 };
 
@@ -22,8 +22,8 @@ export default function RechazosView({ session, profile, packageData }: Props) {
   const [activeTab, setActiveTab] = useState('ingresar');
   const userRole = normalizeRole(profile.role);
 
-  const canViewIngresar = ['SKA Operator', 'Store Operator', 'Store Supervisor', 'Administrador'].includes(userRole || '');
-  const canViewAdmin = ['Warehouse Operator', 'Warehouse Supervisor', 'Administrador'].includes(userRole || '');
+  const canViewIngresar = ['SKA Operator', 'Store Operator', 'Store Supervisor', 'administrador'].includes(userRole || '');
+  const canViewAdmin = ['Warehouse Operator', 'Warehouse Supervisor', 'administrador'].includes(userRole || '');
 
   // Determinar la pestaña inicial basada en permisos
   useEffect(() => {

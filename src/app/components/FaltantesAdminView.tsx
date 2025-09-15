@@ -134,7 +134,7 @@ export default function FaltantesAdminView({ session, profile }: Props) {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ padding: '10px' }}>
       {lightboxImage && <Lightbox src={lightboxImage} onClose={() => setLightboxImage(null)} />}
       
       <h1>Administración de Faltantes ({totalCount} reportes)</h1>

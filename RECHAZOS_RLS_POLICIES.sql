@@ -1,0 +1,28 @@
+-- RECHAZOS_RLS_POLICIES.sql
+-- This script creates the necessary Row Level Security (RLS) policies for the 'rechazos' table.
+
+-- Enable RLS on the table if it's not already enabled.
+ALTER TABLE public.rechazos ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist, to ensure a clean slate.
+DROP POLICY IF EXISTS "Allow authenticated users to insert rechazos" ON public.rechazos;
+DROP POLICY IF EXISTS "Allow authenticated users to select all rechazos" ON public.rechazos;
+
+-- 1. INSERT Policy
+-- Allows any logged-in user to insert a new row into the rechazos table.
+CREATE POLICY "Allow authenticated users to insert rechazos"
+ON public.rechazos
+FOR INSERT
+TO authenticated
+WITH CHECK (true);
+
+-- 2. SELECT Policy
+-- Allows any logged-in user to view all rows in the rechazos table.
+-- You might want to restrict this further later (e.g., users can only see their own entries),
+-- but this is a good starting point.
+CREATE POLICY "Allow authenticated users to select all rechazos"
+ON public.rechazos
+FOR SELECT
+TO authenticated
+USING (true);
+
