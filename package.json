@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-        "dev": "next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "clean": "node scripts/clean.js",
-    "dev:clean": "node scripts/clean-cache.js && next dev"
+    "clean": "node scripts/clear-cache.js",
+    "dev:clean": "node scripts/clear-cache.js && next dev"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.10.0",
@@ -16,6 +16,7 @@
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.56.1",
+    "@tanstack/react-table": "^8.21.3",
     "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",
     "barcode-detector": "^3.0.5",

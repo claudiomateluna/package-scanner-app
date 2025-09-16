@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import { Session } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
+import LocalesSearchableSelect from './LocalesSearchableSelect'
 
 type Profile = { role: string | null; local_asignado?: string | null; }
 
@@ -35,18 +36,21 @@ const styles: { [key: string]: CSSProperties } = {
   formContainer: {
     width: '100%',
     maxWidth: '500px',
-    padding: '30px',
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    borderRadius: '8px',
+    padding: '20px',
+    backgroundColor: 'var(--color-card-background)',
+    borderRadius: '4px',
+    border: '1px solid var(--color-border)',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    boxSizing: 'border-box' // Añadido para prevenir desbordamiento
   },
   title: {
-    color: '#FE7F2D',
+    color: 'var(--color-text-primary)',
     textAlign: 'center',
-    marginBottom: '30px'
+    marginBottom: '10px'
   },
   buttonPrimary: {
-    backgroundColor: '#FE7F2D',
-    color: '#233D4D',
+    backgroundColor: 'var(--color-button-background)',
+    color: 'var(--color-button-text)',
     border: 'none',
     padding: '12px 20px',
     cursor: 'pointer',
@@ -54,27 +58,27 @@ const styles: { [key: string]: CSSProperties } = {
     fontWeight: 'bold',
     fontSize: '1.2em',
     width: '100%',
-    marginTop: '20px'
+    marginTop: '0px'
   },
   input: {
     width: '100%',
     padding: '12px',
     marginTop: '8px',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    color: '#CCCCCC',
+    backgroundColor: '(--color-background)',
+    color: '(--color-text-primary)',
     borderTopWidth: '1px',
     borderTopStyle: 'solid',
-    borderTopColor: '#CCCCCC',
+    borderTopColor: '(--color-border)',
     borderBottomWidth: '1px',
     borderBottomStyle: 'solid',
-    borderBottomColor: '#CCCCCC',
+    borderBottomColor: '(--color-border)',
     borderLeftWidth: '1px',
     borderLeftStyle: 'solid',
-    borderLeftColor: '#CCCCCC',
+    borderLeftColor: '(--color-border)',
     borderRightWidth: '1px',
     borderRightStyle: 'solid',
-    borderRightColor: '#CCCCCC',
-    borderRadius: '5px',
+    borderRightColor: '(--color-border)',
+    borderRadius: '4px',
     fontSize: '1em',
     boxSizing: 'border-box' // Añadido para prevenir desbordamiento
   },
@@ -83,7 +87,7 @@ const styles: { [key: string]: CSSProperties } = {
     textAlign: 'left',
     fontWeight: 'bold',
     marginBottom: '5px',
-    color: '#CCCCCC'
+    color: '(--color-text-primary)'
   },
   filterContainer: {
     display: 'flex',
@@ -94,8 +98,8 @@ const styles: { [key: string]: CSSProperties } = {
   filterButton: {
     padding: '6px 12px',
     backgroundColor: 'transparent',
-    color: '#CCCCCC',
-    border: '1px solid #CCCCCC',
+    color: '(--color-text-primary)',
+    border: '1px solid var(--color-text-primary)',
     borderRadius: '5px',
     cursor: 'pointer',
     fontSize: '0.9em'
@@ -279,18 +283,12 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
             <div>
               <label htmlFor="local-select" style={styles.label}>Seleccionar Local:</label>
               {availableLocals.length > 0 ? (
-                <select 
-                  id="local-select" 
-                  value={selectedLocal}
-                  onChange={(e) => setSelectedLocal(e.target.value)}
-                  style={styles.input}
-                >
-                  {availableLocals.map(local => (
-                    <option key={local.id} value={local.nombre_local}>
-                      [{local.tipo_local}] {local.nombre_local}
-                    </option>
-                  ))}
-                </select>
+                <LocalesSearchableSelect
+                  locals={availableLocals}
+                  selectedLocal={selectedLocal}
+                  onLocalSelect={setSelectedLocal}
+                  placeholder="Buscar y seleccionar local..."
+                />
               ) : (
                 <p>No se pudieron cargar los locales. Contacta a un administrador.</p>
               )}
@@ -299,18 +297,12 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
             <div>
               <label htmlFor="local-select" style={styles.label}>Locales Asignados:</label>
               {availableLocals.length > 0 ? (
-                <select 
-                  id="local-select" 
-                  value={selectedLocal}
-                  onChange={(e) => setSelectedLocal(e.target.value)}
-                  style={styles.input}
-                >
-                  {availableLocals.map(local => (
-                    <option key={local.id} value={local.nombre_local}>
-                      [{local.tipo_local}] {local.nombre_local}
-                    </option>
-                  ))}
-                </select>
+                <LocalesSearchableSelect
+                  locals={availableLocals}
+                  selectedLocal={selectedLocal}
+                  onLocalSelect={setSelectedLocal}
+                  placeholder="Buscar y seleccionar local asignado..."
+                />
               ) : (
                 <p>No tienes locales asignados. Contacta a un administrador.</p>
               )}
@@ -338,12 +330,11 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
           
           {/* Botón Reportar Rechazo - Visible para todos los usuarios */}
           <button 
-            onClick={() => setCurrentView && setCurrentView('rechazos')}
+            onClick={() => window.dispatchEvent(new CustomEvent('openRechazoForm'))}
             style={{
               ...styles.buttonPrimary,
-              backgroundColor: '#233D4D',
-              color: '#CCCCCC',
-              border: '1px solid #CCCCCC'
+              backgroundColor: 'var(--color-error)',
+              color: 'var(--color-button-text)'
             }}
           >
             Reportar Rechazo

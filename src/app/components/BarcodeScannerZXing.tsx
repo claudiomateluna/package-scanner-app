@@ -238,8 +238,7 @@ export default function BarcodeScannerZXing({
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
-      fontFamily: 'sans-serif'
+      alignItems: 'center'
     }}>
 
       <div style={{
@@ -265,10 +264,10 @@ export default function BarcodeScannerZXing({
         ></div>
       </div>
 
-      {error && <p style={{ color: '#ef4444', marginTop: '1rem', fontSize: '0.875rem' }}>{error}</p>}
+      {error && <p style={{ color: 'var(--color-error)', marginTop: '1rem', fontSize: '0.875rem' }}>{error}</p>}
 
       <p style={{
-        color: '#4b5563',
+        color: 'var(--color-text-secondary)',
         fontSize: '0.875rem',
         textAlign: 'center'
       }}>
@@ -278,7 +277,7 @@ export default function BarcodeScannerZXing({
       <h3 style={{
         fontSize: '1rem',
         fontWeight: 'semibold',
-        color: '#1f2937',
+        color: 'var(--color-text-primary)',
         display: 'none'
       }}>
         Área de Escaneo Focalizada:
@@ -287,7 +286,7 @@ export default function BarcodeScannerZXing({
       <canvas
         ref={displayCroppedCanvasRef}
         style={{
-          border: '2px solid #3b82f6',
+          border: '2px solid var(--color-accent)',
           borderRadius: '0.5rem',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
           maxWidth: '100%',
@@ -301,17 +300,17 @@ export default function BarcodeScannerZXing({
       </canvas>
 
       <p style={{
-        color: '#9ca3af',
+        color: 'var(--color-text-tertiary)',
         fontSize: '0.75rem',
       }}>
         Esto se actualiza cada 0.5 segundo con el área focalizada.
       </p>
         <div style={{
           padding: '1rem',
-          border: '2px dashed #10b981',
+          border: '2px dashed var(--color-success)',
           borderRadius: '0.5rem',
-          backgroundColor: '#ecfdf5',
-          color: '#065f46',
+          backgroundColor: 'var(--color-card-background)',
+          color: 'var(--color-text-primary)',
           fontSize: '1rem',
           fontWeight: '500',
           textAlign: 'center',

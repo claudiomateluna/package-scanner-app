@@ -1,6 +1,4 @@
-// src/app/components/ToggleSwitch.tsx
-'use client'
-
+import React from 'react';
 import './ToggleSwitch.css';
 
 interface ToggleSwitchProps {
@@ -8,15 +6,17 @@ interface ToggleSwitchProps {
   onChange: (checked: boolean) => void;
 }
 
-export default function ToggleSwitch({ checked, onChange }: ToggleSwitchProps) {
+const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.checked);
+  };
+
   return (
-    <label className="toggle-switch">
-      <input 
-        type="checkbox" 
-        checked={checked} 
-        onChange={(e) => onChange(e.target.checked)} 
-      />
-      <span className="slider round"></span>
+    <label className="switch">
+      <input type="checkbox" checked={checked} onChange={handleChange} />
+      <span className="slider"></span>
     </label>
   );
-}
+};
+
+export default ToggleSwitch;

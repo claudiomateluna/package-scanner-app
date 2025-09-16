@@ -130,11 +130,11 @@ export default function FaltantesAdminView({ session, profile }: Props) {
   };
 
   if (error) {
-    return <div style={{ padding: '20px', color: 'red' }}>Error: {error}</div>;
+    return <div style={{ padding: '20px', color: 'var(--color-error)' }}>Error: {error}</div>;
   }
 
   return (
-    <div style={{ padding: '10px' }}>
+    <div style={{ padding: '5px' }}>
       {lightboxImage && <Lightbox src={lightboxImage} onClose={() => setLightboxImage(null)} />}
       
       <h1>Administración de Faltantes ({totalCount} reportes)</h1>
@@ -143,18 +143,18 @@ export default function FaltantesAdminView({ session, profile }: Props) {
         <input 
           type="text" 
           placeholder="Buscar por Local, OLPN, Ticket, DN..." 
-          style={{ width: '100%', padding: '10px', fontSize: '1em' }} 
+          style={{ width: '98%', padding: '10px', fontSize: '1em', backgroundColor: 'var(--color-card-background)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)' }} 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
+      <div style={{ overflowX: 'auto', width: '100%' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white' }}>
+          <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--color-background)' }}>
             <tr>
               {[ 'Ticket', 'OLPN / B2B', 'DN', 'Reporte', 'Local', 'Tipo', 'Fecha', 'Factura', 'Producto', 'Talla', 'Cant', 'Peso', 'Estado Bulto', 'Foto OLPN', 'Foto Bulto', 'Creado Por', 'Fecha Reporte', 'Últ. Act', 'Responsabilidad', 'Gestionado', 'Comentarios', 'Acciones' ].map(header => (
-                <th key={header} style={{ padding: '5px', border: '1px solid #FFF', textAlign: 'left', backgroundColor: '#000', color: 'white', borderTopLeftRadius: '4px', borderTopRightRadius: '4px',WebkitBorderTopRightRadius: '4px' }}>{header}</th>
+                <th key={header} style={{ padding: '5px', border: '1px solid var(--color-border)', textAlign: 'left', backgroundColor: 'var(--color-accent)', color: 'var(--color-card-background)', borderTopLeftRadius: '4px', borderTopRightRadius: '4px',WebkitBorderTopRightRadius: '4px' }}>{header}</th>
               ))}
             </tr>
           </thead>
@@ -176,14 +176,14 @@ export default function FaltantesAdminView({ session, profile }: Props) {
       {loading && <div>Cargando...</div>}
 
       {!loading && hasMore && (
-        <button onClick={handleLoadMore} style={{ marginTop: '20px', padding: '10px 20px' }}>
+        <button onClick={handleLoadMore} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: 'var(--color-accent)', color: 'var(--color-card-background)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
           Cargar más
         </button>
       )}
 
-      {!loading && !hasMore && faltantes.length > 0 && <div style={{ marginTop: '20px', color: '#888' }}>Fin de los resultados.</div>}
+      {!loading && !hasMore && faltantes.length > 0 && <div style={{ marginTop: '20px', color: 'var(--color-text-tertiary)' }}>Fin de los resultados.</div>}
 
-      {!loading && faltantes.length === 0 && <div style={{ marginTop: '20px', color: '#888' }}>No se encontraron resultados.</div>}
+      {!loading && faltantes.length === 0 && <div style={{ marginTop: '20px', color: 'var(--color-text-tertiary)' }}>No se encontraron resultados.</div>}
     </div>
   );
 }

@@ -12,6 +12,8 @@ import MissingReportForm from './MissingReportForm';
 import { isMobileDevice, isMobilePhone } from '@/lib/deviceUtils';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import '../globals.css';
+import styles from './ScannerView.module.css';
 import './scrollbarStyles.css';
 import './ScannerView.css';
 
@@ -866,7 +868,6 @@ export default function ScannerView({ session, profile, selection, currentView, 
                             setShowMissingReportForm(true);
                           }}
                           style={{
-                            fontFamily: 'CuerpoPersonalizado',
                             padding: '5px 5px', 
                             backgroundColor: '#000000', 
                             color: '#fff', 
@@ -884,7 +885,6 @@ export default function ScannerView({ session, profile, selection, currentView, 
                             navigateToRechazos(pkg);
                           }}
                           style={{
-                            fontFamily: 'CuerpoPersonalizado',
                             padding: '5px 5px', 
                             backgroundColor: '#FE7F2D', 
                             color: '#fff', 

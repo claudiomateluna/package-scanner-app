@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
-import RechazoForm from './RechazoForm';
 import RechazosAdminView from './RechazosAdminView';
 
 interface Props {
@@ -19,63 +18,24 @@ const normalizeRole = (role: string | null) => {
 };
 
 export default function RechazosView({ session, profile, packageData }: Props) {
-  const [activeTab, setActiveTab] = useState('ingresar');
   const userRole = normalizeRole(profile.role);
 
-  const canViewIngresar = ['SKA Operator', 'Store Operator', 'Store Supervisor', 'administrador'].includes(userRole || '');
+  // Verificar si el usuario puede ver la administración de rechazos
   const canViewAdmin = ['Warehouse Operator', 'Warehouse Supervisor', 'administrador'].includes(userRole || '');
 
-  // Determinar la pestaña inicial basada en permisos
-  useEffect(() => {
-    if (canViewIngresar) {
-      setActiveTab('ingresar');
-    } else if (canViewAdmin) {
-      setActiveTab('administracion');
-    }
-  }, [canViewIngresar, canViewAdmin]);
+  // Si el usuario no puede ver la administración, mostramos un mensaje
+  if (!canViewAdmin) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <h1 style={{ color: '#233D4D', marginBottom: '20px' }}>Acceso Denegado</h1>
+        <p>No tienes permisos para acceder a la administración de rechazos.</p>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ color: '#233D4D', marginBottom: '20px' }}>Gestión de Rechazos</h1>
-      <div style={{ marginBottom: '20px', borderBottom: '1px solid #ccc' }}>
-        {canViewIngresar && (
-          <button 
-            onClick={() => setActiveTab('ingresar')} 
-            style={{ 
-              padding: '10px 20px', 
-              border: activeTab === 'ingresar' ? '1px solid #FE7F2D' : '1px solid transparent',
-              backgroundColor: activeTab === 'ingresar' ? '#FE7F2D' : '#f0f0f0',
-              color: activeTab === 'ingresar' ? 'white' : '#333',
-              cursor: 'pointer',
-              marginRight: '10px',
-              borderRadius: '4px'
-            }}
-          >
-            Ingresar Rechazo
-          </button>
-        )}
-        {canViewAdmin && (
-          <button 
-            onClick={() => setActiveTab('administracion')} 
-            style={{ 
-              padding: '10px 20px', 
-              border: activeTab === 'administracion' ? '1px solid #FE7F2D' : '1px solid transparent',
-              backgroundColor: activeTab === 'administracion' ? '#FE7F2D' : '#f0f0f0',
-              color: activeTab === 'administracion' ? 'white' : '#333',
-              cursor: 'pointer',
-              marginRight: '10px',
-              borderRadius: '4px'
-            }}
-          >
-            Administración
-          </button>
-        )}
-      </div>
-
-      <div>
-        {activeTab === 'ingresar' && canViewIngresar && <RechazoForm session={session} profile={profile} initialData={packageData} />}
-        {activeTab === 'administracion' && canViewAdmin && <RechazosAdminView session={session} profile={profile} />}
-      </div>
+    <div style={{ padding: '0px' }}>
+      <RechazosAdminView session={session} profile={profile} />
     </div>
   );
 }

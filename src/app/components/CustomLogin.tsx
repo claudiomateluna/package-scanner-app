@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import '@/app/globals.css'
+import styles from './CustomLogin.module.css'
 import { isUserLocked, incrementLoginAttempts, resetLoginAttempts, lockUser, formatTime } from '@/lib/authUtils'
 
 interface LoginProps {
@@ -111,29 +112,8 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
   }
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      height: '100vh',
-      backgroundColor: '#FFF',
-      backgroundImage: 'url("/bkgrn.jpg")',
-      backgroundPosition: 'center',
-      backgroundSize: 'cover',
-      backgroundRepeat: 'no-repeat',
-      position: 'relative'
-    }}>
-      <div style={{ 
-        width: '400px', 
-        backgroundColor: '#ffffffbe', 
-        padding: '40px', 
-        borderRadius: '4px',
-        textAlign: 'center',
-        borderColor: '#000000',
-        borderWidth: '1px',
-        borderStyle: 'solid',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-      }}>
+    <div className={styles.container}>
+      <div className={styles.loginBox}>
         {isLocked ? (
           <div className="notification-error">
             <h3 style={{ margin: '0 0 10px 0' }}>Cuenta Bloqueada</h3>
@@ -144,17 +124,11 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
             </p>
           </div>
         ) : (
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <form onSubmit={handleLogin} className={styles.form}>
             <div>
               <label 
                 htmlFor="email" 
-                style={{ 
-                  display: 'block', 
-                  textAlign: 'left', 
-                  fontWeight: 'bold', 
-                  marginBottom: '5px',
-                  color: '#000000'
-                }}
+                className={styles.label}
               >
                 Correo Electrónico
               </label>
@@ -163,16 +137,7 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  color: '#000000',
-                  border: '1px solid #000',
-                  borderRadius: '4px',
-                  fontSize: '1em',
-                  boxSizing: 'border-box'
-                }}
+                className={styles.input}
                 disabled={loading}
                 autoComplete="email"
               />
@@ -181,13 +146,7 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
             <div>
               <label 
                 htmlFor="password" 
-                style={{ 
-                  display: 'block', 
-                  textAlign: 'left', 
-                  fontWeight: 'bold', 
-                  marginBottom: '5px',
-                  color: '#000000'
-                }}
+                className={styles.label}
               >
                 Contraseña
               </label>
@@ -196,16 +155,7 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  color: '#000000',
-                  border: '1px solid #000',
-                  borderRadius: '4px',
-                  fontSize: '1em',
-                  boxSizing: 'border-box'
-                }}
+                className={styles.input}
                 disabled={loading}
                 autoComplete="current-password"
               />
@@ -214,22 +164,7 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
             <button
               type="submit"
               disabled={loading}
-              style={{
-                padding: '12px 20px',
-                backgroundColor: '#000000',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '5px',
-                fontWeight: 'bold',
-                fontSize: '1.2em',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-                width: '100%',
-                boxSizing: 'border-box'
-              }}
+              className={styles.submitButton}
             >
               {loading ? (
                 <>
@@ -243,7 +178,7 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
                     strokeWidth="2" 
                     strokeLinecap="round" 
                     strokeLinejoin="round"
-                    style={{ animation: 'spin 1s linear infinite' }}
+                    className={styles.spinner}
                   >
                     <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                   </svg>
@@ -274,27 +209,15 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
         )}
         
         {loginAttempts > 0 && loginAttempts < 3 && !isLocked && (
-          <p style={{ 
-            color: '#000000', 
-            fontSize: '0.9em', 
-            marginTop: '10px',
-            marginBottom: '0'
-          }}>
+          <p className={styles.attemptsText}>
             Intento {loginAttempts}/3
           </p>
         )}
       </div>
       
-      <footer className="footer">
+      <footer className={styles.footer}>
         Desarrollado por Claudio Mateluna González <br /> Warehouse Local Tech
       </footer>
-      
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   )
 }

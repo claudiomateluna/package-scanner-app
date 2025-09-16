@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS rechazos (
   bultos_totales INTEGER,
   transporte VARCHAR(255),
   foto_rechazado TEXT,
+  gestionado BOOLEAN DEFAULT false,
   
   -- Audit fields
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

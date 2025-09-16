@@ -6,6 +6,9 @@ import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
 import SlidingMenu from './SlidingMenu'
+import RechazoForm from './RechazoForm' // Import RechazoForm
+import '../globals.css'
+import styles from './AppLayout.module.css'
 
 // --- Tipos de Datos ---
 type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
@@ -38,106 +41,16 @@ const ChangePasswordForm = ({ onDone }: { onDone: () => void }) => {
     else { toast.success('Contraseña actualizada exitosamente.'); onDone(); }
   };
 
-  const inputStyle: CSSProperties = { 
-    width: '100%', 
-    padding: '10px', 
-    backgroundColor: '#fff', 
-    color: '#000', 
-    borderTopWidth: '1px',
-    borderTopStyle: 'solid',
-    borderTopColor: '#ccc',
-    borderBottomWidth: '1px',
-    borderBottomStyle: 'solid',
-    borderBottomColor: '#ccc',
-    borderLeftWidth: '1px',
-    borderLeftStyle: 'solid',
-    borderLeftColor: '#ccc',
-    borderRightWidth: '1px',
-    borderRightStyle: 'solid',
-    borderRightColor: '#ccc',
-    borderRadius: '5px' 
-  };
-
   return (
-    <div style={{ 
-      margin: '20px 0', 
-      padding: '20px', 
-      borderTopWidth: '1px',
-      borderTopStyle: 'solid',
-      borderTopColor: '#555',
-      borderBottomWidth: '1px',
-      borderBottomStyle: 'solid',
-      borderBottomColor: '#555',
-      borderLeftWidth: '1px',
-      borderLeftStyle: 'solid',
-      borderLeftColor: '#555',
-      borderRightWidth: '1px',
-      borderRightStyle: 'solid',
-      borderRightColor: '#555',
-      borderRadius: '8px' 
-    }}>
+    <div className={styles.formContainer}>
       <form onSubmit={handleSubmit}>
         <h4 style={{marginTop: 0}}>Cambiar mi contraseña</h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '400px' }}>
-          <input 
-            type="password" 
-            placeholder="Nueva contraseña" 
-            value={newPassword} 
-            onChange={e => setNewPassword(e.target.value)} 
-            required 
-            style={inputStyle} 
-          />
-          <input 
-            type="password" 
-            placeholder="Confirmar nueva contraseña" 
-            value={confirmPassword} 
-            onChange={e => setConfirmPassword(e.target.value)} 
-            required 
-            style={inputStyle} 
-          />
+          <input type="password" placeholder="Nueva contraseña" value={newPassword} onChange={e => setNewPassword(e.target.value)} required className={styles.input} />
+          <input type="password" placeholder="Confirmar nueva contraseña" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className={styles.input} />
           <div style={{marginTop: '10px', display: 'flex', gap: '10px'}}>
-            <button 
-              type="submit" 
-              style={{
-                padding: '10px 15px', 
-                backgroundColor: '#FE7F2D', 
-                color: '#fff', 
-                border: 'none', 
-                borderTopWidth: 0,
-                borderBottomWidth: 0,
-                borderLeftWidth: 0,
-                borderRightWidth: 0,
-                borderRadius: '5px', 
-                cursor: 'pointer'
-              }}
-            >
-              Guardar
-            </button>
-            <button 
-              type="button" 
-              onClick={onDone} 
-              style={{
-                padding: '10px 15px', 
-                backgroundColor: 'transparent', 
-                color: '#CCCCCC', 
-                borderTopWidth: '1px',
-                borderTopStyle: 'solid',
-                borderTopColor: '#CCCCCC',
-                borderBottomWidth: '1px',
-                borderBottomStyle: 'solid',
-                borderBottomColor: '#CCCCCC',
-                borderLeftWidth: '1px',
-                borderLeftStyle: 'solid',
-                borderLeftColor: '#CCCCCC',
-                borderRightWidth: '1px',
-                borderRightStyle: 'solid',
-                borderRightColor: '#CCCCCC',
-                borderRadius: '5px', 
-                cursor: 'pointer'
-              }}
-            >
-              Cancelar
-            </button>
+            <button type="submit" className={styles.button}>Guardar</button>
+            <button type="button" onClick={onDone} className={styles.buttonSecondary}>Cancelar</button>
           </div>
         </div>
       </form>
@@ -150,50 +63,68 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [faltantesCount, setFaltantesCount] = useState(0);
+  const [rechazosCount, setRechazosCount] = useState(0);
+  const [showRechazoForm, setShowRechazoForm] = useState(false); // New state for rechazo form modal
 
   const isWarehouseOrAdmin = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator' || profile?.role === 'Store Supervisor';
   const canViewFaltantesAdmin = ['administrador', 'admnistrador', 'warehouse supervisor', 'warehouse operator'].includes(profile?.role?.toLowerCase() || '');
+  const canViewRechazos = true; // All authenticated users can see the menu item
+  
+  // Verificar si el usuario puede reportar rechazos
+  const canReportarRechazo = ['SKA Operator', 'Store Operator', 'Store Supervisor', 'Warehouse Operator', 'administrador'].includes(profile?.role || '');
 
+  // Efecto para escuchar el evento personalizado para abrir el formulario de rechazos
+  useEffect(() => {
+    const handleOpenRechazoForm = () => setShowRechazoForm(true);
+    
+    window.addEventListener('openRechazoForm', handleOpenRechazoForm);
+    
+    return () => {
+      window.removeEventListener('openRechazoForm', handleOpenRechazoForm);
+    };
+  }, []);
+
+  // Effect for Faltantes
   useEffect(() => {
     const fetchFaltantesCount = async () => {
         if (canViewFaltantesAdmin) {
-            try {
-                const { count, error } = await supabase
-                    .from('faltantes')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('gestionado', false);
-
-                if (error) {
-                    console.error('Error fetching faltantes count:', JSON.stringify(error, null, 2));
-                } else {
-                    setFaltantesCount(count || 0);
-                }
-            } catch (error) {
-                console.error('Error in fetchFaltantesCount:', error);
+            const { count, error } = await supabase.from('faltantes').select('*', { count: 'exact', head: true }).eq('gestionado', false);
+            if (error) {
+                console.error('Error fetching faltantes count:', error);
+            } else {
+                setFaltantesCount(count || 0);
             }
         }
     };
 
     fetchFaltantesCount();
-
-    const channel = supabase.channel('faltantes-count')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'faltantes' }, () => {
-            fetchFaltantesCount();
-        })
-        .subscribe();
-
-    return () => {
-        supabase.removeChannel(channel);
-    };
+    const channel = supabase.channel('faltantes-count').on('postgres_changes', { event: '*', schema: 'public', table: 'faltantes' }, fetchFaltantesCount).subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [canViewFaltantesAdmin]);
+
+  // Effect for Rechazos (Mirroring Faltantes logic)
+  useEffect(() => {
+    const fetchRechazosCount = async () => {
+        if (canViewRechazos) {
+            const { count, error } = await supabase.from('rechazos').select('*', { count: 'exact', head: true }).eq('gestionado', false);
+            if (error) {
+                console.error('Error fetching rechazos count:', error);
+            } else {
+                setRechazosCount(count || 0);
+            }
+        }
+    };
+
+    fetchRechazosCount();
+    const channel = supabase.channel('rechazos-count').on('postgres_changes', { event: '*', schema: 'public', table: 'rechazos' }, fetchRechazosCount).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [canViewRechazos]);
 
   const headerStyle: CSSProperties = { 
     display: 'flow-root',
     alignItems: 'center',
-    borderBottomWidth: '1px',
-    borderBottomStyle: 'solid',
-    borderBottomColor: '#dddddd',
-    padding: '10px',
+    borderBottom: '1px solid var (--color-text-tertiary)',
+    padding: '5px',
     position: 'sticky',
     top: 0,
     backgroundColor: '#ffffff',
@@ -201,23 +132,13 @@ export default function AppLayout({ session, profile, onBack, children, currentV
     color: '#000000'
   };
   
-  // Obtener nombre y apellido por separado
-  const getUserFirstAndLastName = () => {
-    return {
-      firstName: profile?.first_name || '',
-      lastName: profile?.last_name || ''
-    };
-  };
+  const getUserFirstAndLastName = () => ({ firstName: profile?.first_name || '', lastName: profile?.last_name || '' });
 
-  const mainStyle: CSSProperties = {
-    padding: '5px',
-    margin: 'auto',
-    maxWidth: currentView === 'faltantes' || currentView === 'rechazos' ? '100%' : '800px',
-  };
+  // Verificar si la vista actual es de administración de rechazos o faltantes
+  const isFullWidthView = currentView === 'faltantes' || currentView === 'rechazos';
 
   return (
     <div>
-      {/* Sliding Menu */}
       <SlidingMenu
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
@@ -229,27 +150,20 @@ export default function AppLayout({ session, profile, onBack, children, currentV
         showPasswordForm={showPasswordForm}
         setShowPasswordForm={setShowPasswordForm}
         faltantesCount={faltantesCount}
+        rechazosCount={rechazosCount}
+        onReportarRechazo={() => setShowRechazoForm(true)} // New prop
+        canReportarRechazo={canReportarRechazo} // New prop
       />
       
-      <header style={headerStyle}>
-        <div style={{ maxWidth: currentView === 'faltantes' || currentView === 'rechazos' ? '100%' : '800px', margin: '0 auto', padding: '0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            {/* Menu button that opens the sliding menu */}
-            <div 
-              id="menu-button"
-              onClick={() => setIsMenuOpen(true)}
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-            >
-              <Image 
-                src="/adidas_shp.svg" 
-                alt="Adidas Logo" 
-                width={60}
-                height={60}
-              />
+      <header className={styles.header}>
+        <div className={styles.contentWrapper}>
+          <div className={styles.userContainer}>
+            <div id="menu-button" onClick={() => setIsMenuOpen(true)} className={styles.cursorPointer}>
+              <Image src="/adidas_shp.svg" alt="Adidas Logo" width={60} height={60} />
             </div>
             <div>
-              <h2 style={{ margin: '0', color: '#000000', lineHeight: '1' }}>Recepciones</h2>
-              <p style={{ margin: '0', fontSize: '0.9em', color: '#000000', lineHeight: '1' }}>
+              <h2 className={styles.title}>Recepciones</h2>
+              <p className={styles.welcomeText}>
                 Bienvenido {getUserFirstAndLastName().firstName} {getUserFirstAndLastName().lastName ? ` ${getUserFirstAndLastName().lastName}` : ''}
               </p>
             </div>
@@ -257,11 +171,57 @@ export default function AppLayout({ session, profile, onBack, children, currentV
         </div>
       </header>
       
-      <main style={mainStyle}>
-        {showPasswordForm ? 
-          <ChangePasswordForm onDone={() => setShowPasswordForm(false)} /> : 
+      <main className={`${styles.main} ${isFullWidthView ? styles.fullWidth : ''}`}>
+        {showPasswordForm ? (
+          <ChangePasswordForm onDone={() => setShowPasswordForm(false)} />
+        ) : showRechazoForm ? (
+          // Render the RechazoForm in a modal
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 2000
+          }}>
+            <div style={{
+              backgroundColor: 'var(--color-card-background)',
+              padding: '20px',
+              borderRadius: '8px',
+              maxWidth: '600px',
+              width: '90%',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h2>Reportar Rechazo</h2>
+                <button 
+                  onClick={() => setShowRechazoForm(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
+                    color: 'var(--color-text-primary)'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              <RechazoForm 
+                session={session} 
+                profile={profile} 
+                onComplete={() => setShowRechazoForm(false)} // Close modal when scan is complete
+              />
+            </div>
+          </div>
+        ) : (
           children
-        }
+        )}
       </main>
     </div>
   );

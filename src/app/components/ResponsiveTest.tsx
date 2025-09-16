@@ -22,7 +22,7 @@ export default function ResponsiveTestPage() {
   }, [])
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+    <div style={{ padding: '20px' }}>
       <h1>Responsive Design Test</h1>
       
       <div style={{ 

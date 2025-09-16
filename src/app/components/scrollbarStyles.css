@@ -6,29 +6,29 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #ffffff;
+  background: var(--color-background);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #000000;
+  background: var(--color-accent);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #333333;
+  background: var(--color-accent-hover);
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #000000 #ffffff;
+  scrollbar-color: var(--color-accent) var(--color-background);
 }
 
 /* Estilos específicos para ciertos contenedores */
 .scroll-container {
   scrollbar-width: thin;
-  scrollbar-color: #000000 #ffffff;
+  scrollbar-color: var(--color-accent) var(--color-background);
 }
 
 .scroll-container::-webkit-scrollbar {
@@ -36,15 +36,15 @@
 }
 
 .scroll-container::-webkit-scrollbar-track {
-  background: #ffffff;
+  background: var(--color-background);
   border-radius: 4px;
 }
 
 .scroll-container::-webkit-scrollbar-thumb {
-  background: #000000;
+  background: var(--color-accent);
   border-radius: 4px;
 }
 
 .scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #333333;
+  background: var(--color-accent-hover);
 }

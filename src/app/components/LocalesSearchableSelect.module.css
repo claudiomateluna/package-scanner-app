@@ -1,0 +1,92 @@
+/* src/app/components/LocalesSearchableSelect.module.css */
+
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.selector {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--color-card-background);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 1em;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.selectorPlaceholder {
+  color: var(--color-text-tertiary);
+  flex: 1;
+}
+
+.selectorText {
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.arrow {
+  color: var(--color-text-tertiary);
+  font-size: 0.8em;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--color-card-background);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-top: 4px;
+  max-height: 300px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-card-background);
+  color: var(--color-text-primary);
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+.listContainer {
+  overflow-y: auto;
+  max-height: 250px;
+}
+
+.listItem {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-card-background);
+  color: var(--color-text-primary);
+}
+
+.listItem:hover {
+  background-color: var(--color-background);
+}
+
+.listItem.selected {
+  background-color: var(--color-accent-light);
+  color: var(--color-accent);
+}
+
+.noResults {
+  padding: 10px;
+  text-align: center;
+  color: var(--color-text-tertiary);
+}

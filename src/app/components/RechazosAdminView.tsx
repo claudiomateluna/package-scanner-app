@@ -1,81 +1,251 @@
 // src/app/components/RechazosAdminView.tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  ColumnDef,
+  flexRender,
+  SortingState,
+  ColumnFiltersState,
+} from '@tanstack/react-table';
+import ToggleSwitch from './ToggleSwitch';
 
 interface Props {
-  session: Session;
-  profile: { role: string | null };
+    session: Session;
+    profile: { role: string | null };
 }
 
 interface Rechazo {
-  id: number;
-  ticket_id: string;
-  tipo_rechazo: string;
-  ruta: string;
-  mes: string;
-  fecha: string;
-  hora: string;
-  folio: string;
-  oc: string;
-  nombre_local: string;
-  tipo_local: string;
-  cliente_final: string;
-  motivo: string;
-  responsabilidad: string;
-  responsabilidad_area: string;
-  unidades_rechazadas: number;
-  unidades_totales: number;
-  bultos_rechazados: number;
-  bultos_totales: number;
-  transporte: string;
-  foto_rechazado: string;
-  created_at: string;
-  created_by_user_name: string;
-  updated_at: string;
-  updated_by_user_name: string;
+    id: number;
+    ticket_id: string;
+    tipo_rechazo: string;
+    ruta: string;
+    mes: string;
+    fecha: string;
+    hora: string;
+    folio: string;
+    oc: string;
+    nombre_local: string;
+    tipo_local: string;
+    cliente_final: string;
+    motivo: string;
+    responsabilidad: string;
+    responsabilidad_area: string;
+    unidades_rechazadas: number;
+    unidades_totales: number;
+    bultos_rechazados: number;
+    bultos_totales: number;
+    transporte: string;
+    foto_rechazado: string;
+    gestionado: boolean;
+    created_at: string;
+    created_by_user_name: string;
+    updated_at: string;
+    updated_by_user_name: string;
 }
+
+const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const [year, month, day] = date.toISOString().split('T')[0].split('-');
+    return `${day}-${month}-${year}`;
+};
+
+const formatMonthInSpanish = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    return monthNames[date.getUTCMonth()];
+};
+
+const formatMonthYearInSpanish = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    return `${monthNames[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+};
 
 export default function RechazosAdminView({ session, profile }: Props) {
   const [rechazos, setRechazos] = useState<Rechazo[]>([]);
-  const [filteredRechazos, setFilteredRechazos] = useState<Rechazo[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({
-    fechaDesde: '',
-    fechaHasta: '',
-    mes: '',
-    anio: '',
-    cliente: '',
-    tipoLocal: '',
-    responsabilidad: '',
-    transporte: '',
-    tipoRechazo: ''
-  });
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editData, setEditData] = useState<Partial<Rechazo>>({});
-  const [showLightbox, setShowLightbox] = useState(false);
-  const [lightboxImage, setLightboxImage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showStatistics, setShowStatistics] = useState(false);
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
 
-  // Fetch rechazos data
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingRechazo, setEditingRechazo] = useState<Partial<Rechazo> | null>(null);
+
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState('');
+
+  const handleEditClick = (rechazo: Rechazo) => {
+    setEditingRechazo(rechazo);
+    setIsEditModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsEditModalOpen(false);
+    setEditingRechazo(null);
+  };
+
+  const handleModalChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    if (!editingRechazo) return;
+    const { name, value } = e.target;
+    setEditingRechazo({ ...editingRechazo, [name]: value });
+  };
+
+  const handleSaveChanges = async () => {
+    if (!editingRechazo || !editingRechazo.id) return;
+    
+    // Crear objeto de actualización excluyendo campos que no se deben actualizar directamente
+    const { id, created_at, ticket_id, ...updateData } = editingRechazo;
+    
+    try {
+      const { error } = await supabase
+        .from('rechazos')
+        .update({ 
+          ...updateData, 
+          updated_at: new Date().toISOString(), 
+          updated_by_user_id: session.user.id, 
+          updated_by_user_name: session.user.user_metadata?.full_name || session.user.email,
+        })
+        .eq('id', editingRechazo.id);
+      
+      if (error) throw error;
+      
+      // Actualizar la lista de rechazos con los cambios
+      setRechazos(rechazos.map(r => 
+        r.id === editingRechazo.id ? { ...r, ...editingRechazo } as Rechazo : r
+      ));
+      
+      handleModalClose();
+    } catch (err) {
+      console.error('Error updating rechazo:', err);
+      setError('Error al actualizar el rechazo');
+    }
+  };
+
+  const handleGestionadoToggle = async (rechazoId: number, newGestionadoState: boolean) => {
+    // Actualizar estado local inmediatamente para feedback visual
+    const originalRechazos = [...rechazos];
+    setRechazos(prevRechazos => 
+        prevRechazos.map(r => 
+            r.id === rechazoId ? { 
+              ...r, 
+              gestionado: newGestionadoState, 
+              updated_at: new Date().toISOString(), 
+              updated_by_user_name: session.user.user_metadata?.full_name || session.user.email 
+            } : r
+        )
+    );
+
+    try {
+        const { error } = await supabase
+            .from('rechazos')
+            .update({ 
+                gestionado: newGestionadoState,
+                updated_at: new Date().toISOString(),
+                updated_by_user_id: session.user.id,
+                updated_by_user_name: session.user.user_metadata?.full_name || session.user.email,
+            })
+            .eq('id', rechazoId);
+
+        if (error) {
+            setError('Error al actualizar. Reintentando...');
+            setRechazos(originalRechazos);
+            throw error;
+        }
+    } catch (err) {
+        console.error('Error toggling gestionado state:', err);
+        // Mostrar mensaje de error al usuario
+        alert('Error al actualizar el estado de gestión. Por favor, inténtelo de nuevo.');
+    }
+  };
+
+  const openLightbox = (imageUrl: string) => {
+    setLightboxImage(imageUrl);
+    setShowLightbox(true);
+  };
+
+  const columns: ColumnDef<Rechazo>[] = [
+    { accessorKey: 'ticket_id', header: 'Ticket ID' },
+    { accessorKey: 'tipo_rechazo', header: 'Tipo Rechazo' },
+    { accessorKey: 'ruta', header: 'Ruta' },
+    { accessorKey: 'mes', header: 'Mes', cell: info => formatMonthYearInSpanish(info.getValue() as string) },
+    { accessorKey: 'fecha', header: 'Fecha', cell: info => formatDate(info.getValue() as string) },
+    { accessorKey: 'hora', header: 'Hora' },
+    { accessorKey: 'folio', header: 'Folio' },
+    { accessorKey: 'oc', header: 'OC' },
+    { accessorKey: 'nombre_local', header: 'Cliente' },
+    { accessorKey: 'tipo_local', header: 'Tipo Local' },
+    { accessorKey: 'cliente_final', header: 'Cliente Final' },
+    { accessorKey: 'motivo', header: 'Motivo', cell: info => <div title={info.getValue() as string}>{(info.getValue() as string)?.substring(0, 30)}...</div> },
+    { accessorKey: 'responsabilidad', header: 'Responsabilidad' },
+    { accessorKey: 'responsabilidad_area', header: 'Área' },
+    { accessorKey: 'unidades_rechazadas', header: 'Unid. Rech.' },
+    { accessorKey: 'unidades_totales', header: 'Unid. Tot.' },
+    { accessorKey: 'bultos_rechazados', header: 'Bultos Rech.' },
+    { accessorKey: 'bultos_totales', header: 'Bultos Tot.' },
+    { accessorKey: 'transporte', header: 'Transporte' },
+    {
+      accessorKey: 'foto_rechazado',
+      header: 'Foto',
+      enableSorting: false,
+      enableColumnFilter: false,
+      cell: ({ row }) => {
+        const imageUrl = row.original.foto_rechazado;
+        return imageUrl ? <img src={imageUrl} alt="Rechazo" style={{ width: '50px', height: '50px', cursor: 'pointer', objectFit: 'cover' }} onClick={() => openLightbox(imageUrl)} /> : null;
+      }
+    },
+    { accessorKey: 'created_by_user_name', header: 'Creado por' },
+    { accessorKey: 'updated_by_user_name', header: 'Actualizado por' },
+    { accessorKey: 'updated_at', header: 'Actualizado', cell: info => formatDate(info.getValue() as string) },
+    {
+      accessorKey: 'gestionado',
+      header: 'Gestionado',
+      cell: ({ row }) => (
+        <ToggleSwitch 
+            checked={row.original.gestionado}
+            onChange={(newCheckedState) => handleGestionadoToggle(row.original.id, newCheckedState)}
+        />
+      )
+    },
+    {
+        id: 'acciones',
+        header: 'Acciones',
+        cell: ({ row }) => <button onClick={() => handleEditClick(row.original)} style={{ padding: '6px 12px', backgroundColor: 'var(--color-button-background)', color: 'var(--color-button-text)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Editar</button>
+    }
+  ];
+
+  const table = useReactTable({
+    data: rechazos,
+    columns,
+    state: { sorting, columnFilters, globalFilter },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    columnResizeMode: 'onChange',
+    enableColumnResizing: true,
+  });
+
   useEffect(() => {
     const fetchRechazos = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('rechazos')
-          .select('*')
-          .order('fecha', { ascending: false });
-        
+        const { data, error } = await supabase.from('rechazos').select('*').order('fecha', { ascending: false });
         if (error) throw error;
-        
         setRechazos(data || []);
-        setFilteredRechazos(data || []);
       } catch (err) {
         console.error('Error fetching rechazos:', err);
         setError('Error al cargar los rechazos');
@@ -83,870 +253,308 @@ export default function RechazosAdminView({ session, profile }: Props) {
         setLoading(false);
       }
     };
-    
     fetchRechazos();
   }, []);
 
-  // Apply filters
-  useEffect(() => {
-    let result = [...rechazos];
-    
-    // Apply search term
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(rechazo => 
-        rechazo.nombre_local.toLowerCase().includes(term) ||
-        rechazo.ticket_id.toLowerCase().includes(term) ||
-        rechazo.oc.toLowerCase().includes(term) ||
-        rechazo.folio.toLowerCase().includes(term) ||
-        rechazo.responsabilidad.toLowerCase().includes(term) ||
-        rechazo.transporte.toLowerCase().includes(term) ||
-        rechazo.tipo_rechazo.toLowerCase().includes(term) ||
-        rechazo.motivo.toLowerCase().includes(term)
-      );
-    }
-    
-    // Apply filters
-    if (filters.fechaDesde) {
-      result = result.filter(rechazo => rechazo.fecha >= filters.fechaDesde);
-    }
-    
-    if (filters.fechaHasta) {
-      result = result.filter(rechazo => rechazo.fecha <= filters.fechaHasta);
-    }
-    
-    if (filters.cliente) {
-      result = result.filter(rechazo => rechazo.nombre_local === filters.cliente);
-    }
-    
-    if (filters.tipoLocal) {
-      result = result.filter(rechazo => rechazo.tipo_local === filters.tipoLocal);
-    }
-    
-    if (filters.responsabilidad) {
-      result = result.filter(rechazo => rechazo.responsabilidad === filters.responsabilidad);
-    }
-    
-    if (filters.transporte) {
-      result = result.filter(rechazo => rechazo.transporte === filters.transporte);
-    }
-    
-    if (filters.tipoRechazo) {
-      result = result.filter(rechazo => rechazo.tipo_rechazo === filters.tipoRechazo);
-    }
-    
-    setFilteredRechazos(result);
-  }, [searchTerm, filters, rechazos]);
-
-  // Handle filter changes
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFilters({ ...filters, [name]: value });
-  };
-
-  // Start editing a rechazo
-  const startEditing = (rechazo: Rechazo) => {
-    setEditingId(rechazo.id);
-    setEditData({ ...rechazo });
-  };
-
-  // Cancel editing
-  const cancelEditing = () => {
-    setEditingId(null);
-    setEditData({});
-  };
-
-  // Save edited rechazo
-  const saveEdit = async () => {
-    if (!editingId) return;
-    
-    try {
-      const { error } = await supabase
-        .from('rechazos')
-        .update({
-          ...editData,
-          updated_by_user_id: session.user.id,
-          updated_by_user_name: session.user.user_metadata?.full_name || session.user.email,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingId);
-      
-      if (error) throw error;
-      
-      // Update local state
-      setRechazos(rechazos.map(r => r.id === editingId ? { ...r, ...editData } as Rechazo : r));
-      setEditingId(null);
-      setEditData({});
-    } catch (err) {
-      console.error('Error updating rechazo:', err);
-      setError('Error al actualizar el rechazo');
-    }
-  };
-
-  // Handle edit field changes
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setEditData({ ...editData, [name]: value });
-  };
-
-  // Open lightbox for image
-  const openLightbox = (imageUrl: string) => {
-    setLightboxImage(imageUrl);
-    setShowLightbox(true);
-  };
-
-  // Close lightbox
-  const closeLightbox = () => {
-    setShowLightbox(false);
-    setLightboxImage('');
-  };
-
-  // Format date as DD-MM-YYYY
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-CL');
-  };
-
-  // Format month in Spanish
-  const formatMonthInSpanish = (dateString: string) => {
-    const date = new Date(dateString);
-    const monthNames = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-    ];
-    return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-  };
-
-  // Get unique values for filters
-  const uniqueClientes = Array.from(new Set(rechazos.map(r => r.nombre_local)));
-  const uniqueTipoLocal = Array.from(new Set(rechazos.map(r => r.tipo_local)));
-  const uniqueResponsabilidad = Array.from(new Set(rechazos.map(r => r.responsabilidad)));
-  const uniqueTransporte = Array.from(new Set(rechazos.map(r => r.transporte)));
-  const uniqueTipoRechazo = Array.from(new Set(rechazos.map(r => r.tipo_rechazo)));
-
-  if (loading) {
-    return <div>Cargando...</div>;
-  }
-
-  if (error) {
-    return <div style={{ color: 'red' }}>{error}</div>;
-  }
+  if (loading) return <div>Cargando...</div>;
+  if (error) return <div style={{ color: 'var(--color-error)' }}>{error}</div>;
 
   return (
-    <div style={{ width: '100%', padding: '5px', boxSizing: 'border-box' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '20px',
-        flexWrap: 'wrap'
-      }}>
-        <h2 style={{ color: '#000' }}>Administración de Rechazos</h2>
-        <button 
-          onClick={() => setShowStatistics(true)}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#A1C181',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Estadísticas
-        </button>
-      </div>
+    <>
+      <style>{`
+        .resizer { position: absolute; right: 0; top: 0; height: 100%; width: 5px; background: rgba(0, 0, 0, 0.5); cursor: col-resize; user-select: none; touch-action: none; opacity: 0; }
+        .resizer.isResizing { background: var(--color-accent); opacity: 1; }
+        th:hover .resizer { opacity: 1; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .modal-content { background-color: var(--color-card-background); padding: 25px; border-radius: 8px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal-form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        .modal-form-grid label { font-weight: bold; margin-bottom: 5px; display: block; }
+        .modal-form-grid input, .modal-form-grid select, .modal-form-grid textarea { width: 100%; padding: 8px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-card-background); color: var(--color-text-primary); }
+      `}</style>
       
-      {/* Simple Search */}
-      <div style={{ 
-        backgroundColor: '#f5f5f5', 
-        padding: '15px', 
-        borderRadius: '4px', 
-        marginBottom: '20px' 
-      }}>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1', minWidth: '250px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Buscar
-            </label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar en todos los campos..."
-              style={{
-                width: '99%',
-                padding: '8px',
-                border: '1px solid #000',
-                borderRadius: '4px'
-              }}
-            />
-          </div>
-          
-          <button 
-            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: showAdvancedFilters ? '#000' : '#000',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              alignSelf: 'flex-end',
-              height: '36px'
-            }}
-          >
-            {showAdvancedFilters ? 'Ocultar Filtros' : 'Búsqueda Avanzada'}
-          </button>
+      <div style={{ width: '100%', padding: '5px', boxSizing: 'border-box', maxWidth: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', width: '100%' }}>
+            <h2 style={{ color: 'var(--color-text-primary)' }}>Administración de Rechazos</h2>
+            <input type="text" value={globalFilter ?? ''} onChange={e => setGlobalFilter(e.target.value)} placeholder="Buscar en toda la tabla..." style={{ padding: '8px', border: '1px solid var(--color-border)', borderRadius: '4px', width: '400px', backgroundColor: 'var(--color-card-background)', color: 'var(--color-text-primary)' }} />
         </div>
         
-        {/* Advanced Filters - Collapsible */}
-        {showAdvancedFilters && (
-          <div style={{ 
-            marginTop: '15px', 
-            paddingTop: '15px', 
-            borderTop: '1px solid #000',
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
-            gap: '10px' 
-          }}>
-          
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Fecha Desde
-            </label>
-            <input
-              type="date"
-              name="fechaDesde"
-              value={filters.fechaDesde}
-              onChange={handleFilterChange}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #000',
-                borderRadius: '4px'
-              }}
-            />
-          </div>
-          
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Fecha Hasta
-            </label>
-            <input
-              type="date"
-              name="fechaHasta"
-              value={filters.fechaHasta}
-              onChange={handleFilterChange}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #000',
-                borderRadius: '4px'
-              }}
-            />
-          </div>
-          
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Cliente
-            </label>
-            <select
-              name="cliente"
-              value={filters.cliente}
-              onChange={handleFilterChange}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #000',
-                borderRadius: '4px'
-              }}
-            >
-              <option value="">Todos</option>
-              {uniqueClientes.map(cliente => (
-                <option key={cliente} value={cliente}>{cliente}</option>
+        <div style={{ width: '100%', overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id} style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}>
+                  {headerGroup.headers.map(header => (
+                    <th key={header.id} colSpan={header.colSpan} style={{ position: 'relative', width: header.getSize(), padding: '12px', textAlign: 'left' }}>
+                      <div {...{ onClick: header.column.getToggleSortingHandler(), className: header.column.getCanSort() ? 'cursor-pointer select-none' : '' }}>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {{ asc: ' 🔼', desc: ' 🔽' }[header.column.getIsSorted() as string] ?? null}
+                      </div>
+                      {header.column.getCanFilter() ? (
+                        <div>
+                          <input type="text" value={(header.column.getFilterValue() ?? '') as string} onChange={e => header.column.setFilterValue(e.target.value)} placeholder={`Filtrar...`} style={{ width: '100%', marginTop: '5px', padding: '4px', borderRadius: '4px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-card-background)', color: 'var(--color-text-primary)' }} onClick={e => e.stopPropagation()} />
+                        </div>
+                      ) : null}
+                      <div {...{ onMouseDown: header.getResizeHandler(), onTouchStart: header.getResizeHandler() }} className={`resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`} />
+                    </th>
+                  ))}
+                </tr>
               ))}
-            </select>
-          </div>
-          
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Tipo Local
-            </label>
-            <select
-              name="tipoLocal"
-              value={filters.tipoLocal}
-              onChange={handleFilterChange}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #000',
-                borderRadius: '4px'
-              }}
-            >
-              <option value="">Todos</option>
-              {uniqueTipoLocal.map(tipo => (
-                <option key={tipo} value={tipo}>{tipo}</option>
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.map(row => (
+                <tr key={row.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} style={{ width: cell.column.getSize(), padding: '12px' }}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </select>
-          </div>
-          
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Responsabilidad
-            </label>
-            <select
-              name="responsabilidad"
-              value={filters.responsabilidad}
-              onChange={handleFilterChange}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #000',
-                borderRadius: '4px'
-              }}
-            >
-              <option value="">Todos</option>
-              {uniqueResponsabilidad.map(resp => (
-                <option key={resp} value={resp}>{resp}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Transporte
-            </label>
-            <select
-              name="transporte"
-              value={filters.transporte}
-              onChange={handleFilterChange}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #000',
-                borderRadius: '4px'
-              }}
-            >
-              <option value="">Todos</option>
-              {uniqueTransporte.map(trans => (
-                <option key={trans} value={trans}>{trans}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Tipo Rechazo
-            </label>
-            <select
-              name="tipoRechazo"
-              value={filters.tipoRechazo}
-              onChange={handleFilterChange}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #000',
-                borderRadius: '4px'
-              }}
-            >
-              <option value="">Todos</option>
-              {uniqueTipoRechazo.map(tipo => (
-                <option key={tipo} value={tipo}>{tipo}</option>
-              ))}
-            </select>
-          </div>
+            </tbody>
+          </table>
         </div>
+
+        {isEditModalOpen && editingRechazo && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h3 style={{ marginBottom: '20px' }}>Editando Ticket: {editingRechazo.ticket_id}</h3>
+              <div className="modal-form-grid">
+                 {/* Todos los campos del rechazo */}
+                 <div>
+                   <label>Tipo Rechazo</label>
+                   <select 
+                     name="tipo_rechazo" 
+                     value={editingRechazo.tipo_rechazo || ''} 
+                     onChange={handleModalChange}
+                   >
+                     <option value="">Seleccione tipo</option>
+                     <option value="Completo">Completo</option>
+                     <option value="Parcial">Parcial</option>
+                   </select>
+                 </div>
+                 
+                 <div>
+                   <label>Ruta</label>
+                   <input 
+                     type="text" 
+                     name="ruta" 
+                     value={editingRechazo.ruta || ''} 
+                     onChange={handleModalChange} 
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Mes</label>
+                   <input 
+                     type="text" 
+                     name="mes" 
+                     value={editingRechazo.mes ? formatMonthInSpanish(editingRechazo.mes) : ''} 
+                     onChange={handleModalChange} 
+                     readOnly
+                   />
+                   <input 
+                     type="date" 
+                     name="mes" 
+                     value={editingRechazo.mes || ''} 
+                     onChange={handleModalChange} 
+                     style={{ display: 'none' }} 
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Fecha</label>
+                   <input 
+                     type="date" 
+                     name="fecha" 
+                     value={editingRechazo.fecha || ''} 
+                     onChange={handleModalChange} 
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Hora</label>
+                   <input 
+                     type="time" 
+                     name="hora" 
+                     value={editingRechazo.hora || ''} 
+                     onChange={handleModalChange} 
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Folio</label>
+                   <input 
+                     type="text" 
+                     name="folio" 
+                     value={editingRechazo.folio || ''} 
+                     onChange={handleModalChange} 
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>OC</label>
+                   <input 
+                     type="text" 
+                     name="oc" 
+                     value={editingRechazo.oc || ''} 
+                     onChange={handleModalChange} 
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Nombre Local</label>
+                   <input 
+                     type="text" 
+                     name="nombre_local" 
+                     value={editingRechazo.nombre_local || ''} 
+                     onChange={handleModalChange} 
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Tipo Local</label>
+                   <input 
+                     type="text" 
+                     name="tipo_local" 
+                     value={editingRechazo.tipo_local || ''} 
+                     onChange={handleModalChange} 
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Cliente Final</label>
+                   <input 
+                     type="text" 
+                     name="cliente_final" 
+                     value={editingRechazo.cliente_final || ''} 
+                     onChange={handleModalChange} 
+                   />
+                 </div>
+                 
+                 <div style={{ gridColumn: '1 / -1' }}>
+                   <label>Motivo</label>
+                   <textarea 
+                     name="motivo" 
+                     value={editingRechazo.motivo || ''} 
+                     onChange={handleModalChange} 
+                     rows={4}
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Responsabilidad</label>
+                   <select 
+                     name="responsabilidad" 
+                     value={editingRechazo.responsabilidad || ''} 
+                     onChange={handleModalChange}
+                   >
+                     <option value="">Seleccione responsabilidad</option>
+                     <option value="Customer">Customer</option>
+                     <option value="Transporte">Transporte</option>
+                     <option value="Cliente">Cliente</option>
+                     <option value="CD">CD</option>
+                   </select>
+                 </div>
+                 
+                 {editingRechazo.responsabilidad === 'CD' && (
+                   <div>
+                     <label>Área de Responsabilidad</label>
+                     <select 
+                       name="responsabilidad_area" 
+                       value={editingRechazo.responsabilidad_area || ''} 
+                       onChange={handleModalChange}
+                     >
+                       <option value="">Seleccione área</option>
+                       <option value="Shipping">Shipping</option>
+                       <option value="QA">QA</option>
+                       <option value="Planning">Planning</option>
+                       <option value="Picking">Picking</option>
+                       <option value="VAS">VAS</option>
+                       <option value="Consolidación">Consolidación</option>
+                     </select>
+                   </div>
+                 )}
+                 
+                 <div>
+                   <label>Unidades Rechazadas</label>
+                   <input 
+                     type="number" 
+                     name="unidades_rechazadas" 
+                     value={editingRechazo.unidades_rechazadas || ''} 
+                     onChange={handleModalChange} 
+                     min="0"
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Unidades Totales</label>
+                   <input 
+                     type="number" 
+                     name="unidades_totales" 
+                     value={editingRechazo.unidades_totales || ''} 
+                     onChange={handleModalChange} 
+                     min="0"
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Bultos Rechazados</label>
+                   <input 
+                     type="number" 
+                     name="bultos_rechazados" 
+                     value={editingRechazo.bultos_rechazados || ''} 
+                     onChange={handleModalChange} 
+                     min="0"
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Bultos Totales</label>
+                   <input 
+                     type="number" 
+                     name="bultos_totales" 
+                     value={editingRechazo.bultos_totales || ''} 
+                     onChange={handleModalChange} 
+                     min="0"
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>Transporte</label>
+                   <input 
+                     type="text" 
+                     name="transporte" 
+                     value={editingRechazo.transporte || ''} 
+                     onChange={handleModalChange} 
+                   />
+                 </div>
+                 
+                 <div>
+                   <label>
+                     <input 
+                       type="checkbox" 
+                       name="gestionado" 
+                       checked={editingRechazo.gestionado || false} 
+                       onChange={(e) => setEditingRechazo({ ...editingRechazo, gestionado: e.target.checked })}
+                     />
+                     Gestionado
+                   </label>
+                 </div>
+              </div>
+              <div style={{ marginTop: '25px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button onClick={handleModalClose} style={{ padding: '10px 20px', backgroundColor: 'var(--color-button-alternative-background)', color: 'var(--color-button-alternative-text)', border: '1px solid var(--color-button-alternative-border)', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+                <button onClick={handleSaveChanges} style={{ padding: '10px 20px', backgroundColor: 'var(--color-success)', color: 'var(--color-card-background)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Guardar Cambios</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showLightbox && (
+            <div onClick={() => setShowLightbox(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <img src={lightboxImage} alt="Rechazo" style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain' }} />
+            </div>
         )}
       </div>
-      
-      {/* Rechazos Table - Full Width */}
-      <div style={{ width: '100%', overflowX: 'auto' }}>
-        <table style={{ 
-          fontFamily: 'CuerpoPersonalizado',
-          width: '100%', 
-          borderCollapse: 'collapse',
-          backgroundColor: 'white',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <thead>
-            <tr style={{ backgroundColor: '#233D4D', color: 'black' }}>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Ticket ID</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Tipo Rechazo</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Ruta</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Mes</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Fecha</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Hora</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Folio</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>OC</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Cliente</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Tipo Local</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Cliente Final</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Motivo</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Responsabilidad</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Área</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Unid. Rech.</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Unid. Tot.</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Bultos Rech.</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Bultos Tot.</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Transporte</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Foto</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Creado por</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Actualizado</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRechazos.map(rechazo => (
-              <tr key={rechazo.id} style={{ borderBottom: '1px solid #eee' }}>
-                {editingId === rechazo.id ? (
-                  <>
-                    {/* Editing mode - show input fields for editable columns */}
-                    <td style={{ padding: '12px' }}>{rechazo.ticket_id}</td>
-                    <td style={{ padding: '12px' }}>
-                      <select
-                        name="tipo_rechazo"
-                        value={editData.tipo_rechazo || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      >
-                        <option value="Completo">Completo</option>
-                        <option value="Parcial">Parcial</option>
-                      </select>
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="text"
-                        name="ruta"
-                        value={editData.ruta || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>{formatMonthInSpanish(rechazo.mes)}</td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="date"
-                        name="fecha"
-                        value={editData.fecha || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="time"
-                        name="hora"
-                        value={editData.hora || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="text"
-                        name="folio"
-                        value={editData.folio || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="text"
-                        name="oc"
-                        value={editData.oc || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="text"
-                        name="nombre_local"
-                        value={editData.nombre_local || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>{rechazo.tipo_local}</td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="text"
-                        name="cliente_final"
-                        value={editData.cliente_final || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <textarea
-                        name="motivo"
-                        value={editData.motivo || ''}
-                        onChange={handleEditChange}
-                        rows={2}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <select
-                        name="responsabilidad"
-                        value={editData.responsabilidad || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      >
-                        <option value="">Seleccionar</option>
-                        <option value="Customer">Customer</option>
-                        <option value="Transporte">Transporte</option>
-                        <option value="Cliente">Cliente</option>
-                        <option value="CD">CD</option>
-                      </select>
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <select
-                        name="responsabilidad_area"
-                        value={editData.responsabilidad_area || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      >
-                        <option value="">Seleccionar</option>
-                        <option value="Shipping">Shipping</option>
-                        <option value="QA">QA</option>
-                        <option value="Planning">Planning</option>
-                        <option value="Picking">Picking</option>
-                        <option value="VAS">VAS</option>
-                        <option value="Consolidación">Consolidación</option>
-                      </select>
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="number"
-                        name="unidades_rechazadas"
-                        value={editData.unidades_rechazadas || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="number"
-                        name="unidades_totales"
-                        value={editData.unidades_totales || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="number"
-                        name="bultos_rechazados"
-                        value={editData.bultos_rechazados || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="number"
-                        name="bultos_totales"
-                        value={editData.bultos_totales || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <input
-                        type="text"
-                        name="transporte"
-                        value={editData.transporte || ''}
-                        onChange={handleEditChange}
-                        style={{
-                          width: '100%',
-                          padding: '4px',
-                          border: '1px solid #000',
-                          borderRadius: '4px'
-                        }}
-                      />
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      {rechazo.foto_rechazado && (
-                        <img 
-                          src={rechazo.foto_rechazado} 
-                          alt="Rechazo" 
-                          style={{ width: '50px', height: '50px', cursor: 'pointer' }}
-                          onClick={() => openLightbox(rechazo.foto_rechazado)}
-                        />
-                      )}
-                    </td>
-                    <td style={{ padding: '12px' }}>{rechazo.created_by_user_name}</td>
-                    <td style={{ padding: '12px' }}>{formatDate(rechazo.updated_at)}</td>
-                    <td style={{ padding: '12px' }}>
-                      <button
-                        onClick={saveEdit}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#A1C181',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          marginRight: '5px'
-                        }}
-                      >
-                        Guardar
-                      </button>
-                      <button
-                        onClick={cancelEditing}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#FFF',
-                          color: 'black',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Cancelar
-                      </button>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    {/* View mode - show data */}
-                    <td style={{ padding: '12px' }}>{rechazo.ticket_id}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.tipo_rechazo}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.ruta}</td>
-                    <td style={{ padding: '12px' }}>{formatMonthInSpanish(rechazo.mes)}</td>
-                    <td style={{ padding: '12px' }}>{formatDate(rechazo.fecha)}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.hora}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.folio}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.oc}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.nombre_local}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.tipo_local}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.cliente_final}</td>
-                    <td style={{ padding: '12px' }} title={rechazo.motivo}>{rechazo.motivo.substring(0, 50)}{rechazo.motivo.length > 50 ? '...' : ''}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.responsabilidad}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.responsabilidad_area}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.unidades_rechazadas}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.unidades_totales}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.bultos_rechazados}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.bultos_totales}</td>
-                    <td style={{ padding: '12px' }}>{rechazo.transporte}</td>
-                    <td style={{ padding: '12px' }}>
-                      {rechazo.foto_rechazado && (
-                        <img 
-                          src={rechazo.foto_rechazado} 
-                          alt="Rechazo" 
-                          style={{ width: '50px', height: '50px', cursor: 'pointer' }}
-                          onClick={() => openLightbox(rechazo.foto_rechazado)}
-                        />
-                      )}
-                    </td>
-                    <td style={{ padding: '12px' }}>{rechazo.created_by_user_name}</td>
-                    <td style={{ padding: '12px' }}>{formatDate(rechazo.updated_at)}</td>
-                    <td style={{ padding: '12px' }}>
-                      <button
-                        onClick={() => startEditing(rechazo)}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#000',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Editar
-                      </button>
-                    </td>
-                  </>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      
-      {/* Lightbox */}
-      {showLightbox && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            zIndex: 1000,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}
-          onClick={closeLightbox}
-        >
-          <div 
-            style={{ 
-              position: 'relative',
-              maxWidth: '90%',
-              maxHeight: '90%'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img 
-              src={lightboxImage} 
-              alt="Rechazo" 
-              style={{ 
-                maxWidth: '100%', 
-                maxHeight: '80vh',
-                objectFit: 'contain'
-              }}
-            />
-            <button
-              onClick={closeLightbox}
-              style={{
-                position: 'absolute',
-                top: '-40px',
-                right: '0',
-                padding: '8px 16px',
-                backgroundColor: 'white',
-                color: 'black',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
-      
-      {/* Statistics Modal */}
-      {showStatistics && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 1000,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}
-        >
-          <div 
-            style={{ 
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '8px',
-              maxWidth: '90%',
-              maxHeight: '90%',
-              overflow: 'auto'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3>Estadísticas de Rechazos</h3>
-              <button
-                onClick={() => setShowStatistics(false)}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#ccc',
-                  color: 'black',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Cerrar
-              </button>
-            </div>
-            
-            <div>
-              {/* Statistics content would go here */}
-              <p>Las estadísticas se mostrarían aquí con gráficos y tablas basadas en los datos de rechazos.</p>
-              <p>Funcionalidad pendiente de implementación completa.</p>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 }

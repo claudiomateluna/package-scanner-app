@@ -4,11 +4,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
+import toast from 'react-hot-toast'; // Importar toast
 
 interface Props {
   session: Session;
   profile: { role: string | null };
   initialData?: { OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; };
+  onComplete?: () => void; // Nueva prop opcional
 }
 
 interface RechazoData {
@@ -32,7 +34,12 @@ interface RechazoData {
   foto_rechazado: File | null;
 }
 
-export default function RechazoForm({ session, profile, initialData }: Props) {
+export default function RechazoForm({ 
+  session, 
+  profile, 
+  initialData,
+  onComplete
+}: Props) {
   const [rechazoData, setRechazoData] = useState<RechazoData>(() => {
     // If initialData is provided, pre-populate the form
     if (initialData) {
@@ -248,20 +255,19 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
         const fileName = `${session.user.id}-${Date.now()}.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
-          .from('rechazos-fotos')
+          .from('rechazos-fotos')  // Corregido el nombre del bucket
           .upload(fileName, rechazoData.foto_rechazado);
           
         if (uploadError) {
-          console.error('Error uploading image:', uploadError);
-          throw new Error(`Error uploading image: ${uploadError.message}`);
+          console.error('Upload error:', uploadError);
+          throw new Error(`Error al subir la imagen: ${uploadError.message}`);
         }
         
         // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('rechazos-fotos')
+        const { data } = supabase.storage
+          .from('rechazos-fotos')  // Corregido el nombre del bucket
           .getPublicUrl(fileName);
-          
-        imageUrl = publicUrl;
+        imageUrl = data.publicUrl;
         console.log('Image uploaded. Public URL:', imageUrl);
       }
       
@@ -269,40 +275,57 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
       console.log('Saving to database...');
       const { data, error } = await supabase
         .from('rechazos')
-        .insert([
-          {
-            ...finalData,
-            foto_rechazado: imageUrl
-          }
-        ])
-        .select();
+        .insert({
+          ...finalData,
+          foto_rechazado: imageUrl
+        })
+        .select()
+        .single();
       
       if (error) {
-        console.error('Database insert error:', error);
-        throw error;
+        console.error('Database error:', error);
+        throw new Error(`Error al guardar en la base de datos: ${error.message}`);
       }
       
-      console.log('Database insert successful. Data:', data);
+      console.log('Saved to database:', data);
+      toast.success(`Rechazo ${ticketId} guardado exitosamente`);
       
-      // Get the ticket ID from the response
-      if (data && data[0]) {
-        console.log('Setting ticket ID and showing confirmation');
-        setTicketId(data[0].ticket_id);
-        setShowConfirmation(true);
-      } else {
-        throw new Error('No data returned from database insert');
+      // Reset form
+      setRechazoData({
+        tipo_rechazo: '',
+        mes: new Date().toISOString().substring(0, 7) + '-01',
+        fecha: new Date().toISOString().substring(0, 10),
+        hora: new Date().toTimeString().substring(0, 5),
+        folio: '',
+        oc: '',
+        nombre_local: '',
+        tipo_local: '',
+        cliente_final: '',
+        motivo: '',
+        responsabilidad: '',
+        responsabilidad_area: '',
+        unidades_rechazadas: null,
+        unidades_totales: null,
+        bultos_rechazados: null,
+        bultos_totales: null,
+        transporte: '',
+        foto_rechazado: null
+      });
+      setFotoPreview(null);
+      setSearchTerm('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
-    } catch (err) {
-      console.error('Error saving rechazo:', err);
-      // Log more detailed error information
-      if (err instanceof Error) {
-        console.error('Error name:', err.name);
-        console.error('Error message:', err.message);
-        console.error('Error stack:', err.stack);
-        setError(`Error al guardar el rechazo: ${err.message}. Por favor, intente nuevamente.`);
-      } else {
-        setError(`Error al guardar el rechazo: ${String(err)}. Por favor, intente nuevamente.`);
+      
+      // Llamar a la función onComplete si está definida
+      if (onComplete) {
+        onComplete();
       }
+    } catch (err: unknown) {
+      console.error('Error in handleSubmit:', err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage);
+      toast.error(`Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -349,8 +372,7 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      <h2 style={{ color: '#233D4D', marginBottom: '20px' }}>Formulario de Rechazo</h2>
+    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       
       {showConfirmation ? (
         <div style={{
@@ -359,20 +381,20 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
           left: '50%',
           transform: 'translate(-50%, -50%)',
           backgroundColor: 'white',
-          padding: '30px',
-          borderRadius: '8px',
+          padding: '10px',
+          borderRadius: '4px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           zIndex: 1000,
           textAlign: 'center'
         }}>
           <h3>Su Ticket es</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#FE7F2D' }}>{ticketId}</p>
+          <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-error)' }}>{ticketId}</p>
           <button 
             onClick={closeConfirmation}
             style={{
               marginTop: '20px',
               padding: '10px 20px',
-              backgroundColor: '#FE7F2D',
+              backgroundColor: '(--color-button-background)',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -722,8 +744,10 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
                 style={{
                   width: '100%',
                   padding: '8px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px'
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--color-card-background)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
@@ -764,8 +788,10 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
                 style={{
                   width: '100%',
                   padding: '8px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px'
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--color-card-background)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
@@ -785,8 +811,10 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
                 style={{
                   width: '100%',
                   padding: '8px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px'
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--color-card-background)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
@@ -805,8 +833,10 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
               style={{
                 width: '100%',
                 padding: '8px',
-                border: '1px solid #ccc',
-                borderRadius: '4px'
+                border: '1px solid var(--color-border)',
+                borderRadius: '4px',
+                backgroundColor: 'var(--color-card-background)',
+                color: 'var(--color-text-primary)'
               }}
             />
             {fotoPreview && (
@@ -814,7 +844,7 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
                 <img 
                   src={fotoPreview} 
                   alt="Preview" 
-                  style={{ maxWidth: '200px', maxHeight: '200px', border: '1px solid #ccc' }}
+                  style={{ maxWidth: '200px', maxHeight: '200px', border: '1px solid var(--color-border)' }}
                 />
               </div>
             )}
@@ -822,7 +852,7 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
         </div>
         
         {error && (
-          <div style={{ color: 'red', margin: '10px 0' }}>
+          <div style={{ color: 'var(--color-error)', margin: '10px 0' }}>
             {error}
           </div>
         )}
@@ -833,8 +863,8 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
             disabled={loading}
             style={{
               padding: '12px 30px',
-              backgroundColor: '#FE7F2D',
-              color: 'white',
+              backgroundColor: 'var(--color-accent)',
+              color: 'var(--color-card-background)',
               border: 'none',
               borderRadius: '4px',
               cursor: loading ? 'not-allowed' : 'pointer',
@@ -876,9 +906,9 @@ export default function RechazoForm({ session, profile, initialData }: Props) {
             style={{
               marginLeft: '10px',
               padding: '12px 30px',
-              backgroundColor: '#ccc',
-              color: 'black',
-              border: 'none',
+              backgroundColor: 'var(--color-button-alternative-background)',
+              color: 'var(--color-button-alternative-text)',
+              border: 'var(--color-button-alternative-border)',
               borderRadius: '4px',
               cursor: 'pointer',
               fontSize: '16px'

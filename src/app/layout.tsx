@@ -1,7 +1,27 @@
 import type { Metadata } from "next";
+import localFont from 'next/font/local';
 import "./globals.css";
 import { Toaster } from 'react-hot-toast';
 import ChunkErrorBoundary from './components/ChunkErrorBoundary';
+
+// Font definitions
+const fontTitulo = localFont({
+  src: './fonts/titulo.woff2',
+  display: 'swap',
+  variable: '--font-titulo',
+});
+
+const fontTitulo2 = localFont({
+  src: './fonts/titulo2.woff2',
+  display: 'swap',
+  variable: '--font-titulo2',
+});
+
+const fontCuerpo = localFont({
+  src: './fonts/cuerpo.woff2',
+  display: 'swap',
+  variable: '--font-cuerpo',
+});
 
 export const metadata: Metadata = {
   title: "Recepciones",
@@ -17,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" className={`${fontTitulo.variable} ${fontTitulo2.variable} ${fontCuerpo.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" type="image/x-icon" />
         <link rel="apple-touch-icon" href="/favicon.ico" />
@@ -25,15 +45,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body
-        style={{ 
-          backgroundColor: '#ffffff',
-          color: '#000000',
-          margin: 0,
-          padding: 0,
-          minHeight: '100vh'
-        }}
-      >
+      <body className={fontCuerpo.className}>
         <ChunkErrorBoundary>
           <Toaster position="bottom-center" />
           {children}
