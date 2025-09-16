@@ -9,6 +9,7 @@ import ReceptionHistory from './ReceptionHistory';
 import ReceptionStatistics from './ReceptionStatistics';
 import BarcodeScannerZXing from './BarcodeScannerZXing';
 import MissingReportForm from './MissingReportForm';
+import ActionDropdown from './ActionDropdown';
 import { isMobileDevice, isMobilePhone } from '@/lib/deviceUtils';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -86,6 +87,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
   const [packageSearchTerm, setPackageSearchTerm] = useState(''); // For package search filter
   const [filteredPackages, setFilteredPackages] = useState<Package[]>([]); // Filtered packages for display
   const [existingReports, setExistingReports] = useState<Record<string, string>>({}); // Track existing reports by OLPN -> ticket_id
+  const [existingRechazos, setExistingRechazos] = useState<Record<string, string>>({}); // Track existing rechazos by OLPN -> ticket_id
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const canEditMissing = profile?.role === 'administrador' || profile?.role === 'Store Operator';
@@ -271,29 +273,49 @@ export default function ScannerView({ session, profile, selection, currentView, 
           // Get all unique OLPNs
           const olpns = packages.map(pkg => pkg.OLPN);
           
-          // Query for existing reports
-          const { data: existingReportsData, error } = await supabase
+          // Query for existing faltantes reports
+          const { data: existingReportsData, error: faltantesError } = await supabase
             .from('faltantes')
             .select('olpn, ticket_id')
             .in('olpn', olpns);
           
-          if (error) {
-            console.error('Error checking for existing reports:', error);
+          if (faltantesError) {
+            console.error('Error checking for existing faltantes reports:', faltantesError);
             return;
           }
           
-          // Create a map of OLPN -> ticket_id
+          // Create a map of OLPN -> ticket_id for faltantes
           const reportsMap: Record<string, string> = {};
           existingReportsData.forEach(report => {
             reportsMap[report.olpn] = report.ticket_id;
           });
           
           setExistingReports(reportsMap);
+          
+          // Query for existing rechazos reports
+          const { data: existingRechazosData, error: rechazosError } = await supabase
+            .from('rechazos')
+            .select('folio, ticket_id')
+            .in('folio', olpns);
+          
+          if (rechazosError) {
+            console.error('Error checking for existing rechazos reports:', rechazosError);
+            return;
+          }
+          
+          // Create a map of OLPN -> ticket_id for rechazos
+          const rechazosMap: Record<string, string> = {};
+          existingRechazosData.forEach(rechazo => {
+            rechazosMap[rechazo.folio] = rechazo.ticket_id;
+          });
+          
+          setExistingRechazos(rechazosMap);
         } catch (error) {
           console.error('Error checking for existing reports:', error);
         }
       } else {
         setExistingReports({});
+        setExistingRechazos({});
       }
     };
     
@@ -825,7 +847,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
             )}
           </div>
           <div className="scroll-container" style={{ 
-            maxHeight: '50vh', 
+            maxHeight: '45vh', 
             overflowY: 'auto', 
             borderTopWidth: '1px', 
             borderTopStyle: 'solid', 
@@ -846,7 +868,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
                 <tr style={{borderBottom: '1px solid #000000'}}>
                   <th style={{padding: '8px', textAlign: 'center', color: '#000000'}}>{tableHeaders.col1}</th>
                   <th style={{padding: '8px', textAlign: 'center', width: '150px', color: '#000000'}}>{tableHeaders.col2}</th>
-                  <th style={{padding: '8px', textAlign: 'center', width: '120px', color: '#000000'}}>Unidades</th>
+                  <th style={{padding: '8px', textAlign: 'center', width: '120px', color: '#000000'}}>ud.</th>
                   <th style={{padding: '8px', textAlign: 'center', width: '120px', color: '#000000'}}>Acciones</th>
                 </tr>
               </thead>
@@ -861,41 +883,45 @@ export default function ScannerView({ session, profile, selection, currentView, 
                     <td style={{padding: '8px', textAlign: 'center'}}>{pkg.DN}</td>
                     <td style={{padding: '8px', textAlign: 'center'}}>{pkg.Unidades}</td>
                     <td style={{padding: '8px', textAlign: 'center'}}>
-                      <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
-                        <button
-                          onClick={() => {
+                      <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', alignItems: 'center' }}>
+                        {/* Show ticket numbers if they exist */}
+                        {existingReports[pkg.OLPN] && (
+                          <span style={{ 
+                            backgroundColor: 'var(--color-error)', 
+                            color: 'white', 
+                            padding: '2px 6px', 
+                            borderRadius: '4px', 
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                          }}>
+                            {existingReports[pkg.OLPN]}
+                          </span>
+                        )}
+                        {existingRechazos[pkg.OLPN] && (
+                          <span style={{ 
+                            backgroundColor: 'var(--color-error)', 
+                            color: 'white', 
+                            padding: '2px 6px', 
+                            borderRadius: '4px', 
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                          }}>
+                            {existingRechazos[pkg.OLPN]}
+                          </span>
+                        )}
+                        {/* Always show the dropdown menu */}
+                        <ActionDropdown
+                          faltantesTicket={existingReports[pkg.OLPN]}
+                          rechazosTicket={existingRechazos[pkg.OLPN]}
+                          onFaltantesClick={() => {
                             setSelectedPackage(pkg);
                             setShowMissingReportForm(true);
                           }}
-                          style={{
-                            padding: '5px 5px', 
-                            backgroundColor: '#000000', 
-                            color: '#fff', 
-                            border: 'none', 
-                            borderRadius: '3px', 
-                            cursor: 'pointer',
-                            fontSize: '12px'
-                          }}
-                        >
-                          {existingReports[pkg.OLPN] || 'F/S'}
-                        </button>
-                        <button
-                          onClick={() => {
+                          onRechazosClick={() => {
                             // Navigate to Rechazos view with package data
                             navigateToRechazos(pkg);
                           }}
-                          style={{
-                            padding: '5px 5px', 
-                            backgroundColor: '#FE7F2D', 
-                            color: '#fff', 
-                            border: 'none', 
-                            borderRadius: '3px', 
-                            cursor: 'pointer',
-                            fontSize: '12px'
-                          }}
-                        >
-                          Rechazo
-                        </button>
+                        />
                       </div>
                     </td>
                   </tr>
@@ -912,18 +938,18 @@ export default function ScannerView({ session, profile, selection, currentView, 
           
           {/* Progreso por DN */}
           <div id='ProgresoPorDN' style={{ 
-            backgroundColor: '#ffffff', 
+            backgroundColor: 'var(--color-background)', 
             borderRadius: '4px', 
             padding: '10px', 
             flex: '1',
             display: 'flex',
             flexDirection: 'column',
-            maxHeight: '80vh',
-            border: '1px solid #cccccc'
+            maxHeight: '82vh',
+            border: '1px solid var(--color-text-tertiary)'
           }}>
             <h3 style={{ 
               margin: '0 0 15px 0', 
-              color: '#000000', 
+              color: 'var(--color-text-primary)', 
               textAlign: 'center',
               fontSize: '1.2em'
             }}>
@@ -952,15 +978,15 @@ export default function ScannerView({ session, profile, selection, currentView, 
         {/* Progreso por DN en dispositivos móviles */}
         {!isSkaOperator && isPhone && (
           <div id='ProgresoPorDN' style={{ 
-            backgroundColor: '#ffffff', 
+            backgroundColor: 'var(--color-background)', 
             borderRadius: '8px', 
             padding: '10px',
             marginTop: '10px',
-            border: '1px solid #cccccc'
+            border: '1px solid var(--color-text-tertiary)'
           }}>
             <h3 style={{ 
               margin: '0 0 15px 0', 
-              color: '#000000', 
+              color: 'var(--color-text-primary)', 
               textAlign: 'center',
               fontSize: '1.2em'
             }}>

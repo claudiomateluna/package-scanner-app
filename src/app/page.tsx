@@ -8,6 +8,7 @@ import AppLayout from './components/AppLayout'
 import CustomLogin from './components/CustomLogin'
 import FaltantesAdminView from './components/FaltantesAdminView'
 import RechazosView from './components/RechazosView'
+import RechazoFormView from './components/RechazoFormView' // Import the new component
 
 // Definimos los tipos de datos que usaremos en este componente padre
 type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
@@ -69,6 +70,11 @@ export default function Home() {
     setCurrentView('rechazos');
   }
 
+  const handleBackFromRechazos = () => {
+    setCurrentView('scanner');
+    setSelectedPackage(null);
+  }
+
   if (loading) {
     return <div style={{textAlign: 'center', paddingTop: '40px'}}>Cargando sesión...</div>
   }
@@ -90,7 +96,16 @@ export default function Home() {
       {currentView === 'faltantes' ? (
         <FaltantesAdminView session={session} profile={profile} />
       ) : currentView === 'rechazos' ? (
-        <RechazosView session={session} profile={profile} packageData={selectedPackage || undefined} />
+        selectedPackage ? (
+          <RechazoFormView 
+            session={session} 
+            profile={profile} 
+            packageData={selectedPackage} 
+            onBack={handleBackFromRechazos}
+          />
+        ) : (
+          <RechazosView session={session} profile={profile} />
+        )
       ) : !selection && currentView === 'scanner' ? (
         <SelectionScreenWithLocales profile={profile} onSelectionComplete={handleSelectionComplete} session={session} setCurrentView={setCurrentView} />
       ) : (
