@@ -20,34 +20,36 @@ interface SlidingMenuProps {
   isOpen: boolean;
   onClose: () => void;
   onBack?: () => void;
-  isWarehouseOrAdmin: boolean;
-  canViewFaltantesAdmin: boolean;
-  currentView: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search';
-  setCurrentView: (view: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search') => void;
+  canAccessAdministracion: boolean;
+  canAccessAdmFaltantes: boolean;
+  canAccessGestionRechazos: boolean;
+  currentView: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search' | 'reportar-faltante';
+  setCurrentView: (view: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search' | 'reportar-faltante') => void;
   showPasswordForm: boolean;
   setShowPasswordForm: (show: boolean) => void;
   faltantesCount: number;
-  rechazosCount: number; // New prop
-  onReportarRechazo?: () => void; // New prop for reporting rechazos
-  canReportarRechazo: boolean; // New prop to check if user can report rechazos
-  onTicketSearch?: () => void; // New prop for ticket search
+  rechazosCount: number;
+  onReportarRechazo?: () => void;
+  onTicketSearch?: () => void;
+  onReportarFaltante?: () => void; // New prop for reporting faltantes
 }
 
 export default function SlidingMenu({
   isOpen,
   onClose,
   onBack,
-  isWarehouseOrAdmin,
-  canViewFaltantesAdmin,
+  canAccessAdministracion,
+  canAccessAdmFaltantes,
+  canAccessGestionRechazos,
   currentView,
   setCurrentView,
   showPasswordForm,
   setShowPasswordForm,
   faltantesCount,
-  rechazosCount, // Destructure new prop
-  onReportarRechazo, // Destructure new prop
-  canReportarRechazo, // Destructure new prop
-  onTicketSearch // Destructure new prop
+  rechazosCount,
+  onReportarRechazo,
+  onTicketSearch,
+  onReportarFaltante // Destructure new prop
 }: SlidingMenuProps) {
   const router = useRouter();
 
@@ -109,33 +111,39 @@ export default function SlidingMenu({
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', padding: '10px', flex: 1 }}>
           {onBack && <button onClick={() => { onBack(); onClose(); }} style={buttonStyle}><BackIcon /><span>Volver</span></button>}
+          {/* Recepción - Todos los Usuarios */}
           <button onClick={() => { setCurrentView('scanner'); onClose(); }} style={{ ...buttonStyle, backgroundColor: currentView === 'scanner' ? 'rgba(0, 0, 0, 0.1)' : 'transparent' }}><ScannerIcon /><span>Recepción</span></button>
-          {isWarehouseOrAdmin && <button onClick={() => { setCurrentView('admin'); onClose(); }} style={{ ...buttonStyle, backgroundColor: currentView === 'admin' ? 'rgba(0, 0, 0, 0.1)' : 'transparent' }}><AdminIcon /><span>Administración</span></button>}
-          {canViewFaltantesAdmin && (
+          {/* Administración - Store Supervisor, Warehouse Operator, Warehouse Supervisor, administrador */}
+          {canAccessAdministracion && <button onClick={() => { setCurrentView('admin'); onClose(); }} style={{ ...buttonStyle, backgroundColor: currentView === 'admin' ? 'rgba(0, 0, 0, 0.1)' : 'transparent' }}><AdminIcon /><span>Administración</span></button>}
+          {/* Reportar Faltante - Todos los Usuarios */}
+          <button onClick={() => { if (onReportarFaltante) onReportarFaltante(); onClose(); }} style={buttonStyle}><FaltantesIcon /><span>Reportar Faltante</span></button>
+          {/* Adm. Faltantes - Warehouse Operator, Warehouse Supervisor, administrador */}
+          {canAccessAdmFaltantes && (
             <button onClick={() => { setCurrentView('faltantes'); onClose(); }} style={{ ...buttonStyle, backgroundColor: currentView === 'faltantes' ? 'rgba(0, 0, 0, 0.1)' : 'transparent' }}>
               <FaltantesIcon />
               <span>Adm. Faltantes</span>
               {faltantesCount > 0 && <span style={notificationBadgeStyle}>{faltantesCount}</span>}
             </button>
           )}
-          {/* Botón para búsqueda de tickets - Visible para todos los usuarios */}
+          {/* Buscar Tickets - Todos los Usuarios */}
           <button onClick={() => { if (onTicketSearch) onTicketSearch(); onClose(); }} style={buttonStyle}>
             <TicketSearchIcon />
             <span>Buscar Tickets</span>
           </button>
-          {/* Botón para Reportar Rechazo - Visible para usuarios autorizados */}
-          {canReportarRechazo && onReportarRechazo && (
-            <button onClick={() => { onReportarRechazo(); onClose(); }} style={buttonStyle}>
+          {/* Reportar Rechazo - Todos los Usuarios */}
+          <button onClick={() => { if (onReportarRechazo) onReportarRechazo(); onClose(); }} style={buttonStyle}>
+            <RechazosIcon />
+            <span>Reportar Rechazo</span>
+          </button>
+          {/* Gestión de Rechazos - Warehouse Operator, Warehouse Supervisor, administrador */}
+          {canAccessGestionRechazos && (
+            <button onClick={() => { setCurrentView('rechazos'); onClose(); }} style={{ ...buttonStyle, backgroundColor: currentView === 'rechazos' ? 'rgba(0, 0, 0, 0.1)' : 'transparent' }}>
               <RechazosIcon />
-              <span>Reportar Rechazo</span>
+              <span>Gestión de Rechazos</span>
+              {rechazosCount > 0 && <span style={notificationBadgeStyle}>{rechazosCount}</span>}
             </button>
           )}
-          {/* Botón para Gestión de Rechazos - Visible para usuarios con permisos de administración */}
-          <button onClick={() => { setCurrentView('rechazos'); onClose(); }} style={{ ...buttonStyle, backgroundColor: currentView === 'rechazos' ? 'rgba(0, 0, 0, 0.1)' : 'transparent' }}>
-            <RechazosIcon />
-            <span>Gestión de Rechazos</span>
-            {rechazosCount > 0 && <span style={notificationBadgeStyle}>{rechazosCount}</span>}
-          </button>
+          {/* Cambiar Contraseña - Todos los Usuarios */}
           <button onClick={() => { setShowPasswordForm(!showPasswordForm); onClose(); }} style={buttonStyle}><KeyIcon /><span>Cambiar Contraseña</span></button>
           <button onClick={() => { handleSignOut(); onClose(); }} style={{ ...buttonStyle, marginTop: 'auto', borderBottom: 'none' }}><LogoutIcon /><span>Cerrar Sesión</span></button>
         </div>

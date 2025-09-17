@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { Session } from '@supabase/supabase-js'
 import ScannerView from './components/ScannerView'
 import SelectionScreenWithLocales from './components/SelectionScreenWithLocales'
-import AppLayout from './components/AppLayout'
+import AppLayout, { View as AppView } from './components/AppLayout'
 import CustomLogin from './components/CustomLogin'
 import FaltantesAdminView from './components/FaltantesAdminView'
 import RechazosView from './components/RechazosView'
@@ -19,7 +19,7 @@ export default function Home() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [selection, setSelection] = useState<Selection | null>(null)
   const [loading, setLoading] = useState(true)
-  const [currentView, setCurrentView] = useState<'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search'>('scanner'); // Estado para la vista
+  const [currentView, setCurrentView] = useState<AppView>('scanner'); // Estado para la vista
   const [selectedPackage, setSelectedPackage] = useState<{ OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; } | null>(null); // Estado para el paquete seleccionado
 
   useEffect(() => {

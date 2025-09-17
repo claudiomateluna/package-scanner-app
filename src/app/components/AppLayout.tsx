@@ -8,12 +8,13 @@ import Image from 'next/image'
 import SlidingMenu from './SlidingMenu'
 import RechazoForm from './RechazoForm' // Import RechazoForm
 import TicketSearch from './TicketSearch' // Import TicketSearch
+import ReportarFaltanteForm from './ReportarFaltanteForm' // Import ReportarFaltanteForm
 import '../globals.css'
 import styles from './AppLayout.module.css'
 
 // --- Tipos de Datos ---
 type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
-type View = 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search'; // Added ticket-search
+export type View = 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search' | 'reportar-faltante'; // Added ticket-search and reportar-faltante
 
 interface Props {
   session: Session;
@@ -67,12 +68,17 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   const [rechazosCount, setRechazosCount] = useState(0);
   const [showRechazoForm, setShowRechazoForm] = useState(false); // New state for rechazo form modal
 
-  const isWarehouseOrAdmin = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator' || profile?.role === 'Store Supervisor';
-  const canViewFaltantesAdmin = ['administrador', 'admnistrador', 'warehouse supervisor', 'warehouse operator'].includes(profile?.role?.toLowerCase() || '');
-  const canViewRechazos = true; // All authenticated users can see the menu item
-  
-  // Verificar si el usuario puede reportar rechazos
-  const canReportarRechazo = ['SKA Operator', 'Store Operator', 'Store Supervisor', 'Warehouse Operator', 'administrador'].includes(profile?.role || '');
+  // Role-based access control functions
+  const userRole = profile?.role || '';
+
+  // Administración ('Store Supervisor', 'Warehouse Operator', 'Warehouse Supervisor', 'administrador')
+  const canAccessAdministracion = ['Store Supervisor', 'Warehouse Operator', 'Warehouse Supervisor', 'administrador'].includes(userRole);
+
+  // Adm. Faltantes ('Warehouse Operator', 'Warehouse Supervisor', 'administrador')
+  const canAccessAdmFaltantes = ['Warehouse Operator', 'Warehouse Supervisor', 'administrador'].includes(userRole);
+
+  // Gestión de Rechazos ('Warehouse Operator', 'Warehouse Supervisor', 'administrador')
+  const canAccessGestionRechazos = ['Warehouse Operator', 'Warehouse Supervisor', 'administrador'].includes(userRole);
 
   // Efecto para escuchar el evento personalizado para abrir el formulario de rechazos
   useEffect(() => {
@@ -88,7 +94,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   // Effect for Faltantes
   useEffect(() => {
     const fetchFaltantesCount = async () => {
-        if (canViewFaltantesAdmin) {
+        if (canAccessAdmFaltantes) {
             const { count, error } = await supabase.from('faltantes').select('*', { count: 'exact', head: true }).eq('gestionado', false);
             if (error) {
                 console.error('Error fetching faltantes count:', error);
@@ -100,13 +106,13 @@ export default function AppLayout({ session, profile, onBack, children, currentV
 
     fetchFaltantesCount();
     const channel = supabase.channel('faltantes-count').on('postgres_changes', { event: '*', schema: 'public', table: 'faltantes' }, fetchFaltantesCount).subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [canViewFaltantesAdmin]);
+    return () => { supabase.removeChannel(channel); }
+  }, [canAccessAdmFaltantes]);
 
   // Effect for Rechazos (Mirroring Faltantes logic)
   useEffect(() => {
     const fetchRechazosCount = async () => {
-        if (canViewRechazos) {
+        if (canAccessGestionRechazos) {
             const { count, error } = await supabase.from('rechazos').select('*', { count: 'exact', head: true }).eq('gestionado', false);
             if (error) {
                 console.error('Error fetching rechazos count:', error);
@@ -118,8 +124,8 @@ export default function AppLayout({ session, profile, onBack, children, currentV
 
     fetchRechazosCount();
     const channel = supabase.channel('rechazos-count').on('postgres_changes', { event: '*', schema: 'public', table: 'rechazos' }, fetchRechazosCount).subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [canViewRechazos]);
+    return () => { supabase.removeChannel(channel); }
+  }, [canAccessGestionRechazos]);
 
   const headerStyle: CSSProperties = { 
     display: 'flow-root',
@@ -144,8 +150,9 @@ export default function AppLayout({ session, profile, onBack, children, currentV
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         onBack={onBack}
-        isWarehouseOrAdmin={isWarehouseOrAdmin}
-        canViewFaltantesAdmin={canViewFaltantesAdmin}
+        canAccessAdministracion={canAccessAdministracion}
+        canAccessAdmFaltantes={canAccessAdmFaltantes}
+        canAccessGestionRechazos={canAccessGestionRechazos}
         currentView={currentView}
         setCurrentView={setCurrentView}
         showPasswordForm={showPasswordForm}
@@ -153,8 +160,8 @@ export default function AppLayout({ session, profile, onBack, children, currentV
         faltantesCount={faltantesCount}
         rechazosCount={rechazosCount}
         onReportarRechazo={() => setShowRechazoForm(true)} // New prop
-        canReportarRechazo={canReportarRechazo} // New prop
         onTicketSearch={() => setCurrentView('ticket-search')} // New prop
+        onReportarFaltante={() => setCurrentView('reportar-faltante')} // New prop
       />
       
       <header className={styles.header}>
@@ -223,6 +230,15 @@ export default function AppLayout({ session, profile, onBack, children, currentV
           </div>
         ) : currentView === 'ticket-search' ? (
           <TicketSearch session={session} />
+        ) : currentView === 'reportar-faltante' ? (
+          <ReportarFaltanteForm 
+            session={session} 
+            onClose={() => setCurrentView('scanner')}
+            onReportSaved={() => {
+              toast.success('Reporte guardado exitosamente');
+              setCurrentView('scanner');
+            }}
+          />
         ) : (
           children
         )}
