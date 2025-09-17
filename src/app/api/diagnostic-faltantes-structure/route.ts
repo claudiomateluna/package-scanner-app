@@ -1,11 +1,11 @@
--- src/app/api/diagnostic-faltantes-structure/route.ts
+// src/app/api/diagnostic-faltantes-structure/route.ts
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -43,10 +43,7 @@ export async function GET() {
     // Contar registros por ticket_id
     const { data: ticketCounts, error: countError } = await supabase
       .from('faltantes')
-      .select('ticket_id')
-      .group('ticket_id')
-      .order('count', { ascending: false })
-      .limit(10);
+      .select('ticket_id, count(*)', { count: 'exact' });
     
     if (countError) {
       console.error('Error contando tickets:', countError);

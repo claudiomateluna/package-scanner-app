@@ -3,10 +3,29 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { FaltanteTicket, RechazoTicket } from '@/app/components/TicketTypes';
+
+interface SearchResult {
+  table: 'faltantes';
+  data: FaltanteTicket;
+}
+
+interface SearchResultRechazos {
+  table: 'rechazos';
+  data: RechazoTicket;
+}
+
+interface SearchSamples {
+  message: string;
+  faltantesSample: { ticket_id: string }[] | null;
+  rechazosSample: { ticket_id: string }[] | null;
+}
+
+type ResultType = SearchResult | SearchResultRechazos | SearchSamples | null;
 
 export default function DiagnosticPage() {
   const [ticketId, setTicketId] = useState('RTL000000001');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<ResultType>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
