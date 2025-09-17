@@ -5,10 +5,10 @@ import { Session } from '@supabase/supabase-js'
 import ScannerView from './components/ScannerView'
 import SelectionScreenWithLocales from './components/SelectionScreenWithLocales'
 import AppLayout, { View as AppView } from './components/AppLayout'
-import CustomLogin from './components/CustomLogin'
+import MinimalLogin from './components/MinimalLogin'
 import FaltantesAdminView from './components/FaltantesAdminView'
 import RechazosView from './components/RechazosView'
-import RechazoFormView from './components/RechazoFormView' // Import RechazoFormView
+import RechazoFormView from './components/RechazoFormView'
 
 // Definimos los tipos de datos que usaremos en este componente padre
 type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
@@ -19,42 +19,71 @@ export default function Home() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [selection, setSelection] = useState<Selection | null>(null)
   const [loading, setLoading] = useState(true)
-  const [currentView, setCurrentView] = useState<AppView>('scanner'); // Estado para la vista
-  const [selectedPackage, setSelectedPackage] = useState<{ OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; } | null>(null); // Estado para el paquete seleccionado
+  const [currentView, setCurrentView] = useState<AppView>('scanner')
+  const [selectedPackage, setSelectedPackage] = useState<{ OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; } | null>(null)
 
   useEffect(() => {
-    setLoading(true);
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      if (session) {
+    const checkSession = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
+        setSession(currentSession)
+        
+        if (currentSession) {
+          const { data: profileData, error } = await supabase
+            .from('profiles')
+            .select('role, first_name, last_name')
+            .eq('id', currentSession.user.id)
+            .single()
+          
+          if (!error && profileData) {
+            setProfile(profileData)
+          }
+        }
+      } catch (err) {
+        console.error('Error checking session:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    checkSession()
+    
+    // Listener para cambios de autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      if (!session) {
+        setProfile(null)
+        setSelection(null)
+      }
+    })
+    
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  // Efecto para cargar el perfil cuando hay sesión
+  useEffect(() => {
+    if (session && !profile) {
+      const fetchProfile = async () => {
         try {
           const { data: profileData, error } = await supabase
             .from('profiles')
             .select('role, first_name, last_name')
             .eq('id', session.user.id)
-            .single();
+            .single()
           
-          if (error) {
-            console.error('Error fetching profile:', error);
-            setProfile(null);
-          } else {
-            setProfile(profileData);
+          if (!error && profileData) {
+            setProfile(profileData)
           }
         } catch (err) {
-          console.error('Unexpected error fetching profile:', err);
-          setProfile(null);
+          console.error('Error fetching profile:', err)
         }
-      } else {
-        setProfile(null);
-        setSelection(null);
       }
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+      
+      fetchProfile()
+    }
+  }, [session, profile])
 
   const handleSelectionComplete = (newSelection: Selection) => {
     setSelection(newSelection)
@@ -62,17 +91,22 @@ export default function Home() {
 
   const handleBackToSelection = () => {
     setSelection(null)
-    setCurrentView('scanner'); // Resetea la vista al volver a la selección
+    setCurrentView('scanner')
   }
 
   const handleNavigateToRechazos = (packageData: { OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; }) => {
-    setSelectedPackage(packageData);
-    setCurrentView('rechazos');
+    setSelectedPackage(packageData)
+    setCurrentView('rechazos')
   }
 
   const handleBackFromRechazos = () => {
-    setCurrentView('scanner');
-    setSelectedPackage(null);
+    setCurrentView('scanner')
+    setSelectedPackage(null)
+  }
+
+  const handleLoginSuccess = () => {
+    // Recargar la página para forzar una actualización completa del estado
+    window.location.reload()
   }
 
   if (loading) {
@@ -80,11 +114,9 @@ export default function Home() {
   }
 
   if (!session || !profile) {
-    // Usar el componente de login personalizado
-    return <CustomLogin onLoginSuccess={() => {}} />
+    return <MinimalLogin onLoginSuccess={handleLoginSuccess} />
   }
 
-  // A partir de aquí, todo se renderiza dentro del AppLayout
   return (
     <AppLayout 
       session={session} 
@@ -107,7 +139,6 @@ export default function Home() {
           <RechazosView session={session} profile={profile} />
         )
       ) : currentView === 'ticket-search' ? (
-        // We'll handle this in AppLayout
         <div></div>
       ) : !selection && currentView === 'scanner' ? (
         <SelectionScreenWithLocales profile={profile} onSelectionComplete={handleSelectionComplete} session={session} setCurrentView={setCurrentView} />

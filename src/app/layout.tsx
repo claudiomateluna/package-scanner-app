@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import "./globals.css";
 import { Toaster } from 'react-hot-toast';
 import ChunkErrorBoundary from './components/ChunkErrorBoundary';
+import AppVersionChecker from './components/AppVersionChecker';
 
 // Font definitions
 const fontTitulo = localFont({
@@ -47,6 +48,7 @@ export default function RootLayout({
       </head>
       <body className={fontCuerpo.className}>
         <ChunkErrorBoundary>
+          <AppVersionChecker />
           <Toaster position="bottom-center" />
           {children}
         </ChunkErrorBoundary>

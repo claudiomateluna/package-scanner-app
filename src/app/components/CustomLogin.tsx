@@ -50,6 +50,26 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
     }
   }, [])
 
+  // Función para limpiar el estado de sesión y forzar un refresco
+  const handleSessionCleanup = async () => {
+    try {
+      // Cerrar cualquier sesión existente
+      await supabase.auth.signOut()
+      
+      // Limpiar localStorage
+      localStorage.removeItem('login_attempts')
+      localStorage.removeItem('lock_time')
+      
+      // Resetear estado
+      setLoginAttempts(0)
+      setIsLocked(false)
+      
+      toast.success('Sesión limpiada correctamente')
+    } catch (error) {
+      console.error('Error al limpiar sesión:', error)
+    }
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -111,6 +131,25 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
     }
   }
 
+  // Función para forzar un refresco completo de la aplicación
+  const handleForceRefresh = () => {
+    // Limpiar todos los caches
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        names.forEach(name => {
+          caches.delete(name)
+        })
+      })
+    }
+    
+    // Limpiar localStorage y sessionStorage
+    localStorage.clear()
+    sessionStorage.clear()
+    
+    // Refrescar la página con un parámetro para evitar cache
+    window.location.href = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'refresh=' + Date.now()
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.loginBox}>
@@ -122,90 +161,126 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
               <br />
               Intente nuevamente en: <strong>{formatTime(lockTimeout)}</strong>
             </p>
+            
+            <div style={{ marginTop: '15px', textAlign: 'center' }}>
+              <button 
+                onClick={handleSessionCleanup}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: '#FE7F2D',
+                  border: '1px solid #FE7F2D',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+              >
+                Limpiar Sesión
+              </button>
+            </div>
           </div>
         ) : (
-          <form onSubmit={handleLogin} className={styles.form}>
-            <div>
-              <label 
-                htmlFor="email" 
-                className={styles.label}
-              >
-                Correo Electrónico
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={styles.input}
+          <>
+            <form onSubmit={handleLogin} className={styles.form}>
+              <div>
+                <label 
+                  htmlFor="email" 
+                  className={styles.label}
+                >
+                  Correo Electrónico
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={styles.input}
+                  disabled={loading}
+                  autoComplete="email"
+                />
+              </div>
+              
+              <div>
+                <label 
+                  htmlFor="password" 
+                  className={styles.label}
+                >
+                  Contraseña
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={styles.input}
+                  disabled={loading}
+                  autoComplete="current-password"
+                />
+              </div>
+              
+              <button
+                type="submit"
                 disabled={loading}
-                autoComplete="email"
-              />
-            </div>
-            
-            <div>
-              <label 
-                htmlFor="password" 
-                className={styles.label}
+                className={styles.submitButton}
               >
-                Contraseña
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={styles.input}
-                disabled={loading}
-                autoComplete="current-password"
-              />
-            </div>
+                {loading ? (
+                  <>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className={styles.spinner}
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                    Iniciando Sesión...
+                  </>
+                ) : (
+                  <>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                    >
+                      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                      <polyline points="10 17 15 12 10 7" />
+                      <line x1="15" y1="12" x2="3" y2="12" />
+                    </svg>
+                    Iniciar Sesión
+                  </>
+                )}
+              </button>
+            </form>
             
-            <button
-              type="submit"
-              disabled={loading}
-              className={styles.submitButton}
-            >
-              {loading ? (
-                <>
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    width="20" 
-                    height="20" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                    className={styles.spinner}
-                  >
-                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                  </svg>
-                  Iniciando Sesión...
-                </>
-              ) : (
-                <>
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    width="20" 
-                    height="20" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  >
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                    <polyline points="10 17 15 12 10 7" />
-                    <line x1="15" y1="12" x2="3" y2="12" />
-                  </svg>
-                  Iniciar Sesión
-                </>
-              )}
-            </button>
-          </form>
+            <div style={{ marginTop: '15px', textAlign: 'center' }}>
+              <button 
+                onClick={handleForceRefresh}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: '#A1C181',
+                  border: '1px solid #A1C181',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+              >
+                Refrescar Aplicación
+              </button>
+            </div>
+          </>
         )}
         
         {loginAttempts > 0 && loginAttempts < 3 && !isLocked && (
