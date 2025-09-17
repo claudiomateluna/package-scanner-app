@@ -11,12 +11,52 @@ interface Local {
   nombre_local: string;
 }
 
+interface ReceptionDetail {
+  olpn: string;
+  dn: string;
+  unidades: number;
+  escaneado: boolean;
+  faltantes: number;
+}
+
+interface ReceptionCompleted {
+  local: string;
+  fecha_recepcion: string;
+  fecha_hora_completada: string;
+  olpn_esperadas: number;
+  olpn_escaneadas: number;
+  dn_esperadas: number;
+  dn_escaneadas: number;
+  unidades_esperadas: number;
+  unidades_escaneadas: number;
+  detalles: ReceptionDetail[];
+}
+
+interface FaltanteRecord {
+  olpn: string;
+  nombre_local: string;
+  created_at: string;
+  cantidad: number | null;
+  ticket_id: string;
+  tipo_reporte: string;
+}
+
+interface RechazoRecord {
+  folio: string;
+  nombre_local: string;
+  created_at: string;
+  unidades_rechazadas: number | null;
+  ticket_id: string;
+}
+
 interface ReceptionStats {
   local: string;
   tipo_local: string;
   total_receptions: number;
   total_packages: number;
   total_units: number;
+  total_faltantes: number; // New field for faltantes count
+  total_rechazos: number;  // New field for rechazos count
   last_reception_date: string;
 }
 
@@ -34,12 +74,11 @@ export default function ReceptionStatisticsWithLocales({ onClose }: Props) {
 
   useEffect(() => {
     fetchLocals();
-    fetchStatistics();
   }, []);
 
   useEffect(() => {
     fetchStatistics();
-  }, [selectedLocal, selectedType]);
+  }, [selectedLocal, selectedType, locals]);
 
   const fetchLocals = async () => {
     try {
@@ -62,29 +101,226 @@ export default function ReceptionStatisticsWithLocales({ onClose }: Props) {
     setError(null);
     
     try {
-      // Build the query based on filters
-      let query = supabase
-        .rpc('get_reception_statistics'); // This would be a custom PostgreSQL function
+      // Fetch recepciones completadas with detalles
+      let recepcionesQuery = supabase
+        .from('recepciones_completadas')
+        .select(`
+          local,
+          fecha_recepcion,
+          fecha_hora_completada,
+          olpn_esperadas,
+          olpn_escaneadas,
+          dn_esperadas,
+          dn_escaneadas,
+          unidades_esperadas,
+          unidades_escaneadas,
+          detalles
+        `);
 
       // Apply local filter
       if (selectedLocal !== 'ALL') {
-        query = query.eq('local', selectedLocal);
+        recepcionesQuery = recepcionesQuery.eq('local', selectedLocal);
       }
 
-      const { data, error } = await query;
+      const { data: recepcionesData, error: recepcionesError } = await recepcionesQuery.order('fecha_hora_completada', { ascending: false });
 
-      if (error) throw error;
+      if (recepcionesError) throw recepcionesError;
       
-      // Apply type filter in memory if needed
-      let filteredData = data || [];
+      // Extract all OLPNs from recepciones to check for faltantes/rechazos
+      const allOlpns: string[] = [];
+      recepcionesData.forEach((reception: ReceptionCompleted) => {
+        if (reception.detalles && Array.isArray(reception.detalles)) {
+          reception.detalles.forEach((detail: ReceptionDetail) => {
+            if (detail.olpn) {
+              allOlpns.push(detail.olpn);
+            }
+          });
+        }
+      });
+      
+      // Remove duplicates
+      const uniqueOlpns = [...new Set(allOlpns)];
+      
+      // Fetch faltantes for these OLPNs
+      let faltantesData: FaltanteRecord[] = [];
+      let faltantesError: Error | null = null;
+      
+      if (uniqueOlpns.length > 0) {
+        let faltantesQuery = supabase
+          .from('faltantes')
+          .select(`
+            olpn,
+            nombre_local,
+            created_at,
+            cantidad,
+            ticket_id,
+            tipo_reporte
+          `)
+          .in('olpn', uniqueOlpns);
+
+        // Apply local filter to faltantes
+        if (selectedLocal !== 'ALL') {
+          faltantesQuery = faltantesQuery.eq('nombre_local', selectedLocal);
+        }
+
+        const faltantesResult = await faltantesQuery.order('created_at', { ascending: false });
+        faltantesData = faltantesResult.data || [];
+        faltantesError = faltantesResult.error;
+      }
+
+      if (faltantesError) throw faltantesError;
+      
+      // Fetch rechazos - note: rechazos uses 'folio' instead of 'olpn'
+      let rechazosData: RechazoRecord[] = [];
+      let rechazosError: Error | null = null;
+      
+      if (uniqueOlpns.length > 0) {
+        let rechazosQuery = supabase
+          .from('rechazos')
+          .select(`
+            folio,
+            nombre_local,
+            created_at,
+            unidades_rechazadas,
+            ticket_id
+          `)
+          .in('folio', uniqueOlpns);
+
+        // Apply local filter to rechazos
+        if (selectedLocal !== 'ALL') {
+          rechazosQuery = rechazosQuery.eq('nombre_local', selectedLocal);
+        }
+
+        const rechazosResult = await rechazosQuery.order('created_at', { ascending: false });
+        rechazosData = rechazosResult.data || [];
+        rechazosError = rechazosResult.error;
+      }
+
+      if (rechazosError) throw rechazosError;
+      
+      // Process data to aggregate statistics by local
+      const statsMap: { [key: string]: ReceptionStats } = {};
+      
+      // Process recepciones completadas
+      recepcionesData.forEach((item: ReceptionCompleted) => {
+        if (!statsMap[item.local]) {
+          statsMap[item.local] = {
+            local: item.local,
+            tipo_local: '', // Will be filled later
+            total_receptions: 0,
+            total_packages: 0,
+            total_units: 0,
+            total_faltantes: 0, // Initialize faltantes count
+            total_rechazos: 0,  // Initialize rechazos count
+            last_reception_date: item.fecha_hora_completada
+          };
+        }
+        
+        const stat = statsMap[item.local];
+        stat.total_receptions += 1;
+        stat.total_packages += item.olpn_escaneadas;
+        stat.total_units += item.unidades_escaneadas;
+        
+        // Update last reception date if this one is more recent
+        if (new Date(item.fecha_hora_completada) > new Date(stat.last_reception_date)) {
+          stat.last_reception_date = item.fecha_hora_completada;
+        }
+      });
+      
+      // Process faltantes - count by local and also count units
+      faltantesData.forEach((item: {
+        olpn: string;
+        nombre_local: string;
+        created_at: string;
+        cantidad: number | null;
+        ticket_id: string;
+        tipo_reporte: string;
+      }) => {
+        if (!statsMap[item.nombre_local]) {
+          const local = locals.find(l => l.nombre_local === item.nombre_local);
+          statsMap[item.nombre_local] = {
+            local: item.nombre_local,
+            tipo_local: local ? local.tipo_local : 'N/A',
+            total_receptions: 0,
+            total_packages: 0,
+            total_units: 0,
+            total_faltantes: 0,
+            total_rechazos: 0,
+            last_reception_date: item.created_at
+          };
+        }
+        
+        const stat = statsMap[item.nombre_local];
+        stat.total_faltantes += 1;
+        
+        // Add cantidad to total_units if available
+        if (item.cantidad) {
+          stat.total_units += item.cantidad;
+        }
+        
+        // Update last date if this one is more recent
+        if (new Date(item.created_at) > new Date(stat.last_reception_date)) {
+          stat.last_reception_date = item.created_at;
+        }
+      });
+      
+      // Process rechazos - count by local and also count units
+      rechazosData.forEach((item: {
+        folio: string;
+        nombre_local: string;
+        created_at: string;
+        unidades_rechazadas: number | null;
+        ticket_id: string;
+      }) => {
+        if (!statsMap[item.nombre_local]) {
+          const local = locals.find(l => l.nombre_local === item.nombre_local);
+          statsMap[item.nombre_local] = {
+            local: item.nombre_local,
+            tipo_local: local ? local.tipo_local : 'N/A',
+            total_receptions: 0,
+            total_packages: 0,
+            total_units: 0,
+            total_faltantes: 0,
+            total_rechazos: 0,
+            last_reception_date: item.created_at
+          };
+        }
+        
+        const stat = statsMap[item.nombre_local];
+        stat.total_rechazos += 1;
+        
+        // Add unidades_rechazadas to total_units if available
+        if (item.unidades_rechazadas) {
+          stat.total_units += item.unidades_rechazadas;
+        }
+        
+        // Update last date if this one is more recent
+        if (new Date(item.created_at) > new Date(stat.last_reception_date)) {
+          stat.last_reception_date = item.created_at;
+        }
+      });
+      
+      // Convert to array
+      let processedStats = Object.values(statsMap);
+      
+      // Apply type filter
       if (selectedType !== 'ALL') {
-        filteredData = filteredData.filter((stat: ReceptionStats) => {
+        processedStats = processedStats.filter((stat: ReceptionStats) => {
           const local = locals.find(l => l.nombre_local === stat.local);
           return local && local.tipo_local === selectedType;
         });
       }
+      
+      // Add tipo_local to stats for any that don't have it yet
+      processedStats = processedStats.map(stat => {
+        const local = locals.find(l => l.nombre_local === stat.local);
+        return {
+          ...stat,
+          tipo_local: stat.tipo_local || (local ? local.tipo_local : 'N/A')
+        };
+      });
 
-      setStats(filteredData);
+      setStats(processedStats);
     } catch (err) {
       console.error('Error fetching statistics:', err);
       setError('Error al cargar las estadísticas');
@@ -263,6 +499,12 @@ export default function ReceptionStatisticsWithLocales({ onClose }: Props) {
                 <p style={{ margin: '5px 0', color: '#CCCCCC' }}>
                   <strong>Total Unidades:</strong> {stats.reduce((sum, stat) => sum + stat.total_units, 0)}
                 </p>
+                <p style={{ margin: '5px 0', color: '#CCCCCC' }}>
+                  <strong>Total Faltantes:</strong> {stats.reduce((sum, stat) => sum + stat.total_faltantes, 0)}
+                </p>
+                <p style={{ margin: '5px 0', color: '#CCCCCC' }}>
+                  <strong>Total Rechazos:</strong> {stats.reduce((sum, stat) => sum + stat.total_rechazos, 0)}
+                </p>
               </div>
               
               <div style={{
@@ -279,14 +521,18 @@ export default function ReceptionStatisticsWithLocales({ onClose }: Props) {
                   Por Tipo de Local
                 </h3>
                 {(['FRA', 'RTL', 'SKA', 'WHS'] as const).map(type => {
-                  const typeStats = stats.filter(stat => {
-                    const local = locals.find(l => l.nombre_local === stat.local);
-                    return local && local.tipo_local === type;
-                  });
+                  const typeStats = stats.filter(stat => stat.tipo_local === type);
                   return (
-                    <p key={type} style={{ margin: '5px 0', color: '#CCCCCC' }}>
-                      <strong>{type}:</strong> {typeStats.length} locales, {typeStats.reduce((sum, stat) => sum + stat.total_packages, 0)} paquetes
-                    </p>
+                    <div key={type} style={{ margin: '10px 0', color: '#CCCCCC' }}>
+                      <p style={{ margin: '5px 0' }}>
+                        <strong>{type}:</strong> {typeStats.length} locales
+                      </p>
+                      <p style={{ margin: '2px 0 10px 20px', fontSize: '0.9em' }}>
+                        {typeStats.reduce((sum, stat) => sum + stat.total_packages, 0)} paquetes, 
+                        {typeStats.reduce((sum, stat) => sum + stat.total_faltantes, 0)} faltantes, 
+                        {typeStats.reduce((sum, stat) => sum + stat.total_rechazos, 0)} rechazos
+                      </p>
+                    </div>
                   );
                 })}
               </div>
@@ -342,6 +588,18 @@ export default function ReceptionStatisticsWithLocales({ onClose }: Props) {
                       textAlign: 'left', 
                       color: '#CCCCCC',
                       fontWeight: 'bold'
+                    }}>Faltantes</th>
+                    <th style={{ 
+                      padding: '12px', 
+                      textAlign: 'left', 
+                      color: '#CCCCCC',
+                      fontWeight: 'bold'
+                    }}>Rechazos</th>
+                    <th style={{ 
+                      padding: '12px', 
+                      textAlign: 'left', 
+                      color: '#CCCCCC',
+                      fontWeight: 'bold'
                     }}>Unidades</th>
                     <th style={{ 
                       padding: '12px', 
@@ -373,6 +631,12 @@ export default function ReceptionStatisticsWithLocales({ onClose }: Props) {
                         </td>
                         <td style={{ padding: '10px', color: '#CCCCCC' }}>
                           {stat.total_packages}
+                        </td>
+                        <td style={{ padding: '10px', color: '#CCCCCC' }}>
+                          {stat.total_faltantes}
+                        </td>
+                        <td style={{ padding: '10px', color: '#CCCCCC' }}>
+                          {stat.total_rechazos}
                         </td>
                         <td style={{ padding: '10px', color: '#CCCCCC' }}>
                           {stat.total_units}

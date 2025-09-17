@@ -207,7 +207,7 @@ export default function RechazoForm({
       // Generate ticket ID
       console.log('Generating ticket ID...');
       const ticketResponse = await fetch('/api/rechazos/ticket', {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
