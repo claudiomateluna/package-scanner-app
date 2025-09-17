@@ -37,7 +37,17 @@ export default class ChunkErrorBoundary extends Component<Props, State> {
       setTimeout(() => {
         // Limpiar el cache y recargar
         if (typeof window !== 'undefined') {
-          window.location.reload()
+          // Limpiar el cache de la aplicación antes de recargar
+          if ('caches' in window) {
+            caches.keys().then(names => {
+              names.forEach(name => {
+                caches.delete(name);
+              });
+            });
+          }
+          
+          // Recargar la página con un timestamp para evitar cache
+          window.location.href = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'v=' + Date.now();
         }
       }, 2000)
     }

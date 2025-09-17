@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
+            value: 'public, max-age=0, must-revalidate',
           },
           {
             key: 'Pragma',
@@ -24,6 +24,16 @@ const nextConfig: NextConfig = {
           {
             key: 'Expires',
             value: '0',
+          },
+        ],
+      },
+      {
+        // Configuración específica para archivos estáticos
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },
@@ -53,6 +63,10 @@ const nextConfig: NextConfig = {
     
     return config;
   },
+  
+  // Configuración para evitar problemas de cache en navegadores
+  poweredByHeader: false,
+  generateEtags: false,
 };
 
 export default nextConfig;
