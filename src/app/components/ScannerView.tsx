@@ -10,6 +10,7 @@ import ReceptionStatistics from './ReceptionStatistics';
 import BarcodeScannerZXing from './BarcodeScannerZXing';
 import MissingReportForm from './MissingReportForm';
 import ActionDropdown from './ActionDropdown';
+import TicketViewer from './TicketViewer'; // Import TicketViewer
 import { isMobileDevice, isMobilePhone } from '@/lib/deviceUtils';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -88,6 +89,8 @@ export default function ScannerView({ session, profile, selection, currentView, 
   const [filteredPackages, setFilteredPackages] = useState<Package[]>([]); // Filtered packages for display
   const [existingReports, setExistingReports] = useState<Record<string, string>>({}); // Track existing reports by OLPN -> ticket_id
   const [existingRechazos, setExistingRechazos] = useState<Record<string, string>>({}); // Track existing rechazos by OLPN -> ticket_id
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null); // State for selected ticket to view
+  const [showTicketViewer, setShowTicketViewer] = useState(false); // State to show TicketViewer
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const canEditMissing = profile?.role === 'administrador' || profile?.role === 'Store Operator';
@@ -884,28 +887,44 @@ export default function ScannerView({ session, profile, selection, currentView, 
                     <td style={{padding: '8px', textAlign: 'center'}}>{pkg.Unidades}</td>
                     <td style={{padding: '8px', textAlign: 'center'}}>
                       <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', alignItems: 'center' }}>
-                        {/* Show ticket numbers if they exist */}
+                        {/* Show ticket numbers if they exist and make them clickable */}
                         {existingReports[pkg.OLPN] && (
-                          <span style={{ 
-                            backgroundColor: 'var(--color-error)', 
-                            color: 'white', 
-                            padding: '2px 6px', 
-                            borderRadius: '4px', 
-                            fontSize: '12px',
-                            fontWeight: 'bold'
-                          }}>
+                          <span 
+                            onClick={() => {
+                              setSelectedTicketId(existingReports[pkg.OLPN]);
+                              setShowTicketViewer(true);
+                            }}
+                            style={{ 
+                              backgroundColor: 'var(--color-error)', 
+                              color: 'var(--color-button-text)', 
+                              padding: '4px 6px', 
+                              borderRadius: '4px', 
+                              fontSize: '12px',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              textDecoration: 'underline'
+                            }}
+                          >
                             {existingReports[pkg.OLPN]}
                           </span>
                         )}
                         {existingRechazos[pkg.OLPN] && (
-                          <span style={{ 
-                            backgroundColor: 'var(--color-error)', 
-                            color: 'white', 
-                            padding: '2px 6px', 
-                            borderRadius: '4px', 
-                            fontSize: '12px',
-                            fontWeight: 'bold'
-                          }}>
+                          <span 
+                            onClick={() => {
+                              setSelectedTicketId(existingRechazos[pkg.OLPN]);
+                              setShowTicketViewer(true);
+                            }}
+                            style={{ 
+                              backgroundColor: 'var(--color-error)', 
+                              color: 'var(--color-button-text)', 
+                              padding: '4px 6px', 
+                              borderRadius: '4px', 
+                              fontSize: '12px',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              textDecoration: 'underline'
+                            }}
+                          >
                             {existingRechazos[pkg.OLPN]}
                           </span>
                         )}
@@ -1043,6 +1062,15 @@ export default function ScannerView({ session, profile, selection, currentView, 
             // Refresh or update any necessary data
             console.log('Report saved successfully');
           }}
+        />
+      )}
+      
+      {/* Mostrar TicketViewer si está activo */}
+      {showTicketViewer && selectedTicketId && (
+        <TicketViewer
+          ticketId={selectedTicketId}
+          userId={session.user.id}
+          onClose={() => setShowTicketViewer(false)}
         />
       )}
     </div>

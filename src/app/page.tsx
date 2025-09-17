@@ -8,7 +8,7 @@ import AppLayout from './components/AppLayout'
 import CustomLogin from './components/CustomLogin'
 import FaltantesAdminView from './components/FaltantesAdminView'
 import RechazosView from './components/RechazosView'
-import RechazoFormView from './components/RechazoFormView' // Import the new component
+import RechazoFormView from './components/RechazoFormView' // Import RechazoFormView
 
 // Definimos los tipos de datos que usaremos en este componente padre
 type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
@@ -19,7 +19,7 @@ export default function Home() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [selection, setSelection] = useState<Selection | null>(null)
   const [loading, setLoading] = useState(true)
-  const [currentView, setCurrentView] = useState<'scanner' | 'admin' | 'faltantes' | 'rechazos'>('scanner'); // Estado para la vista
+  const [currentView, setCurrentView] = useState<'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search'>('scanner'); // Estado para la vista
   const [selectedPackage, setSelectedPackage] = useState<{ OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; } | null>(null); // Estado para el paquete seleccionado
 
   useEffect(() => {
@@ -106,6 +106,9 @@ export default function Home() {
         ) : (
           <RechazosView session={session} profile={profile} />
         )
+      ) : currentView === 'ticket-search' ? (
+        // We'll handle this in AppLayout
+        <div></div>
       ) : !selection && currentView === 'scanner' ? (
         <SelectionScreenWithLocales profile={profile} onSelectionComplete={handleSelectionComplete} session={session} setCurrentView={setCurrentView} />
       ) : (

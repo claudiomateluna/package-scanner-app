@@ -7,12 +7,13 @@ import toast from 'react-hot-toast'
 import Image from 'next/image'
 import SlidingMenu from './SlidingMenu'
 import RechazoForm from './RechazoForm' // Import RechazoForm
+import TicketSearch from './TicketSearch' // Import TicketSearch
 import '../globals.css'
 import styles from './AppLayout.module.css'
 
 // --- Tipos de Datos ---
 type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
-type View = 'scanner' | 'admin' | 'faltantes' | 'rechazos';
+type View = 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search'; // Added ticket-search
 
 interface Props {
   session: Session;
@@ -153,6 +154,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
         rechazosCount={rechazosCount}
         onReportarRechazo={() => setShowRechazoForm(true)} // New prop
         canReportarRechazo={canReportarRechazo} // New prop
+        onTicketSearch={() => setCurrentView('ticket-search')} // New prop
       />
       
       <header className={styles.header}>
@@ -219,6 +221,8 @@ export default function AppLayout({ session, profile, onBack, children, currentV
               />
             </div>
           </div>
+        ) : currentView === 'ticket-search' ? (
+          <TicketSearch session={session} />
         ) : (
           children
         )}

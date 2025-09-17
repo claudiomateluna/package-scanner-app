@@ -14,6 +14,7 @@ const RechazosIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" he
 const KeyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>;
 const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
 const BackIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>;
+const TicketSearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>;
 
 interface SlidingMenuProps {
   isOpen: boolean;
@@ -21,14 +22,15 @@ interface SlidingMenuProps {
   onBack?: () => void;
   isWarehouseOrAdmin: boolean;
   canViewFaltantesAdmin: boolean;
-  currentView: 'scanner' | 'admin' | 'faltantes' | 'rechazos';
-  setCurrentView: (view: 'scanner' | 'admin' | 'faltantes' | 'rechazos') => void;
+  currentView: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search';
+  setCurrentView: (view: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search') => void;
   showPasswordForm: boolean;
   setShowPasswordForm: (show: boolean) => void;
   faltantesCount: number;
   rechazosCount: number; // New prop
   onReportarRechazo?: () => void; // New prop for reporting rechazos
   canReportarRechazo: boolean; // New prop to check if user can report rechazos
+  onTicketSearch?: () => void; // New prop for ticket search
 }
 
 export default function SlidingMenu({
@@ -44,7 +46,8 @@ export default function SlidingMenu({
   faltantesCount,
   rechazosCount, // Destructure new prop
   onReportarRechazo, // Destructure new prop
-  canReportarRechazo // Destructure new prop
+  canReportarRechazo, // Destructure new prop
+  onTicketSearch // Destructure new prop
 }: SlidingMenuProps) {
   const router = useRouter();
 
@@ -115,6 +118,11 @@ export default function SlidingMenu({
               {faltantesCount > 0 && <span style={notificationBadgeStyle}>{faltantesCount}</span>}
             </button>
           )}
+          {/* Botón para búsqueda de tickets - Visible para todos los usuarios */}
+          <button onClick={() => { if (onTicketSearch) onTicketSearch(); onClose(); }} style={buttonStyle}>
+            <TicketSearchIcon />
+            <span>Buscar Tickets</span>
+          </button>
           {/* Botón para Reportar Rechazo - Visible para usuarios autorizados */}
           {canReportarRechazo && onReportarRechazo && (
             <button onClick={() => { onReportarRechazo(); onClose(); }} style={buttonStyle}>
