@@ -12,6 +12,7 @@ import MissingReportForm from './MissingReportForm';
 import ActionDropdown from './ActionDropdown';
 import TicketViewer from './TicketViewer'; // Import TicketViewer
 import { isMobileDevice, isMobilePhone } from '@/lib/deviceUtils';
+import { createReceptionCompletedNotification } from '@/lib/notificationService';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import '../globals.css';
@@ -504,6 +505,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
       // Obtener la sesión del usuario
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id;
+      const userName = session?.user?.email || 'Usuario desconocido';
 
       // Preparar datos para guardar
       const receptionData = {
@@ -546,6 +548,28 @@ export default function ScannerView({ session, profile, selection, currentView, 
       if (data && data.length > 0) {
         setCompletedReceptionData(data[0]);
         setShowReceptionSummary(true);
+        
+        // Crear notificación de recepción completada
+        const firstPackage = packages[0];
+        const payload = {
+          recepcion_id: data[0].id.toString(),
+          olpn: firstPackage?.OLPN,
+          delivery_note: firstPackage?.DN || '',
+          nombre_local: selection.local,
+          tipo_local: '', // No tenemos este dato en la estructura actual
+          unidades: totalScannedUnits,
+          bultos: totalScannedPackages,
+          completada_por: userName,
+          completada_por_id: userId || '',
+          timestamp: new Date().toISOString()
+        };
+        
+        const notification = await createReceptionCompletedNotification(payload);
+        if (notification) {
+          console.log('Notification created successfully:', notification.id);
+        } else {
+          console.error('Failed to create notification');
+        }
       }
       
       toast.success('Recepción completada y guardada exitosamente');

@@ -1,7 +1,7 @@
 'use client'
 
 import { Session } from '@supabase/supabase-js'
-import { CSSProperties, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
@@ -9,6 +9,9 @@ import SlidingMenu from './SlidingMenu'
 import RechazoForm from './RechazoForm' // Import RechazoForm
 import TicketSearch from './TicketSearch' // Import TicketSearch
 import ReportarFaltanteForm from './ReportarFaltanteForm' // Import ReportarFaltanteForm
+import NotificationBell from './NotificationBell'
+import NotificationCenter from './NotificationCenter'
+import NotificationToast from './NotificationToast'
 import '../globals.css'
 import styles from './AppLayout.module.css'
 
@@ -67,6 +70,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   const [faltantesCount, setFaltantesCount] = useState(0);
   const [rechazosCount, setRechazosCount] = useState(0);
   const [showRechazoForm, setShowRechazoForm] = useState(false); // New state for rechazo form modal
+  const [showNotificationCenter, setShowNotificationCenter] = useState(false); // State for notification center
 
   // Role-based access control functions
   const userRole = profile?.role || '';
@@ -127,17 +131,17 @@ export default function AppLayout({ session, profile, onBack, children, currentV
     return () => { supabase.removeChannel(channel); }
   }, [canAccessGestionRechazos]);
 
-  const headerStyle: CSSProperties = { 
-    display: 'flow-root',
-    alignItems: 'center',
-    borderBottom: '1px solid var (--color-text-tertiary)',
-    padding: '5px',
-    position: 'sticky',
-    top: 0,
-    backgroundColor: '#ffffff',
-    zIndex: 10,
-    color: '#000000'
-  };
+  // const headerStyle: CSSProperties = { 
+  //   display: 'flow-root',
+  //   alignItems: 'center',
+  //   borderBottom: '1px solid var (--color-text-tertiary)',
+  //   padding: '5px',
+  //   position: 'sticky',
+  //   top: 0,
+  //   backgroundColor: '#ffffff',
+  //   zIndex: 10,
+  //   color: '#000000'
+  // };
   
   const getUserFirstAndLastName = () => ({ firstName: profile?.first_name || '', lastName: profile?.last_name || '' });
 
@@ -177,10 +181,27 @@ export default function AppLayout({ session, profile, onBack, children, currentV
               </p>
             </div>
           </div>
+          <div className={styles.notificationContainer}>
+            <NotificationBell 
+              userId={session.user.id} 
+              onNotificationClick={() => setShowNotificationCenter(true)} 
+            />
+          </div>
         </div>
       </header>
       
+      {/* Notification Center Modal */}
+      {showNotificationCenter && (
+        <NotificationCenter 
+          userId={session.user.id} 
+          onClose={() => setShowNotificationCenter(false)} 
+        />
+      )}
+      
       <main className={`${styles.main} ${isFullWidthView ? styles.fullWidth : ''}`}>
+        {/* Notification Toast Component */}
+        <NotificationToast userId={session.user.id} />
+        
         {showPasswordForm ? (
           <ChangePasswordForm onDone={() => setShowPasswordForm(false)} />
         ) : showRechazoForm ? (

@@ -1,0 +1,181 @@
+.notificationCenterOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 1000;
+}
+
+.notificationCenter {
+  background-color: white;
+  width: 100%;
+  max-width: 500px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #666;
+}
+
+.closeButton:hover {
+  color: #333;
+}
+
+.actions {
+  padding: 10px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.markAllButton {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.markAllButton:hover {
+  text-decoration: underline;
+}
+
+.loading, .error, .noNotifications {
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.error {
+  color: #d9534f;
+}
+
+.notificationList {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.notificationItem {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.notificationItem.unread {
+  background-color: #f8f9fa;
+}
+
+.notificationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.notificationTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.notificationTime {
+  font-size: 12px;
+  color: #999;
+}
+
+.notificationBody {
+  margin-bottom: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.notificationFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notificationMeta {
+  font-size: 12px;
+  color: #999;
+}
+
+.markAsReadButton {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.markAsReadButton:hover {
+  text-decoration: underline;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+}
+
+.paginationButton {
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.paginationButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Scrollbar personalizado */
+.notificationList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notificationList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.notificationList::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.notificationList::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
