@@ -401,8 +401,8 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
           </label>
         </div>
         
-        {/* Selección de múltiples locales para Store Supervisor y Store Operator */}
-        {(formData.role === 'Store Supervisor' || formData.role === 'Store Operator' || formData.role === 'Warehouse Supervisor' || formData.role === 'Warehouse Operator') && (
+        {/* Selección de múltiples locales para Store Supervisor, Store Operator y SKA Operator */}
+        {(formData.role === 'Store Supervisor' || formData.role === 'Store Operator' || formData.role === 'SKA Operator' || formData.role === 'Warehouse Supervisor' || formData.role === 'Warehouse Operator') && (
           <div style={{ gridColumn: '1 / -1' }}>
             <label>Locales asignados:</label>
             {loadingLocals ? (
@@ -899,8 +899,8 @@ export default function AdminView({ profile }: AdminViewProps) {
                 </label>
               </div>
               
-              {/* Selección de múltiples locales para Store Supervisor y Store Operator */}
-              {(role === 'Store Supervisor' || role === 'Store Operator' || role === 'Warehouse Supervisor' || role === 'Warehouse Operator') && (
+              {/* Selección de múltiples locales para Store Supervisor, Store Operator y SKA Operator */}
+              {(role === 'Store Supervisor' || role === 'Store Operator' || role === 'SKA Operator' || role === 'Warehouse Supervisor' || role === 'Warehouse Operator') && (
                 <div style={{ gridColumn: '1 / -1' }}>
                   <label>Locales asignados:</label>
                   {loadingLocals ? (

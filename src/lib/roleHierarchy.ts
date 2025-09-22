@@ -4,7 +4,8 @@ export const roleHierarchy: { [key: string]: number } = {
   'Warehouse Supervisor': 2,
   'Warehouse Operator': 3,
   'Store Supervisor': 4,
-  'Store Operator': 5
+  'Store Operator': 5,
+  'SKA Operator': 6
 };
 
 // Función para verificar si un usuario puede editar/eliminar a otro usuario
