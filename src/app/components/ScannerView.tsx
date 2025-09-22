@@ -136,7 +136,14 @@ export default function ScannerView({ session, profile, selection, currentView, 
     setError(null)
     try {
       const startDate = selection.fecha;
-      const endDate = new Date(new Date(startDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      // Validar que startDate tenga un formato de fecha válido antes de usarlo
+      const dateObj = new Date(startDate);
+      if (isNaN(dateObj.getTime())) {
+        throw new Error('Fecha inválida proporcionada: ' + startDate);
+      }
+      
+      const endDate = new Date(dateObj.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       
       // Verificar si la recepción ya fue completada
       const { data: completedReceptions, error: completedError } = await supabase
@@ -195,6 +202,21 @@ export default function ScannerView({ session, profile, selection, currentView, 
   // handleMissingUnitsChange function removed as we're now using the MissingReportForm
 
   useEffect(() => {
+    // Validar que la selección tenga valores válidos antes de cargar datos
+    if (!selection.local || !selection.fecha) {
+      setError("Selección incompleta. Por favor, seleccione un local y una fecha válidos.");
+      setLoading(false);
+      return;
+    }
+
+    // Validar formato de fecha
+    const dateValidation = new Date(selection.fecha);
+    if (isNaN(dateValidation.getTime())) {
+      setError("Formato de fecha inválido. Por favor, seleccione una fecha válida.");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     fetchData();
     const channel = supabase.channel('realtime_recepcion')
