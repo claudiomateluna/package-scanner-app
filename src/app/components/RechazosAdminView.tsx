@@ -15,6 +15,7 @@ import {
   ColumnFiltersState,
 } from '@tanstack/react-table';
 import ToggleSwitch from './ToggleSwitch';
+import { exportToCSV } from '@/lib/csvExport';
 
 interface Props {
     session: Session;
@@ -175,6 +176,39 @@ export default function RechazosAdminView({ session, profile }: Props) {
     setShowLightbox(true);
   };
 
+  const handleExportToCSV = () => {
+    // Create a clean version of the data for export
+    const exportData = rechazos.map(item => ({
+      'Ticket ID': item.ticket_id,
+      'Tipo Rechazo': item.tipo_rechazo,
+      'Ruta': item.ruta,
+      'Mes': formatMonthYearInSpanish(item.mes),
+      'Fecha': formatDate(item.fecha),
+      'Hora': item.hora,
+      'Folio': item.folio,
+      'OC': item.oc,
+      'Cliente': item.nombre_local,
+      'Tipo Local': item.tipo_local,
+      'Cliente Final': item.cliente_final,
+      'Motivo': item.motivo || '',
+      'Responsabilidad': item.responsabilidad || '',
+      'Área': item.responsabilidad_area || '',
+      'Unid. Rech.': item.unidades_rechazadas,
+      'Unid. Tot.': item.unidades_totales,
+      'Bultos Rech.': item.bultos_rechazados,
+      'Bultos Tot.': item.bultos_totales,
+      'Transporte': item.transporte || '',
+      'Foto': item.foto_rechazado || '',
+      'Creado por': item.created_by_user_name,
+      'Actualizado por': item.updated_by_user_name,
+      'Actualizado': formatDate(item.updated_at),
+      'Gestionado': item.gestionado ? 'Sí' : 'No',
+    }));
+
+    const filename = `rechazos_${new Date().toISOString().slice(0, 10)}.csv`;
+    exportToCSV(exportData, filename);
+  };
+
   const columns: ColumnDef<Rechazo>[] = [
     { accessorKey: 'ticket_id', header: 'Ticket ID' },
     { accessorKey: 'tipo_rechazo', header: 'Tipo Rechazo' },
@@ -275,7 +309,23 @@ export default function RechazosAdminView({ session, profile }: Props) {
       <div style={{ width: '100%', padding: '5px', boxSizing: 'border-box', maxWidth: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', width: '100%' }}>
             <h2 style={{ color: 'var(--color-text-primary)' }}>Administración de Rechazos</h2>
-            <input type="text" value={globalFilter ?? ''} onChange={e => setGlobalFilter(e.target.value)} placeholder="Buscar en toda la tabla..." style={{ padding: '8px', border: '1px solid var(--color-border)', borderRadius: '4px', width: '400px', backgroundColor: 'var(--color-card-background)', color: 'var(--color-text-primary)' }} />
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                onClick={handleExportToCSV}
+                style={{ 
+                  padding: '8px 16px', 
+                  backgroundColor: 'var(--color-accent)', 
+                  color: 'var(--color-card-background)', 
+                  border: 'none', 
+                  borderRadius: '4px', 
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Descargar CSV
+              </button>
+              <input type="text" value={globalFilter ?? ''} onChange={e => setGlobalFilter(e.target.value)} placeholder="Buscar en toda la tabla..." style={{ padding: '8px', border: '1px solid var(--color-border)', borderRadius: '4px', width: '400px', backgroundColor: 'var(--color-card-background)', color: 'var(--color-text-primary)' }} />
+            </div>
         </div>
         
         <div style={{ width: '100%', overflowX: 'auto' }}>

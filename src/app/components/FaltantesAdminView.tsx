@@ -7,6 +7,7 @@ import { Session } from '@supabase/supabase-js';
 import toast from 'react-hot-toast';
 import FaltanteRow from './FaltanteRow';
 import Image from 'next/image';
+import { exportToCSV } from '@/lib/csvExport';
 
 // --- Tipos de Datos ---
 interface Faltante {
@@ -129,6 +130,36 @@ export default function FaltantesAdminView({ session, profile }: Props) {
     setFaltantes(prev => prev.map(f => f.id === updatedItem.id ? updatedItem : f));
   };
 
+  const handleExportToCSV = () => {
+    // Create a clean version of the data for export
+    const exportData = faltantes.map(item => ({
+      'Ticket': item.ticket_id,
+      'OLPN / B2B': item.olpn,
+      'DN': item.delivery_note,
+      'Tipo Reporte': item.tipo_reporte,
+      'Local': item.nombre_local,
+      'Tipo': item.tipo_local,
+      'Fecha': item.fecha,
+      'Factura': item.factura || '',
+      'Producto': item.detalle_producto || '',
+      'Talla': item.talla || '',
+      'Cantidad': item.cantidad || 0,
+      'Peso': item.peso_olpn || '',
+      'Estado Bulto': item.detalle_bulto_estado || '',
+      'Foto OLPN': item.foto_olpn || '',
+      'Foto Bulto': item.foto_bulto || '',
+      'Creado Por': item.created_by_user_name,
+      'Fecha Reporte': item.created_at,
+      'Últ. Actualización': item.updated_at || '',
+      'Responsabilidad': item.responsabilidad || '',
+      'Gestionado': item.gestionado ? 'Sí' : 'No',
+      'Comentarios': item.comentarios || '',
+    }));
+
+    const filename = `faltantes_${new Date().toISOString().slice(0, 10)}.csv`;
+    exportToCSV(exportData, filename);
+  };
+
   if (error) {
     return <div style={{ padding: '20px', color: 'var(--color-error)' }}>Error: {error}</div>;
   }
@@ -137,7 +168,23 @@ export default function FaltantesAdminView({ session, profile }: Props) {
     <div style={{ padding: '5px' }}>
       {lightboxImage && <Lightbox src={lightboxImage} onClose={() => setLightboxImage(null)} />}
       
-      <h1>Administración de Faltantes ({totalCount} reportes)</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h1>Administración de Faltantes ({totalCount} reportes)</h1>
+        <button 
+          onClick={handleExportToCSV}
+          style={{ 
+            padding: '8px 16px', 
+            backgroundColor: 'var(--color-accent)', 
+            color: 'var(--color-card-background)', 
+            border: 'none', 
+            borderRadius: '4px', 
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          Descargar CSV
+        </button>
+      </div>
       
       <div style={{ marginBottom: '20px' }}>
         <input 
