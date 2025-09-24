@@ -210,41 +210,43 @@ export default function RechazosAdminView({ session, profile }: Props) {
   };
 
   const columns: ColumnDef<Rechazo>[] = [
-    { accessorKey: 'ticket_id', header: 'Ticket ID' },
-    { accessorKey: 'tipo_rechazo', header: 'Tipo Rechazo' },
-    { accessorKey: 'ruta', header: 'Ruta' },
-    { accessorKey: 'mes', header: 'Mes', cell: info => formatMonthYearInSpanish(info.getValue() as string) },
-    { accessorKey: 'fecha', header: 'Fecha', cell: info => formatDate(info.getValue() as string) },
-    { accessorKey: 'hora', header: 'Hora' },
-    { accessorKey: 'folio', header: 'Folio' },
-    { accessorKey: 'oc', header: 'OC' },
-    { accessorKey: 'nombre_local', header: 'Cliente' },
-    { accessorKey: 'tipo_local', header: 'Tipo Local' },
-    { accessorKey: 'cliente_final', header: 'Cliente Final' },
-    { accessorKey: 'motivo', header: 'Motivo', cell: info => <div title={info.getValue() as string}>{(info.getValue() as string)?.substring(0, 30)}...</div> },
-    { accessorKey: 'responsabilidad', header: 'Responsabilidad' },
-    { accessorKey: 'responsabilidad_area', header: 'Área' },
-    { accessorKey: 'unidades_rechazadas', header: 'Unid. Rech.' },
-    { accessorKey: 'unidades_totales', header: 'Unid. Tot.' },
-    { accessorKey: 'bultos_rechazados', header: 'Bultos Rech.' },
-    { accessorKey: 'bultos_totales', header: 'Bultos Tot.' },
-    { accessorKey: 'transporte', header: 'Transporte' },
+    { accessorKey: 'ticket_id', header: 'Ticket ID', minSize: 85, maxSize: 120 },
+    { accessorKey: 'tipo_rechazo', header: 'Tipo Rechazo', minSize: 95, maxSize: 120 },
+    { accessorKey: 'ruta', header: 'Ruta', minSize: 40, maxSize: 80 },
+    { accessorKey: 'mes', header: 'Mes', cell: info => formatMonthYearInSpanish(info.getValue() as string), minSize: 90, maxSize: 120 },
+    { accessorKey: 'fecha', header: 'Fecha', cell: info => formatDate(info.getValue() as string), minSize: 85, maxSize: 120 },
+    { accessorKey: 'hora', header: 'Hora', minSize: 80 },
+    { accessorKey: 'folio', header: 'Folio', minSize: 80 },
+    { accessorKey: 'oc', header: 'OC', minSize: 80 },
+    { accessorKey: 'nombre_local', header: 'Cliente', minSize: 100 },
+    { accessorKey: 'tipo_local', header: 'Tipo Local', minSize: 100 },
+    { accessorKey: 'cliente_final', header: 'Cliente Final', minSize: 120 },
+    { accessorKey: 'motivo', header: 'Motivo', cell: info => <div title={info.getValue() as string}>{(info.getValue() as string)?.substring(0, 30)}...</div>, minSize: 150 },
+    { accessorKey: 'responsabilidad', header: 'Responsabilidad', minSize: 120 },
+    { accessorKey: 'responsabilidad_area', header: 'Área', minSize: 120 },
+    { accessorKey: 'unidades_rechazadas', header: 'Unid. Rech.', minSize: 100 },
+    { accessorKey: 'unidades_totales', header: 'Unid. Tot.', minSize: 100 },
+    { accessorKey: 'bultos_rechazados', header: 'Bultos Rech.', minSize: 120 },
+    { accessorKey: 'bultos_totales', header: 'Bultos Tot.', minSize: 120 },
+    { accessorKey: 'transporte', header: 'Transporte', minSize: 120 },
     {
       accessorKey: 'foto_rechazado',
       header: 'Foto',
       enableSorting: false,
       enableColumnFilter: false,
+      minSize: 70,
       cell: ({ row }) => {
         const imageUrl = row.original.foto_rechazado;
         return imageUrl ? <img src={imageUrl} alt="Rechazo" style={{ width: '50px', height: '50px', cursor: 'pointer', objectFit: 'cover' }} onClick={() => openLightbox(imageUrl)} /> : null;
       }
     },
-    { accessorKey: 'created_by_user_name', header: 'Creado por' },
-    { accessorKey: 'updated_by_user_name', header: 'Actualizado por' },
-    { accessorKey: 'updated_at', header: 'Actualizado', cell: info => formatDate(info.getValue() as string) },
+    { accessorKey: 'created_by_user_name', header: 'Creado por', minSize: 120 },
+    { accessorKey: 'updated_by_user_name', header: 'Actualizado por', minSize: 120 },
+    { accessorKey: 'updated_at', header: 'Actualizado', cell: info => formatDate(info.getValue() as string), minSize: 100 },
     {
       accessorKey: 'gestionado',
       header: 'Gestionado',
+      minSize: 100,
       cell: ({ row }) => (
         <ToggleSwitch 
             checked={row.original.gestionado}
@@ -255,6 +257,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
     {
         id: 'acciones',
         header: 'Acciones',
+        minSize: 100,
         cell: ({ row }) => <button onClick={() => handleEditClick(row.original)} style={{ padding: '6px 12px', backgroundColor: 'var(--color-button-background)', color: 'var(--color-button-text)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Editar</button>
     }
   ];
@@ -271,6 +274,8 @@ export default function RechazosAdminView({ session, profile }: Props) {
     getFilteredRowModel: getFilteredRowModel(),
     columnResizeMode: 'onChange',
     enableColumnResizing: true,
+    enableSorting: true,
+    enableFilters: true,
   });
 
   useEffect(() => {
@@ -304,6 +309,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
         .modal-form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
         .modal-form-grid label { font-weight: bold; margin-bottom: 5px; display: block; }
         .modal-form-grid input, .modal-form-grid select, .modal-form-grid textarea { width: 100%; padding: 8px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-card-background); color: var(--color-text-primary); }
+        table { table-layout: fixed; }
       `}</style>
       
       <div style={{ width: '100%', padding: '5px', boxSizing: 'border-box', maxWidth: '100%' }}>
@@ -329,12 +335,12 @@ export default function RechazosAdminView({ session, profile }: Props) {
         </div>
         
         <div style={{ width: '100%', overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table style={{ width: table.getTotalSize(), borderCollapse: 'collapse' }}>
             <thead>
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id} style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}>
                   {headerGroup.headers.map(header => (
-                    <th key={header.id} colSpan={header.colSpan} style={{ position: 'relative', width: header.getSize(), padding: '12px', textAlign: 'left' }}>
+                    <th key={header.id} colSpan={header.colSpan} style={{ position: 'relative', width: header.getSize(), padding: '12px', textAlign: 'left', minWidth: header.column.columnDef.minSize ? `${header.column.columnDef.minSize}px` : 'auto' }}>
                       <div {...{ onClick: header.column.getToggleSortingHandler(), className: header.column.getCanSort() ? 'cursor-pointer select-none' : '' }}>
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {{ asc: ' 🔼', desc: ' 🔽' }[header.column.getIsSorted() as string] ?? null}
