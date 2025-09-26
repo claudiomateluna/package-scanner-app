@@ -65,11 +65,15 @@ export default function NotificationBell({ userId, onNotificationClick, session 
       })
       .subscribe();
 
+    // Actualización periódica como respaldo (cada 30 segundos)
+    const intervalId = setInterval(fetchUnreadCount, 30000); // 30 segundos
+
     console.log('Realtime: Subscribed to channel:', readsChannel);
 
     return () => {
       console.log('Realtime: Unsubscribing from channel:', readsChannel);
       supabase.removeChannel(readsChannel);
+      clearInterval(intervalId); // Limpiar el intervalo al desmontar
     };
   }, [userId, session?.access_token]); // session.access_token es una dependencia clave
 
