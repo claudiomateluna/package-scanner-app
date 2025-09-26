@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
+import Image from 'next/image';
 import {
   useReactTable,
   getCoreRowModel,
@@ -238,7 +239,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
       maxSize: 80,
       cell: ({ row }) => {
         const imageUrl = row.original.foto_rechazado;
-        return imageUrl ? <img src={imageUrl} alt="Rechazo" style={{ width: '50px', height: '50px', cursor: 'pointer', objectFit: 'cover' }} onClick={() => openLightbox(imageUrl)} /> : null;
+        return imageUrl ? <Image src={imageUrl} alt="Rechazo" width={50} height={50} style={{ width: '50px', height: '50px', cursor: 'pointer', objectFit: 'cover' }} onClick={() => openLightbox(imageUrl)} /> : null;
       }
     },
     { accessorKey: 'created_by_user_name', header: 'Creado por', minSize: 250 },
@@ -609,7 +610,7 @@ export default function RechazosAdminView({ session, profile }: Props) {
 
         {showLightbox && (
             <div onClick={() => setShowLightbox(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <img src={lightboxImage} alt="Rechazo" style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain' }} />
+                <Image src={lightboxImage} alt="Rechazo" width={800} height={600} style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain' }} />
             </div>
         )}
       </div>

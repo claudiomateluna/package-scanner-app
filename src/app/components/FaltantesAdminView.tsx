@@ -70,7 +70,7 @@ const Lightbox = ({ src, onClose }: { src: string; onClose: () => void }) => (
       cursor: 'pointer' 
     }}
   >
-    <img src={src} alt="Imagen ampliada" style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain' }} />
+    <Image src={src} alt="Imagen ampliada" width={800} height={600} style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain' }} />
   </div>
 );
 
@@ -222,7 +222,7 @@ export default function FaltantesAdminView({ session, profile }: Props) {
       maxSize: 80,
       cell: ({ row }) => {
         const publicUrl = getPublicUrl(row.original.foto_olpn);
-        return publicUrl ? <img src={publicUrl} alt="Foto OLPN" style={{ width: '50px', height: '50px', cursor: 'pointer', objectFit: 'cover' }} onClick={() => openLightbox(publicUrl)} /> : null;
+        return publicUrl ? <Image src={publicUrl} alt="Foto OLPN" width={50} height={50} style={{ width: '50px', height: '50px', cursor: 'pointer', objectFit: 'cover' }} onClick={() => openLightbox(publicUrl)} /> : null;
       }
     },
     {
@@ -234,7 +234,7 @@ export default function FaltantesAdminView({ session, profile }: Props) {
       maxSize: 80,
       cell: ({ row }) => {
         const publicUrl = getPublicUrl(row.original.foto_bulto);
-        return publicUrl ? <img src={publicUrl} alt="Foto Bulto" style={{ width: '50px', height: '50px', cursor: 'pointer', objectFit: 'cover' }} onClick={() => openLightbox(publicUrl)} /> : null;
+        return publicUrl ? <Image src={publicUrl} alt="Foto Bulto" width={50} height={50} style={{ width: '50px', height: '50px', cursor: 'pointer', objectFit: 'cover' }} onClick={() => openLightbox(publicUrl)} /> : null;
       }
     },
     { accessorKey: 'created_by_user_name', header: 'Creado Por', minSize: 250 },
@@ -693,7 +693,7 @@ export default function FaltantesAdminView({ session, profile }: Props) {
 
         {lightboxImage && (
           <div onClick={() => setLightboxImage(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <img src={lightboxImage} alt="Imagen ampliada" style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain' }} />
+            <Image src={lightboxImage} alt="Imagen ampliada" width={800} height={600} style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain' }} />
           </div>
         )}
       </div>

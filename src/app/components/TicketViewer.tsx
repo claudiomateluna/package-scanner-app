@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import Image from 'next/image';
 import { FaltanteTicket, RechazoTicket, FaltanteProducto } from './TicketTypes';
 
 interface TicketViewerProps {
@@ -478,9 +479,11 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
                 {(ticket as FaltanteTicket).foto_olpn && (
                   <div>
                     <p><strong>Foto de OLPN:</strong></p>
-                    <img 
+                    <Image 
                       src={(ticket as FaltanteTicket).foto_olpn!} 
                       alt="Foto de OLPN" 
+                      width={200} 
+                      height={200} 
                       style={{ maxWidth: '200px', maxHeight: '200px', border: '1px solid var(--color-border)' }} 
                     />
                   </div>
@@ -488,9 +491,11 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
                 {(ticket as FaltanteTicket).foto_bulto && (
                   <div>
                     <p><strong>Foto de bulto:</strong></p>
-                    <img 
+                    <Image 
                       src={(ticket as FaltanteTicket).foto_bulto!} 
                       alt="Foto de bulto" 
+                      width={200} 
+                      height={200} 
                       style={{ maxWidth: '200px', maxHeight: '200px', border: '1px solid var(--color-border)' }} 
                     />
                   </div>
@@ -509,9 +514,11 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
               }}>
                 Foto
               </h3>
-              <img 
+              <Image 
                 src={(ticket as RechazoTicket).foto_rechazado!} 
                 alt="Foto de rechazo" 
+                width={300} 
+                height={300} 
                 style={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid var(--color-border)' }} 
               />
             </div>

@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
+import Image from 'next/image';
 import toast from 'react-hot-toast'; // Importar toast
 
 interface Props {
@@ -841,9 +842,11 @@ export default function RechazoForm({
             />
             {fotoPreview && (
               <div style={{ marginTop: '10px' }}>
-                <img 
+                <Image 
                   src={fotoPreview} 
                   alt="Preview" 
+                  width={200} 
+                  height={200} 
                   style={{ maxWidth: '200px', maxHeight: '200px', border: '1px solid var(--color-border)' }}
                 />
               </div>
