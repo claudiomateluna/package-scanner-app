@@ -88,6 +88,12 @@ export default function RechazosAdminView({ session, profile }: Props) {
   const [showLightbox, setShowLightbox] = useState(false);
   const [lightboxImage, setLightboxImage] = useState('');
 
+  const getPublicUrl = (filePath: string | null) => {
+    if (!filePath) return null;
+    const { data } = supabase.storage.from('rechazos-fotos').getPublicUrl(filePath);
+    return data?.publicUrl;
+  };
+
   const handleEditClick = (rechazo: Rechazo) => {
     setEditingRechazo(rechazo);
     setIsEditModalOpen(true);
@@ -173,7 +179,14 @@ export default function RechazosAdminView({ session, profile }: Props) {
   };
 
   const openLightbox = (imageUrl: string) => {
-    setLightboxImage(imageUrl);
+    // If the URL is already a complete URL, use it directly
+    // Otherwise, try to get the public URL from Supabase storage
+    if (imageUrl.startsWith('http')) {
+      setLightboxImage(imageUrl);
+    } else {
+      const publicUrl = getPublicUrl(imageUrl);
+      setLightboxImage(publicUrl || imageUrl);
+    }
     setShowLightbox(true);
   };
 
@@ -238,8 +251,8 @@ export default function RechazosAdminView({ session, profile }: Props) {
       minSize: 40,
       maxSize: 80,
       cell: ({ row }) => {
-        const imageUrl = row.original.foto_rechazado;
-        return imageUrl ? <Image src={imageUrl} alt="Rechazo" width={50} height={50} style={{ width: '50px', height: '50px', cursor: 'pointer', objectFit: 'cover' }} onClick={() => openLightbox(imageUrl)} /> : null;
+        const publicUrl = getPublicUrl(row.original.foto_rechazado);
+        return publicUrl ? <Image src={publicUrl} alt="Rechazo" width={50} height={50} style={{ width: '50px', height: '50px', cursor: 'pointer', objectFit: 'cover' }} onClick={() => openLightbox(publicUrl)} /> : null;
       }
     },
     { accessorKey: 'created_by_user_name', header: 'Creado por', minSize: 250 },

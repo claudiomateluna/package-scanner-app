@@ -1,3 +1,9 @@
+# QWEN rules
+- nunca ejecutes 'npm run dev'
+- siempre que hagas un cambio, modificación, creación o eliminación verifica que todo quede operativo con 'npm run build'
+- todo script de sql se coloca en secuencia en la carpeta '/sql'
+- todo cambio, modificación, creación o eliminación se documenta en secuencia en la carpeta '/docs' en archivos con formato '.md'
+
 ## Qwen Added Memories
 - Hoy trabajamos en la aplicación de gestión de usuarios para un sistema de escaneo de paquetes. Hicimos múltiples mejoras y correcciones:
 

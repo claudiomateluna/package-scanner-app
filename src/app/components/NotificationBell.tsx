@@ -34,13 +34,33 @@ export default function NotificationBell({ userId, onNotificationClick, session 
     console.log('Realtime: Attempting to subscribe to channel...');
     const readsChannel = supabase.channel(`notification-reads-changes-for-${userId}`)
       .on('postgres_changes', {
-        event: '*', // Escucha INSERT, UPDATE, DELETE
+        event: 'INSERT', // Listen for new notification entries for this user
         schema: 'public',
         table: 'notification_reads',
         filter: `user_id=eq.${userId}`
       },
       (payload) => {
-        console.log('Realtime: Change received in notification_reads, refetching count...', payload);
+        console.log('Realtime: New notification created for user, refetching count...', payload);
+        fetchUnreadCount();
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE', // Listen for notification read status changes
+        schema: 'public',
+        table: 'notification_reads',
+        filter: `user_id=eq.${userId}`
+      },
+      (payload) => {
+        console.log('Realtime: Notification status changed for user, refetching count...', payload);
+        fetchUnreadCount();
+      })
+      .on('postgres_changes', {
+        event: 'DELETE', // Listen for notification deletions for this user
+        schema: 'public',
+        table: 'notification_reads',
+        filter: `user_id=eq.${userId}`
+      },
+      (payload) => {
+        console.log('Realtime: Notification deleted for user, refetching count...', payload);
         fetchUnreadCount();
       })
       .subscribe();

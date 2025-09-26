@@ -17,6 +17,14 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const getPublicUrl = (filePath: string | null, isRechazoImage: boolean = false) => {
+    if (!filePath) return null;
+    // Determine which bucket based on the type of ticket
+    const bucket = isRechazoImage ? 'rechazos-fotos' : 'faltantes-attachments';
+    const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
+    return data?.publicUrl;
+  };
+
   useEffect(() => {
     const fetchTicket = async () => {
       setLoading(true);
@@ -480,7 +488,7 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
                   <div>
                     <p><strong>Foto de OLPN:</strong></p>
                     <Image 
-                      src={(ticket as FaltanteTicket).foto_olpn!} 
+                      src={getPublicUrl((ticket as FaltanteTicket).foto_olpn!, false)!} 
                       alt="Foto de OLPN" 
                       width={200} 
                       height={200} 
@@ -492,7 +500,7 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
                   <div>
                     <p><strong>Foto de bulto:</strong></p>
                     <Image 
-                      src={(ticket as FaltanteTicket).foto_bulto!} 
+                      src={getPublicUrl((ticket as FaltanteTicket).foto_bulto!, false)!} 
                       alt="Foto de bulto" 
                       width={200} 
                       height={200} 
@@ -515,7 +523,7 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
                 Foto
               </h3>
               <Image 
-                src={(ticket as RechazoTicket).foto_rechazado!} 
+                src={getPublicUrl((ticket as RechazoTicket).foto_rechazado!, true)!} 
                 alt="Foto de rechazo" 
                 width={300} 
                 height={300} 
