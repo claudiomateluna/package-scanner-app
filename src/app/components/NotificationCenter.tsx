@@ -153,14 +153,14 @@ export default function NotificationCenter({ userId, onClose }: NotificationCent
                         {!isRead && (
                           <button 
                             onClick={() => handleMarkAsRead(notification.id)}
-                            className={styles.footerButton}
+                            className={styles.footerButton_read}
                           >
                             Marcar como leída
                           </button>
                         )}
                         <button 
                           onClick={() => handleDelete(notification.id)}
-                          className={styles.footerButton}
+                          className={styles.footerButton_remove}
                         >
                           Quitar
                         </button>

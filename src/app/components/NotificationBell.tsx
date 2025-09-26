@@ -32,13 +32,7 @@ export default function NotificationBell({ userId, onNotificationClick, session 
 
     // --- Suscripción al canal Realtime (patrón simplificado y estándar) ---
     console.log('Realtime: Attempting to subscribe to channel...');
-    const readsChannel = supabase.channel(`notification-reads-changes-for-${userId}`,
-      {
-        config: {
-          accessToken: session.access_token,
-        },
-      }
-    )
+    const readsChannel = supabase.channel(`notification-reads-changes-for-${userId}`)
       .on('postgres_changes', {
         event: '*', // Escucha INSERT, UPDATE, DELETE
         schema: 'public',
@@ -49,9 +43,6 @@ export default function NotificationBell({ userId, onNotificationClick, session 
         console.log('Realtime: Change received in notification_reads, refetching count...', payload);
         fetchUnreadCount();
       })
-      .on('CHANNEL_STATE', (state) => console.log('Realtime: Channel state changed:', state))
-      .on('SYSTEM_ERROR', (error) => console.error('Realtime: System error:', error))
-      .on('ERROR', (error) => console.error('Realtime: Channel error:', error))
       .subscribe();
 
     console.log('Realtime: Subscribed to channel:', readsChannel);
