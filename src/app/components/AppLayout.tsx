@@ -185,6 +185,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
             <NotificationBell 
               userId={session.user.id} 
               onNotificationClick={() => setShowNotificationCenter(true)} 
+              session={session} 
             />
           </div>
         </div>

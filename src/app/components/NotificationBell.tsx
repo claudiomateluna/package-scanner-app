@@ -1,67 +1,66 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient'; // Usar el cliente global
 import { getUnreadNotificationsCount } from '@/lib/notificationService';
+import { Session } from '@supabase/supabase-js';
 
 interface NotificationBellProps {
   userId: string;
   onNotificationClick: () => void;
+  session: Session; // Recibir la sesión como prop
 }
 
-export default function NotificationBell({ userId, onNotificationClick }: NotificationBellProps) {
+export default function NotificationBell({ userId, onNotificationClick, session }: NotificationBellProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!session?.access_token) {
+      setLoading(false);
+      return;
+    }
+
     const fetchUnreadCount = async () => {
-      try {
-        const count = await getUnreadNotificationsCount(userId);
-        setUnreadCount(count);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching unread notifications count:', error);
-        setLoading(false);
-      }
+      const count = await getUnreadNotificationsCount(userId);
+      setUnreadCount(count);
     };
 
-    fetchUnreadCount();
+    // Carga inicial
+    setLoading(true);
+    fetchUnreadCount().finally(() => setLoading(false));
 
-    // Suscribirse a cambios en tiempo real
-    const channel = supabase.channel(`notifications-${userId}`)
-      .on('broadcast', { event: 'new_notification' }, () => {
-        // Incrementar el contador cuando llega una nueva notificación
-        setUnreadCount(prev => prev + 1);
-      })
-      .subscribe();
-
-    // También podemos escuchar cambios en la tabla notification_reads
-    const readsChannel = supabase.channel('notification-reads-changes')
+    // --- Suscripción al canal Realtime (patrón simplificado y estándar) ---
+    console.log('Realtime: Attempting to subscribe to channel...');
+    const readsChannel = supabase.channel(`notification-reads-changes-for-${userId}`,
+      {
+        config: {
+          accessToken: session.access_token,
+        },
+      }
+    )
       .on('postgres_changes', {
-        event: 'UPDATE',
+        event: '*', // Escucha INSERT, UPDATE, DELETE
         schema: 'public',
         table: 'notification_reads',
         filter: `user_id=eq.${userId}`
-      }, () => {
-        // Actualizar el contador cuando se marcan notificaciones como leídas
+      },
+      (payload) => {
+        console.log('Realtime: Change received in notification_reads, refetching count...', payload);
         fetchUnreadCount();
       })
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'notification_reads',
-        filter: `user_id=eq.${userId}`
-      }, () => {
-        // Actualizar el contador cuando se insertan nuevas lecturas
-        fetchUnreadCount();
-      })
+      .on('CHANNEL_STATE', (state) => console.log('Realtime: Channel state changed:', state))
+      .on('SYSTEM_ERROR', (error) => console.error('Realtime: System error:', error))
+      .on('ERROR', (error) => console.error('Realtime: Channel error:', error))
       .subscribe();
+
+    console.log('Realtime: Subscribed to channel:', readsChannel);
 
     return () => {
-      supabase.removeChannel(channel);
+      console.log('Realtime: Unsubscribing from channel:', readsChannel);
       supabase.removeChannel(readsChannel);
     };
-  }, [userId]);
+  }, [userId, session?.access_token]); // session.access_token es una dependencia clave
 
   if (loading) {
     return (
