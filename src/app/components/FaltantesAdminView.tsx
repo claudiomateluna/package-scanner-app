@@ -361,38 +361,27 @@ export default function FaltantesAdminView({ session, profile }: Props) {
       `}</style>
       
       <div style={{ width: '100%', padding: '5px', boxSizing: 'border-box', maxWidth: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', width: '100%' }}>
-          <h2 style={{ color: 'var(--color-text-primary)' }}>Administración de Faltantes ({totalCount} reportes)</h2>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button 
-              onClick={handleExportToCSV}
-              style={{ 
-                padding: '8px 16px', 
-                backgroundColor: 'var(--color-accent)', 
-                color: 'var(--color-card-background)', 
-                border: 'none', 
-                borderRadius: '4px', 
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              Descargar CSV
-            </button>
-            <input 
-              type="text" 
-              value={globalFilter ?? ''} 
-              onChange={e => setGlobalFilter(e.target.value)} 
-              placeholder="Buscar en toda la tabla..." 
-              style={{ 
-                padding: '8px', 
-                border: '1px solid var(--color-border)', 
-                borderRadius: '4px', 
-                width: '400px', 
-                backgroundColor: 'var(--color-card-background)', 
-                color: 'var(--color-text-primary)' 
-              }} 
-            />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '5px' }}>
+          <div style={{ display: 'flex', gap: '5px', width: '85%' }}><h2 style={{ color: 'var(--color-text-primary)', marginBottom: '0' }}>Administración de Faltantes ({totalCount} reportes)</h2></div>
+          <div style={{ display: 'flex', gap: '5px', width: '15%' }}>
+                <Image src="/descargarCsv1.svg" alt="Descargar CSV" width={80} height={50} style={{marginBottom:'0'}} onClick={handleExportToCSV} />
           </div>
+        </div>
+        <div style={{ display: 'flex', gap: '5px', width: '100%', marginBottom: '20px' }}>
+          <input 
+            type="text" 
+            value={globalFilter ?? ''} 
+            onChange={e => setGlobalFilter(e.target.value)} 
+            placeholder="Buscar en toda la tabla..." 
+            style={{ 
+              padding: '8px', 
+              border: '1px solid var(--color-border)', 
+              borderRadius: '4px', 
+              width: '100%', 
+              backgroundColor: 'var(--color-card-background)', 
+              color: 'var(--color-text-primary)' 
+            }} 
+          />
         </div>
         
         <div style={{ width: '100%', overflowX: 'auto' }}>
