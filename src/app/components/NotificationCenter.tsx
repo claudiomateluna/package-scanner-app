@@ -131,39 +131,105 @@ export default function NotificationCenter({ userId, onClose }: NotificationCent
                     <div 
                       key={notification.id} 
                       className={`${styles.notificationItem} ${isRead ? styles.read : styles.unread}`}
+                      role="listitem"
+                      aria-label={`Notificación ${isRead ? 'leída' : 'no leída'}: ${(() => {
+                        switch(notification.type) {
+                          case 'created':
+                            return 'Ticket Creado';
+                          case 'managed':
+                            return 'Ticket Gestionado';
+                          case 'edited':
+                            return 'Ticket Editado';
+                          case 'pending':
+                            return 'Ticket Pendiente';
+                          case 'modified':
+                            return 'Ticket Modificado';
+                          default:
+                            return 'Ticket Actualizado';
+                        }
+                      })()}`}
                     >
-                      <div className={styles.notificationHeader}>
-                        <div className={styles.entityType}>{entityTypeDisplay}</div>
-                        <div className={styles.ticketId}>
-                          {notification.ticket_id ? (
-                            <a href={`/tickets?ticket_id=${notification.ticket_id}`} onClick={onClose}>
-                              {notification.ticket_id}
-                            </a>
-                          ) : 'N/A'}
+                      <div className={styles.notificationRow}>
+                        {/* Icon and action buttons on the left */}
+                        <div className={styles.notificationIcon}>
+                          <svg className={`${styles.bellIcon} ${isRead ? styles.read : styles.unread}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                          </svg>
+                          <div className={styles.notificationActions}>
+                            {!isRead && (
+                              <button 
+                                onClick={() => handleMarkAsRead(notification.id)}
+                                className={`${styles.actionButton} ${isRead ? styles.read : styles.unread}`}
+                                aria-label="Marcar como leída"
+                                title="Marcar como leída"
+                                role="button"
+                                aria-pressed={isRead}
+                              >
+                                ✓
+                              </button>
+                            )}
+                            <button 
+                              onClick={() => handleDelete(notification.id)}
+                              className={`${styles.actionButton} ${isRead ? styles.read : styles.unread}`}
+                              aria-label="Eliminar notificación"
+                              title="Eliminar notificación"
+                              role="button"
+                            >
+                              ✖
+                            </button>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className={styles.notificationBodyMain}>
-                        <div className={styles.actionText}>{notification.title}</div>
-                        <div className={styles.bodyText}>{notification.body}</div>
-                        <div className={styles.timestamp}>{formatDate(notification.created_at)}</div>
-                      </div>
+                        {/* Notification content on the right */}
+                        <div className={styles.notificationContent}>
+                          <div className={styles.notificationHeader}>
+                            <div className={styles.entityType}>{entityTypeDisplay}</div>
+                            <div className={styles.ticketId}>
+                              {notification.ticket_id ? (
+                                <a href={`/tickets?ticket_id=${notification.ticket_id}`} onClick={onClose}>
+                                  {notification.ticket_id}
+                                </a>
+                              ) : 'N/A'}
+                            </div>
+                          </div>
 
-                      <div className={styles.notificationFooter}>
-                        {!isRead && (
-                          <button 
-                            onClick={() => handleMarkAsRead(notification.id)}
-                            className={styles.footerButton_read}
-                          >
-                            Marcar como leída
-                          </button>
-                        )}
-                        <button 
-                          onClick={() => handleDelete(notification.id)}
-                          className={styles.footerButton_remove}
-                        >
-                          Quitar
-                        </button>
+                          {/* Simplified title based on notification type */}
+                          <div className={`${styles.notificationTitle} ${isRead ? styles.read : styles.unread}`}>
+                            {(() => {
+                              if (notification.type.includes('_creado')) {
+                                return 'Ticket Creado';
+                              } else if (notification.type.includes('_estado_cambiado')) {
+                                // For estado_cambiado notifications, check if it's now gestionado
+                                return notification.body.includes('gestionado') || notification.body.includes('Gestionado') 
+                                  ? 'Ticket Gestionado' 
+                                  : 'Ticket Estado Cambiado';
+                              } else if (notification.type.includes('_actualizado')) {
+                                return 'Ticket Actualizado';
+                              } else if (notification.type === 'recepcion_completada') {
+                                return 'Recepción Completada';
+                              } else {
+                                // Fallback: try to determine from the body or title
+                                if (notification.body.toLowerCase().includes('creado')) {
+                                  return 'Ticket Creado';
+                                } else if (notification.body.toLowerCase().includes('gestionado')) {
+                                  return 'Ticket Gestionado';
+                                } else if (notification.body.toLowerCase().includes('pendiente')) {
+                                  return 'Ticket Pendiente';
+                                } else if (notification.body.toLowerCase().includes('modificado')) {
+                                  return 'Ticket Modificado';
+                                } else if (notification.body.toLowerCase().includes('editado')) {
+                                  return 'Ticket Editado';
+                                } else {
+                                  return 'Ticket Actualizado'; // Default fallback
+                                }
+                              }
+                            })()}
+                          </div>
+
+                          <div className={styles.bodyText}>{notification.body}</div>
+                          <div className={styles.timestamp}>{formatDate(notification.created_at)}</div>
+                        </div>
                       </div>
                     </div>
                   );

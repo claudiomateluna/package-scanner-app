@@ -130,7 +130,6 @@ export default function Home() {
       ) : currentView === 'rechazos' ? (
         selectedPackage ? (
           <RechazoFormView 
-            session={session} 
             profile={profile} 
             packageData={selectedPackage} 
             onBack={handleBackFromRechazos}

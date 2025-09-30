@@ -11,7 +11,7 @@
 }
 
 .notificationCenter {
-  background-color: white;
+  background-color: #f6f6f6;
   width: 100%;
   max-width: 500px;
   height: 100%;
@@ -21,24 +21,29 @@
 }
 
 .header {
+  align-items: center;
+  background: no-repeat left/1.8em url('/adidas_shp.svg') #FFF;
+  background-position: top 8px left 10px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #eee;
+  padding: 10px;
 }
 
 .header h2 {
-  margin: 0;
   color: #333;
+  font-size: 1.5em;
+  margin: 0 0 0 35px;
 }
 
 .closeButton {
   background: none;
   border: none;
-  cursor: pointer;
-  padding: 5px;
   color: #666;
+  cursor: pointer;
+  font-size: 1.5em;
+  line-height: 0;
+  margin-bottom: 0;
+  padding: 5px;
 }
 
 .closeButton:hover {
@@ -46,20 +51,23 @@
 }
 
 .actions {
-  padding: 10px 20px;
-  border-bottom: 1px solid #eee;
+  padding: 10px;
 }
 
 .markAllButton {
-  background: none;
-  border: none;
-  color: #007bff;
+  background: #ccc;
+  border: 1px solid #999;
+  color: #000;
   cursor: pointer;
   font-size: 14px;
+  padding: 5px;
+  border-radius: 14px;
+  transition: background 0.3s ease;
 }
 
 .markAllButton:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  background: #FFF;
 }
 
 .loading, .error, .noNotifications {
@@ -79,100 +87,156 @@
 
 .notificationItem {
   padding: 8px;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 6px;
+  margin: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.notificationItem.read {
+  background-color: #f1f1f1;
+  border-left: 3px solid #999;
+  border-bottom: 1px solid #999;
 }
 
 .notificationItem.unread {
-  background-color: #F8F1B2;
+  background-color: var(--color-background);
+  border-left: 3px solid var(--color-accent);
+}
+
+.notificationRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.notificationIcon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0; /* Prevent the icon area from shrinking */
+  height: 112px;
+  justify-content: space-between;
+}
+
+.bellIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-accent);
+}
+.bellIcon.read {
+  color: #999;
+}
+
+.notificationActions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.actionButton {
+  background: var(--color-button-background);
+  color: var(--color-button-text);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.actionButton.read {
+  background: #999;
+  border: #999;
+}
+
+.actionButton:hover {
+  background: var(--color-accent-hover);
+  transform: scale(1.05);
+}
+
+.actionButton:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.notificationContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0; /* Allows flex item to shrink below content size */
 }
 
 .notificationHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
 }
 
-.entityType{
-  font-size: 12px;
-  color: #999;
+.entityType {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
   text-transform: uppercase;
-  margin-right: 10px;
+  letter-spacing: 1px;
+  line-height: 1;
+  background-color: rgba(0,0,0,0.05);
+  padding: 4px 6px 1px 6px;
+  border-radius: 4px;
+}
+
+p .entityType {
+  margin-bottom: 0;
 }
 
 .ticketId a {
-  color:#d9534f;
+  color: var(--color-error);
   font-weight: bold;
-  font-size: 14px;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.ticketId a:hover {
+  text-decoration: underline;
 }
 
 .notificationTitle {
-  margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
+  margin: 0;
+  padding: 0;
 }
 
-.bodyText{
-  font-size: 12px;
-  color: #333;
-}
-
-.notificationTime {
-  font-size: 12px;
+.notificationTitle.read {
+  font-size: 15px;
+  font-weight: 600;
   color: #999;
+  margin: 0;
+  padding: 0;
 }
 
-.notificationBody {
-  margin-bottom: 12px;
-  color: #666;
+.bodyText {
+  font-size: 13px;
+  color: var(--color-text-secondary);
   line-height: 1.4;
+  margin: 0 0 8px 0;
 }
 
-.notificationFooter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #000000AA;
-  margin: 0 -8px -8px -8px;
-  padding: 6px;
-}
-
-.notificationMeta {
-  font-size: 12px;
-  color: #999;
-}
-
-.markAsReadButton {
-  background: none;
-  border: none;
-  color: #000;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.footerButton_read{
-  background: none;
-  border: 1px solid #FFF;
-  border-radius: 4px;
-  color: #FFF;
-  cursor: pointer;
+.timestamp {
+  color: var(--color-text-tertiary);
   font-size: 10px;
-  padding: 4px 8px;
-}
-
-.footerButton_remove{
-  background: none;
-  border: 1px solid #FFF;
-  border-radius: 4px;
-  color: #FFF;
-  cursor: pointer;
-  font-size: 10px;
-  padding: 4px 8px;
-}
-
-.markAsReadButton:hover {
-  text-decoration: underline;
+  font-style: italic;
+  margin: 0;
+  text-align: right;
 }
 
 .pagination {

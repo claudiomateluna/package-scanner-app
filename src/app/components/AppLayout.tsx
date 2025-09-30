@@ -244,7 +244,6 @@ export default function AppLayout({ session, profile, onBack, children, currentV
                 </button>
               </div>
               <RechazoForm 
-                session={session} 
                 profile={profile} 
                 onComplete={() => setShowRechazoForm(false)} // Close modal when scan is complete
               />
