@@ -1,17 +1,15 @@
 // src/app/components/RechazoFormView.tsx
 'use client';
 
-import { Session } from '@supabase/supabase-js';
 import RechazoForm from './RechazoForm';
 
 interface Props {
-  session: Session;
   profile: { role: string | null };
   packageData?: { OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; };
   onBack: () => void;
 }
 
-export default function RechazoFormView({ session, profile, packageData, onBack }: Props) {
+export default function RechazoFormView({ profile, packageData, onBack }: Props) {
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -33,7 +31,6 @@ export default function RechazoFormView({ session, profile, packageData, onBack 
       </div>
       
       <RechazoForm 
-        session={session} 
         profile={profile} 
         initialData={packageData}
         onComplete={onBack}
