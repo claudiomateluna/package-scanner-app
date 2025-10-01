@@ -36,15 +36,15 @@ interface Rechazo {
     nombre_local: string;
     tipo_local: string;
     cliente_final: string;
-    motivo: string;
-    responsabilidad: string;
-    responsabilidad_area: string;
-    unidades_rechazadas: number;
-    unidades_totales: number;
-    bultos_rechazados: number;
-    bultos_totales: number;
-    transporte: string;
-    foto_rechazado: string;
+    motivo: string | null;
+    responsabilidad: string | null;
+    responsabilidad_area: string | null;
+    unidades_rechazadas: number | null;
+    unidades_totales: number | null;
+    bultos_rechazados: number | null;
+    bultos_totales: number | null;
+    transporte: string | null;
+    foto_rechazado: string | null;
     gestionado: boolean;
     created_at: string;
     created_by_user_name: string;
@@ -89,9 +89,31 @@ export default function RechazosAdminView({ session, profile }: Props) {
   const [lightboxImage, setLightboxImage] = useState('');
 
   const getPublicUrl = (filePath: string | null) => {
-    if (!filePath) return null;
-    const { data } = supabase.storage.from('rechazos-fotos').getPublicUrl(filePath);
-    return data?.publicUrl;
+    if (!filePath || filePath.trim() === '') return null;
+    
+    // Check if filePath is already a complete URL
+    if (filePath.startsWith('http')) {
+      // If it contains the storage URL twice, extract the actual path
+      const storageUrlPattern = /.*\/storage\/v1\/object\/public\/rechazos-fotos\//;
+      const match = filePath.match(storageUrlPattern);
+      if (match && filePath.indexOf(match[0], match[0].length) !== -1) {
+        // URL duplication detected, extract the second (actual) part
+        const duplicatedIndex = filePath.indexOf(match[0], match[0].length);
+        if (duplicatedIndex !== -1) {
+          const actualPath = filePath.substring(duplicatedIndex + match[0].length);
+          const { data } = supabase.storage.from('rechazos-fotos').getPublicUrl(actualPath);
+          return data.publicUrl;
+        } else {
+          return filePath; // Return as is if no duplication found
+        }
+      } else {
+        return filePath; // Return as is if no duplication
+      }
+    } else {
+      // If not a full URL, build it properly
+      const { data } = supabase.storage.from('rechazos-fotos').getPublicUrl(filePath);
+      return data?.publicUrl;
+    }
   };
 
   const handleEditClick = (rechazo: Rechazo) => {
@@ -179,11 +201,26 @@ export default function RechazosAdminView({ session, profile }: Props) {
   };
 
   const openLightbox = (imageUrl: string) => {
-    // If the URL is already a complete URL, use it directly
-    // Otherwise, try to get the public URL from Supabase storage
+    // Check if the URL is already a complete URL
     if (imageUrl.startsWith('http')) {
-      setLightboxImage(imageUrl);
+      // If it contains the storage URL twice, extract the actual path
+      const storageUrlPattern = /.*\/storage\/v1\/object\/public\/rechazos-fotos\//;
+      const match = imageUrl.match(storageUrlPattern);
+      if (match && imageUrl.indexOf(match[0], match[0].length) !== -1) {
+        // URL duplication detected, extract the second (actual) part
+        const duplicatedIndex = imageUrl.indexOf(match[0], match[0].length);
+        if (duplicatedIndex !== -1) {
+          const actualPath = imageUrl.substring(duplicatedIndex + match[0].length);
+          const { data } = supabase.storage.from('rechazos-fotos').getPublicUrl(actualPath);
+          setLightboxImage(data.publicUrl);
+        } else {
+          setLightboxImage(imageUrl); // Use as is if no duplication found
+        }
+      } else {
+        setLightboxImage(imageUrl); // Use as is if no duplication
+      }
     } else {
+      // If not a full URL, build it properly
       const publicUrl = getPublicUrl(imageUrl);
       setLightboxImage(publicUrl || imageUrl);
     }
@@ -207,10 +244,10 @@ export default function RechazosAdminView({ session, profile }: Props) {
       'Motivo': item.motivo || '',
       'Responsabilidad': item.responsabilidad || '',
       'Área': item.responsabilidad_area || '',
-      'Unid. Rech.': item.unidades_rechazadas,
-      'Unid. Tot.': item.unidades_totales,
-      'Bultos Rech.': item.bultos_rechazados,
-      'Bultos Tot.': item.bultos_totales,
+      'Unid. Rech.': item.unidades_rechazadas || 0,
+      'Unid. Tot.': item.unidades_totales || 0,
+      'Bultos Rech.': item.bultos_rechazados || 0,
+      'Bultos Tot.': item.bultos_totales || 0,
       'Transporte': item.transporte || '',
       'Foto': item.foto_rechazado || '',
       'Creado por': item.created_by_user_name,
@@ -235,14 +272,14 @@ export default function RechazosAdminView({ session, profile }: Props) {
     { accessorKey: 'nombre_local', header: 'Cliente', minSize: 120, maxSize: 380 },
     { accessorKey: 'tipo_local', header: 'Tipo Local', minSize: 75, maxSize: 100 },
     { accessorKey: 'cliente_final', header: 'Cliente Final', minSize: 120, maxSize: 380 },
-    { accessorKey: 'motivo', header: 'Motivo', cell: info => <div title={info.getValue() as string}>{(info.getValue() as string)?.substring(0, 30)}...</div>, minSize: 150 },
-    { accessorKey: 'responsabilidad', header: 'Responsabilidad', minSize: 110, maxSize: 180 },
-    { accessorKey: 'responsabilidad_area', header: 'Área', minSize: 80, maxSize: 120 },
-    { accessorKey: 'unidades_rechazadas', header: 'Unid. Rech.', minSize: 85, maxSize: 120 },
-    { accessorKey: 'unidades_totales', header: 'Unid. Tot.', minSize: 67, maxSize: 120 },
-    { accessorKey: 'bultos_rechazados', header: 'Bultos Rech.', minSize: 90, maxSize: 120 },
-    { accessorKey: 'bultos_totales', header: 'Bultos Tot.', minSize: 76, maxSize: 120 },
-    { accessorKey: 'transporte', header: 'Transporte', minSize: 75, maxSize: 320 },
+    { accessorKey: 'motivo', header: 'Motivo', cell: info => <div title={info.getValue() as string || ''}>{(info.getValue() as string || '')?.substring(0, 30)}...</div>, minSize: 150 },
+    { accessorKey: 'responsabilidad', header: 'Responsabilidad', minSize: 110, maxSize: 180, cell: info => info.getValue() as string || '' },
+    { accessorKey: 'responsabilidad_area', header: 'Área', minSize: 80, maxSize: 120, cell: info => info.getValue() as string || '' },
+    { accessorKey: 'unidades_rechazadas', header: 'Unid. Rech.', minSize: 85, maxSize: 120, cell: info => info.getValue() as number ?? 0 },
+    { accessorKey: 'unidades_totales', header: 'Unid. Tot.', minSize: 67, maxSize: 120, cell: info => info.getValue() as number ?? 0 },
+    { accessorKey: 'bultos_rechazados', header: 'Bultos Rech.', minSize: 90, maxSize: 120, cell: info => info.getValue() as number ?? 0 },
+    { accessorKey: 'bultos_totales', header: 'Bultos Tot.', minSize: 76, maxSize: 120, cell: info => info.getValue() as number ?? 0 },
+    { accessorKey: 'transporte', header: 'Transporte', minSize: 75, maxSize: 320, cell: info => info.getValue() as string || '' },
     {
       accessorKey: 'foto_rechazado',
       header: 'Foto',

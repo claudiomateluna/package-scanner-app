@@ -18,11 +18,34 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
   const [error, setError] = useState('');
 
   const getPublicUrl = (filePath: string | null, isRechazoImage: boolean = false) => {
-    if (!filePath) return null;
+    if (!filePath || filePath.trim() === '') return null;
+    
     // Determine which bucket based on the type of ticket
     const bucket = isRechazoImage ? 'rechazos-fotos' : 'faltantes-attachments';
-    const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
-    return data?.publicUrl;
+    
+    // Check if filePath is already a complete URL
+    if (filePath.startsWith('http')) {
+      // If it contains the storage URL twice, extract the actual path
+      const storageUrlPattern = new RegExp(`.*\\/storage\\/v1\\/object\\/public\\/${bucket}\\/`);
+      const match = filePath.match(storageUrlPattern);
+      if (match && filePath.indexOf(match[0], match[0].length) !== -1) {
+        // URL duplication detected, extract the second (actual) part
+        const duplicatedIndex = filePath.indexOf(match[0], match[0].length);
+        if (duplicatedIndex !== -1) {
+          const actualPath = filePath.substring(duplicatedIndex + match[0].length);
+          const { data } = supabase.storage.from(bucket).getPublicUrl(actualPath);
+          return data.publicUrl;
+        } else {
+          return filePath; // Return as is if no duplication found
+        }
+      } else {
+        return filePath; // Return as is if no duplication
+      }
+    } else {
+      // If not a full URL, build it properly
+      const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
+      return data?.publicUrl;
+    }
   };
 
   useEffect(() => {
