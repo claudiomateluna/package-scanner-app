@@ -197,15 +197,21 @@ p .entityType {
   margin-bottom: 0;
 }
 
-.ticketId a {
+.ticketId button {
+  background: none;
+  border: none;
   color: var(--color-error);
   font-weight: bold;
   font-size: 13px;
-  text-decoration: none;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
 }
 
-.ticketId a:hover {
-  text-decoration: underline;
+.ticketId button:hover {
+  opacity: 0.8;
 }
 
 .notificationTitle {

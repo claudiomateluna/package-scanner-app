@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '@/lib/notificationService';
 import styles from './NotificationCenter.module.css';
 import toast from 'react-hot-toast';
+import TicketViewer from './TicketViewer';
 
 interface NotificationItem {
   id: number;
@@ -32,6 +33,7 @@ export default function NotificationCenter({ userId, onClose }: NotificationCent
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const limit = 20;
 
   const fetchNotifications = useCallback(async (pageNum: number = 1) => {
@@ -187,9 +189,15 @@ export default function NotificationCenter({ userId, onClose }: NotificationCent
                             <div className={styles.entityType}>{entityTypeDisplay}</div>
                             <div className={styles.ticketId}>
                               {notification.ticket_id ? (
-                                <a href={`/tickets?ticket_id=${notification.ticket_id}`} onClick={onClose}>
+                                <button 
+                                  className={styles.ticketLink}
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent event bubbling
+                                    setSelectedTicketId(notification.ticket_id || null);
+                                  }}
+                                >
                                   {notification.ticket_id}
-                                </a>
+                                </button>
                               ) : 'N/A'}
                             </div>
                           </div>
@@ -259,6 +267,15 @@ export default function NotificationCenter({ userId, onClose }: NotificationCent
           </>
         )}
       </div>
+      
+      {/* Ticket Viewer Modal */}
+      {selectedTicketId && (
+        <TicketViewer 
+          ticketId={selectedTicketId} 
+          userId={userId} 
+          onClose={() => setSelectedTicketId(null)} 
+        />
+      )}
     </div>
   );
 }
