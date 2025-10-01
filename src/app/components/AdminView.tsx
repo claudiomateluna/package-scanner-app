@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, CSSProperties, useMemo, useRef, ReactNode } from 'react'
+import { useState, useEffect, CSSProperties, useMemo, useRef, ReactNode, useCallback } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import Papa from 'papaparse'
-import { canUserManageRole, getAssignableRoles } from '@/lib/roleHierarchy'
+import { canUserManageRole, getAssignableRoles, roleHierarchy } from '@/lib/roleHierarchy'
 import LocalesView from './LocalesView'
 
 // --- Tipos de Datos ---
@@ -588,7 +588,7 @@ export default function AdminView({ profile }: AdminViewProps) {
     fetchLocals();
   }, [canManageUsers, isStoreSupervisor, profile?.id]);
 
-  async function fetchProfiles() {
+  const fetchProfiles = useCallback(async function fetchProfiles() {
     setLoading(true)
     try {
       // Obtener todos los perfiles
@@ -624,14 +624,60 @@ export default function AdminView({ profile }: AdminViewProps) {
       })
 
       // Convertir el mapa en array
-      const profilesWithLocals: Profile[] = Object.values(profilesMap)
+      let profilesWithLocals: Profile[] = Object.values(profilesMap)
+      
+      // Aplicar filtrado según jerarquía de roles y locales asignados
+      if (profile?.role && profile.id) {
+        const userRank = roleHierarchy[profile.role];
+        if (userRank !== undefined) {
+          // Para Store Supervisor: filtrar solo usuarios con locales que coincidan con los suyos
+          if (profile.role === 'Store Supervisor') {
+            // Obtener locales del supervisor actual
+            const { data: currentUserLocalsData, error: currentUserLocalsError } = await supabase
+              .from('user_locals')
+              .select('local_name')
+              .eq('user_id', profile.id);
+            
+            if (!currentUserLocalsError && currentUserLocalsData) {
+              const currentUserLocals = currentUserLocalsData.map(item => item.local_name);
+              // Filtrar perfiles que tengan al menos un local en común con el supervisor
+              profilesWithLocals = profilesWithLocals.filter(p => {
+                // Mostrar al propio usuario
+                if (p.id === profile.id) return true;
+                
+                // Los usuarios con roles superiores no deben ser visibles
+                const targetRank = roleHierarchy[p.role || ''];
+                if (targetRank !== undefined && targetRank < userRank) return false;
+                
+                // Filtrar por locales asignados
+                if (p.assigned_locals && p.assigned_locals.length > 0) {
+                  return p.assigned_locals.some(local => currentUserLocals.includes(local));
+                }
+                return false; // Si no tiene locales asignados, no se muestra
+              });
+            }
+          } else {
+            // Para otros roles: filtrar usuarios con nivel superior en la jerarquía
+            profilesWithLocals = profilesWithLocals.filter(p => {
+              // Mostrar al propio usuario
+              if (p.id === profile.id) return true;
+              
+              // Ocultar usuarios con rol superior en la jerarquía
+              const targetRank = roleHierarchy[p.role || ''];
+              if (targetRank !== undefined && targetRank < userRank) return false;
+              
+              return true;
+            });
+          }
+        }
+      }
       
       setProfiles(profilesWithLocals)
     } catch (error: unknown) {
       toast.error('Error inesperado al cargar los perfiles: ' + ((error as Error).message || (error as Error).toString()))
     }
     setLoading(false)
-  }
+  }, [profile?.id, profile?.role])
 
   useEffect(() => { 
     if (canManageUsers) { 
@@ -639,7 +685,7 @@ export default function AdminView({ profile }: AdminViewProps) {
     } else { 
       setLoading(false)
     } 
-  }, [canManageUsers])
+  }, [canManageUsers, fetchProfiles])
 
   useEffect(() => {
     setFilteredProfiles(profiles);
