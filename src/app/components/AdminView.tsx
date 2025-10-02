@@ -130,7 +130,7 @@ function DataUploader() {
 }
 
 // --- Componente para Editar Perfil ---
-function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUserLocal, onLocalChange }: { profile: Profile, onSave: () => void, onCancel: () => void, currentUserRole: string, currentUserLocal: string | null, onLocalChange: (local: string, isChecked: boolean) => void }) {
+function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUserLocal }: { profile: Profile, onSave: () => void, onCancel: () => void, currentUserRole: string, currentUserLocal: string | null }) {
   const [formData, setFormData] = useState(profile);
   const [newPassword, setNewPassword] = useState('');
   const [userLocals, setUserLocals] = useState<string[]>(profile.assigned_locals || []);
@@ -209,6 +209,15 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
     fetchLocals();
     fetchUserLocals();
   }, [profile.id]);
+
+  // Function to handle changes to locale assignments
+  const handleLocalChange = (local: string, isChecked: boolean) => {
+    if (isChecked) {
+      setUserLocals(prev => [...prev, local]);
+    } else {
+      setUserLocals(prev => prev.filter(l => l !== local));
+    }
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -447,7 +456,7 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
                         <input
                           type="checkbox"
                           checked={userLocals.includes(local)}
-                          onChange={(e) => onLocalChange(local, e.target.checked)}
+                          onChange={(e) => handleLocalChange(local, e.target.checked)}
                         />
                         <span style={{ marginLeft: '5px' }}>{local}</span>
                       </label>
@@ -1160,7 +1169,6 @@ export default function AdminView({ profile }: AdminViewProps) {
                     onCancel={() => setEditingProfileId(null)} 
                     currentUserRole={userRole} 
                     currentUserLocal={null} 
-                    onLocalChange={handleLocalChange} 
                   />
                 )}
               </div>
