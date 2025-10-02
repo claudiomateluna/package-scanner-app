@@ -2,6 +2,7 @@
 
 import { useState, useEffect, CSSProperties, useMemo, useRef, ReactNode, useCallback } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { validatePassword } from '@/lib/passwordUtils'
 import toast from 'react-hot-toast'
 import Papa from 'papaparse'
 import { canUserManageRole, getAssignableRoles, roleHierarchy } from '@/lib/roleHierarchy'
@@ -166,7 +167,13 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
         if (value.length < 2) return 'El apellido debe tener al menos 2 caracteres';
         return '';
       case 'password':
-        if (value && value.length < 6) return 'La contraseña debe tener al menos 6 caracteres';
+        if (value) {
+          // Use the new password validation function
+          const validation = validatePassword(value);
+          if (!validation.isValid) {
+            return validation.errors[0]; // Return the first error message
+          }
+        }
         return '';
       default:
         return '';

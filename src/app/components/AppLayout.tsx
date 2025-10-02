@@ -3,6 +3,7 @@
 import { Session } from '@supabase/supabase-js'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { validatePassword } from '@/lib/passwordUtils'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
 import SlidingMenu from './SlidingMenu'
@@ -16,7 +17,12 @@ import '../globals.css'
 import styles from './AppLayout.module.css'
 
 // --- Tipos de Datos ---
-type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
+type Profile = { 
+  role: string | null; 
+  first_name?: string | null; 
+  last_name?: string | null; 
+  must_change_password?: boolean; // Add field to track if password change is required
+}
 export type View = 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search' | 'reportar-faltante'; // Added ticket-search and reportar-faltante
 
 interface Props {
@@ -32,18 +38,47 @@ interface Props {
 const ChangePasswordForm = ({ onDone }: { onDone: () => void }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword.length < 6) { return toast.error('La contraseña debe tener al menos 6 caracteres.'); }
-    if (newPassword !== confirmPassword) { return toast.error('Las contraseñas no coinciden.'); }
+    
+    // Validar contraseña con los nuevos requisitos
+    const validation = validatePassword(newPassword);
+    if (!validation.isValid) {
+      toast.error(validation.errors[0]); // Mostrar el primer error
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      toast.error('Las contraseñas no coinciden.');
+      return;
+    }
 
     const loadingToast = toast.loading('Actualizando contraseña...');
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     toast.dismiss(loadingToast);
 
-    if (error) { toast.error('Error al actualizar: ' + error.message); }
-    else { toast.success('Contraseña actualizada exitosamente.'); onDone(); }
+    if (error) { 
+      toast.error('Error al actualizar: ' + error.message); 
+    } else { 
+      toast.success('Contraseña actualizada exitosamente.'); 
+      onDone(); 
+    }
+  };
+
+  // Función para manejar el cambio de contraseña y validar en tiempo real
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewPassword(value);
+    
+    // Validar en tiempo real
+    const validation = validatePassword(value);
+    if (!validation.isValid) {
+      setPasswordError(validation.errors[0]);
+    } else {
+      setPasswordError('');
+    }
   };
 
   return (
@@ -51,10 +86,29 @@ const ChangePasswordForm = ({ onDone }: { onDone: () => void }) => {
       <form onSubmit={handleSubmit}>
         <h4 style={{marginTop: 0}}>Cambiar mi contraseña</h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '400px' }}>
-          <input type="password" placeholder="Nueva contraseña" value={newPassword} onChange={e => setNewPassword(e.target.value)} required className={styles.input} />
-          <input type="password" placeholder="Confirmar nueva contraseña" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className={styles.input} />
+          <input 
+            type="password" 
+            placeholder="Nueva contraseña" 
+            value={newPassword} 
+            onChange={handlePasswordChange} 
+            required 
+            className={styles.input} 
+            style={{ borderColor: passwordError ? '#e63946' : '#ccc' }}
+          />
+          {passwordError && <div style={{ color: '#e63946', fontSize: '0.8em', marginTop: '5px' }}>{passwordError}</div>}
+          <div style={{ fontSize: '0.75em', color: '#6c757d', marginTop: '5px' }}>
+            La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
+          </div>
+          <input 
+            type="password" 
+            placeholder="Confirmar nueva contraseña" 
+            value={confirmPassword} 
+            onChange={e => setConfirmPassword(e.target.value)} 
+            required 
+            className={styles.input} 
+          />
           <div style={{marginTop: '10px', display: 'flex', gap: '10px'}}>
-            <button type="submit" className={styles.button}>Guardar</button>
+            <button type="submit" className={styles.button} disabled={!!passwordError}>Guardar</button>
             <button type="button" onClick={onDone} className={styles.buttonSecondary}>Cancelar</button>
           </div>
         </div>
@@ -71,6 +125,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   const [rechazosCount, setRechazosCount] = useState(0);
   const [showRechazoForm, setShowRechazoForm] = useState(false); // New state for rechazo form modal
   const [showNotificationCenter, setShowNotificationCenter] = useState(false); // State for notification center
+  const [mustChangePassword, setMustChangePassword] = useState(profile?.must_change_password || false); // Add state to track if password change is required
 
   // Role-based access control functions
   const userRole = profile?.role || '';
@@ -130,6 +185,31 @@ export default function AppLayout({ session, profile, onBack, children, currentV
     const channel = supabase.channel('rechazos-count').on('postgres_changes', { event: '*', schema: 'public', table: 'rechazos' }, fetchRechazosCount).subscribe();
     return () => { supabase.removeChannel(channel); }
   }, [canAccessGestionRechazos]);
+
+  // Check if user must change password on component mount
+  useEffect(() => {
+    const checkPasswordRequirement = async () => {
+      try {
+        const response = await fetch(`/api/fetch-profile?userId=${session.user.id}`);
+        const data = await response.json();
+        
+        if (data.profile && data.profile.must_change_password) {
+          setMustChangePassword(true);
+          setShowPasswordForm(true); // Automatically show password change form if required
+        }
+      } catch (error) {
+        console.error('Error checking password requirement:', error);
+      }
+    };
+
+    // Check if the user has the must_change_password flag in their profile prop
+    if (profile?.must_change_password) {
+      setMustChangePassword(true);
+      setShowPasswordForm(true);
+    } else {
+      checkPasswordRequirement(); // Check via API if not in initial profile
+    }
+  }, [session.user.id, profile?.must_change_password]);
 
   // const headerStyle: CSSProperties = { 
   //   display: 'flow-root',
@@ -204,7 +284,13 @@ export default function AppLayout({ session, profile, onBack, children, currentV
         <NotificationToast userId={session.user.id} />
         
         {showPasswordForm ? (
-          <ChangePasswordForm onDone={() => setShowPasswordForm(false)} />
+          <ChangePasswordForm onDone={() => {
+            setShowPasswordForm(false);
+            // If the user had to change password, update the flag
+            if (mustChangePassword) {
+              setMustChangePassword(false);
+            }
+          }} />
         ) : showRechazoForm ? (
           // Render the RechazoForm in a modal
           <div style={{

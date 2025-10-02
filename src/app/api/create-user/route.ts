@@ -39,7 +39,8 @@ export async function POST(request: Request) {
       local_asignado: local_asignado,
       first_name: first_name, // Campo añadido
       last_name: last_name,   // Campo añadido
-      email: email            // Campo añadido
+      email: email,            // Campo añadido
+      must_change_password: true  // Nuevo campo para forzar cambio de contraseña en primer login
     })
     .eq('id', userData.user.id)
 

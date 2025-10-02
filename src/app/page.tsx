@@ -11,7 +11,12 @@ import RechazosView from './components/RechazosView'
 import RechazoFormView from './components/RechazoFormView'
 
 // Definimos los tipos de datos que usaremos en este componente padre
-type Profile = { role: string | null; first_name?: string | null; last_name?: string | null; }
+type Profile = { 
+  role: string | null; 
+  first_name?: string | null; 
+  last_name?: string | null; 
+  must_change_password?: boolean; // Add field to track if password change is required
+}
 type Selection = { local: string; fecha: string; }
 
 export default function Home() {
@@ -31,7 +36,7 @@ export default function Home() {
         if (currentSession) {
           const { data: profileData, error } = await supabase
             .from('profiles')
-            .select('role, first_name, last_name')
+            .select('role, first_name, last_name, must_change_password')
             .eq('id', currentSession.user.id)
             .single()
           
@@ -69,7 +74,7 @@ export default function Home() {
         try {
           const { data: profileData, error } = await supabase
             .from('profiles')
-            .select('role, first_name, last_name')
+            .select('role, first_name, last_name, must_change_password')
             .eq('id', session.user.id)
             .single()
           

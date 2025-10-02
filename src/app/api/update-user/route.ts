@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { canUserManageRole } from '@/lib/roleHierarchy'
+import { hashPassword } from '@/lib/passwordUtils'
 
 export async function PATCH(request: Request) {
   const { id, email, password, role, first_name, last_name, assigned_locals } = await request.json()
@@ -107,12 +108,50 @@ export async function PATCH(request: Request) {
     }
   }
 
-  // --- Actualizar datos del Perfil (rol, nombre, email) ---
-  const profileDataToUpdate: { role?: string; first_name?: string; last_name?: string; email?: string; } = {}
+  // --- Actualizar datos del Perfil (rol, nombre, email, contraseña, historial de contraseñas) ---
+  const profileDataToUpdate: { 
+    role?: string; 
+    first_name?: string; 
+    last_name?: string; 
+    email?: string; 
+    must_change_password?: boolean;
+    password_last_changed?: string;
+    password_history?: string[];
+  } = {}
   if (role) profileDataToUpdate.role = role;
   if (first_name !== undefined) profileDataToUpdate.first_name = first_name;
   if (last_name !== undefined) profileDataToUpdate.last_name = last_name;
   if (email !== undefined) profileDataToUpdate.email = email;
+
+  // Si se está actualizando la contraseña, actualizar también la fecha y el historial
+  if (password) {
+    // Obtener el perfil actual para obtener el historial de contraseñas
+    const { data: currentProfile, error: profileFetchError } = await supabaseAdmin
+      .from('profiles')
+      .select('password_history')
+      .eq('id', id)
+      .single();
+
+    if (profileFetchError) {
+      return NextResponse.json({ error: `Error al obtener el perfil actual: ${profileFetchError.message}` }, { status: 500 });
+    }
+
+    // Obtener el historial actual y añadir la nueva contraseña (hash)
+    let currentPasswordHistory = currentProfile?.password_history || [];
+    
+    // Limitar el historial a las últimas 5 contraseñas
+    if (currentPasswordHistory.length >= 5) {
+      currentPasswordHistory = currentPasswordHistory.slice(-4); // Mantener solo las últimas 4
+    }
+    
+    // Añadir la nueva contraseña al historial
+    const hashedNewPassword = hashPassword(password);
+    currentPasswordHistory.push(hashedNewPassword);
+
+    profileDataToUpdate.password_history = currentPasswordHistory;
+    profileDataToUpdate.password_last_changed = new Date().toISOString();
+    profileDataToUpdate.must_change_password = false; // Resetear el flag si se cambia la contraseña
+  }
 
   if (Object.keys(profileDataToUpdate).length > 0) {
     const { error: profileError } = await supabaseAdmin
