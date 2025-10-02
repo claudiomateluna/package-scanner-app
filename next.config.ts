@@ -3,7 +3,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ['gkqebmqtmjeinjuoivvu.supabase.co'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'gkqebmqtmjeinjuoivvu.supabase.co',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
   
   // Configuración de encabezados para controlar cache
