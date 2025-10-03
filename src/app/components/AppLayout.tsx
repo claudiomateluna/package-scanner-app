@@ -13,6 +13,7 @@ import ReportarFaltanteForm from './ReportarFaltanteForm' // Import ReportarFalt
 import NotificationBell from './NotificationBell'
 import NotificationCenter from './NotificationCenter'
 import NotificationToast from './NotificationToast'
+import SessionTimeoutHandler from './SessionTimeoutHandler'
 import '../globals.css'
 import styles from './AppLayout.module.css'
 
@@ -35,7 +36,7 @@ interface Props {
 }
 
 // --- Componente del Formulario de Contraseña ---
-const ChangePasswordForm = ({ onDone }: { onDone: () => void }) => {
+const ChangePasswordForm = ({ onDone, onCancel }: { onDone: () => void, onCancel?: () => void }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -56,14 +57,45 @@ const ChangePasswordForm = ({ onDone }: { onDone: () => void }) => {
     }
 
     const loadingToast = toast.loading('Actualizando contraseña...');
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    toast.dismiss(loadingToast);
+    
+    try {
+      // Get the session token to make API call
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      if (!token) {
+        toast.error('No se pudo obtener la sesión de autenticación');
+        return;
+      }
 
-    if (error) { 
-      toast.error('Error al actualizar: ' + error.message); 
-    } else { 
-      toast.success('Contraseña actualizada exitosamente.'); 
-      onDone(); 
+      // Update the user's password via the update-user API which handles both password and must_change_password flag
+      const response = await fetch('/api/update-user', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          id: session.user.id,
+          // Only update the password (this will trigger the must_change_password = false in the API)
+          password: newPassword
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error('Error al actualizar: ' + errorData.error);
+        return;
+      }
+
+      toast.success('Contraseña actualizada exitosamente.');
+      
+      onDone();
+    } catch (error) {
+      console.error('Error updating password:', error);
+      toast.error('Error al actualizar la contraseña');
+    } finally {
+      toast.dismiss(loadingToast);
     }
   };
 
@@ -109,7 +141,13 @@ const ChangePasswordForm = ({ onDone }: { onDone: () => void }) => {
           />
           <div style={{marginTop: '10px', display: 'flex', gap: '10px'}}>
             <button type="submit" className={styles.button} disabled={!!passwordError}>Guardar</button>
-            <button type="button" onClick={onDone} className={styles.buttonSecondary}>Cancelar</button>
+            <button 
+              type="button" 
+              onClick={onCancel ? onCancel : onDone} 
+              className={styles.buttonSecondary}
+            >
+              Cancelar
+            </button>
           </div>
         </div>
       </form>
@@ -193,9 +231,18 @@ export default function AppLayout({ session, profile, onBack, children, currentV
         const response = await fetch(`/api/fetch-profile?userId=${session.user.id}`);
         const data = await response.json();
         
-        if (data.profile && data.profile.must_change_password) {
-          setMustChangePassword(true);
-          setShowPasswordForm(true); // Automatically show password change form if required
+        // Only set the state if the response is successful and has data
+        if (response.ok && data.profile) {
+          if (data.profile.must_change_password) {
+            setMustChangePassword(true);
+            setShowPasswordForm(true); // Automatically show password change form if required
+          } else if (mustChangePassword) {
+            // If the user no longer needs to change password but the state says otherwise
+            setMustChangePassword(false);
+          }
+        } else if (response.status === 404) {
+          // User not found, which shouldn't happen if they're logged in
+          console.error('User not found when checking password requirement');
         }
       } catch (error) {
         console.error('Error checking password requirement:', error);
@@ -206,10 +253,11 @@ export default function AppLayout({ session, profile, onBack, children, currentV
     if (profile?.must_change_password) {
       setMustChangePassword(true);
       setShowPasswordForm(true);
-    } else {
+    } else if (!mustChangePassword) {
+      // Only check via API if we don't already know the user doesn't need to change password
       checkPasswordRequirement(); // Check via API if not in initial profile
     }
-  }, [session.user.id, profile?.must_change_password]);
+  }, [session.user.id, profile?.must_change_password, mustChangePassword]);
 
   // const headerStyle: CSSProperties = { 
   //   display: 'flow-root',
@@ -228,8 +276,16 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   // Verificar si la vista actual es de administración de rechazos o faltantes
   const isFullWidthView = currentView === 'faltantes' || currentView === 'rechazos';
 
+  // Handler for session timeout - redirect to login
+  const handleSessionTimeout = () => {
+    // Redirect to login page or handle session timeout as needed
+    window.location.href = '/';
+  };
+
   return (
     <div>
+      <SessionTimeoutHandler userId={session.user.id} onSessionTimeout={handleSessionTimeout} />
+      
       <SlidingMenu
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
@@ -284,13 +340,30 @@ export default function AppLayout({ session, profile, onBack, children, currentV
         <NotificationToast userId={session.user.id} />
         
         {showPasswordForm ? (
-          <ChangePasswordForm onDone={() => {
-            setShowPasswordForm(false);
-            // If the user had to change password, update the flag
-            if (mustChangePassword) {
-              setMustChangePassword(false);
-            }
-          }} />
+          <ChangePasswordForm 
+            onDone={() => {
+              setShowPasswordForm(false);
+              // If the user had to change password, update the flag
+              if (mustChangePassword) {
+                setMustChangePassword(false);
+              }
+            }} 
+            onCancel={() => {
+              // If user is required to change password (new user) and cancels, 
+              // force logout
+              if (mustChangePassword) {
+                // Clear any local storage related to the session
+                localStorage.removeItem('sb-gkqebmqtmjeinjuoivvu-auth-token');
+                
+                // Redirect to login without relying on the signOut API call
+                // This handles the case where the session might be invalid
+                window.location.href = '/';
+              } else {
+                // Otherwise just close the form
+                setShowPasswordForm(false);
+              }
+            }}
+          />
         ) : showRechazoForm ? (
           // Render the RechazoForm in a modal
           <div style={{

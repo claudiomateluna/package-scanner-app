@@ -110,6 +110,10 @@ export default function Home() {
   }
 
   const handleLoginSuccess = () => {
+    // Set the session start time when login is successful
+    import('@/lib/sessionTimeoutUtils').then(({ setSessionStartTime }) => {
+      setSessionStartTime();
+    });
     // Recargar la página para forzar una actualización completa del estado
     window.location.reload()
   }

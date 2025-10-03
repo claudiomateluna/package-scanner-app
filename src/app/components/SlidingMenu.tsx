@@ -54,9 +54,27 @@ export default function SlidingMenu({
   const router = useRouter();
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) toast.error('Error al cerrar sesión: ' + error.message);
-    else { toast.success('Sesión cerrada correctamente'); router.push('/'); }
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error during sign out:', error);
+        // Even if the API sign-out fails, clear local session and redirect
+      }
+      
+      // Clear any local storage related to the session
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      toast.success('Sesión cerrada correctamente');
+      router.push('/');
+    } catch (err) {
+      console.error('Unexpected error during sign out:', err);
+      // Clear local storage and redirect even if there's an error
+      localStorage.clear();
+      sessionStorage.clear();
+      toast.success('Sesión cerrada correctamente');
+      router.push('/');
+    }
   };
 
   useEffect(() => {

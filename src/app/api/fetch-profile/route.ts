@@ -11,14 +11,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    // Create Supabase client
-    const supabase = createClient(
+    // Create Supabase client with service role key for admin access
+    const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
     );
 
     // Query the profiles table to get user profile with password change requirement
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('profiles')
       .select('id, role, first_name, last_name, email, must_change_password')
       .eq('id', userId)
