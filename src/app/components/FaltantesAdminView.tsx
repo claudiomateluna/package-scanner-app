@@ -1,7 +1,7 @@
 // src/app/components/FaltantesAdminView.tsx
 'use client'
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Session } from '@supabase/supabase-js';
 import toast from 'react-hot-toast';
@@ -50,30 +50,6 @@ interface Props {
   profile: { role: string | null };
 }
 
-const PAGE_SIZE = 20;
-
-// --- Componente Lightbox para Imágenes ---
-const Lightbox = ({ src, onClose }: { src: string; onClose: () => void }) => (
-  <div 
-    onClick={onClose} 
-    style={{ 
-      position: 'fixed', 
-      top: 0, 
-      left: 0, 
-      width: '100%', 
-      height: '100%', 
-      backgroundColor: 'rgba(0,0,0,0.8)', 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      zIndex: 2000, 
-      cursor: 'pointer' 
-    }}
-  >
-    <Image src={src} alt="Imagen ampliada" width={800} height={600} style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain' }} />
-  </div>
-);
-
 const formatDate = (dateString: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -81,7 +57,7 @@ const formatDate = (dateString: string) => {
   return `${day}-${month}-${year}`;
 };
 
-export default function FaltantesAdminView({ session, profile }: Props) {
+export default function FaltantesAdminView({ session }: Props) {
   const [faltantes, setFaltantes] = useState<Faltante[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -361,6 +337,19 @@ export default function FaltantesAdminView({ session, profile }: Props) {
       `}</style>
       
       <div style={{ width: '100%', padding: '5px', boxSizing: 'border-box', maxWidth: '100%' }}>
+        {loading && (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '60px', 
+            width: '100%',
+            color: 'var(--color-text-primary)',
+            fontSize: '16px'
+          }}>
+            Cargando datos...
+          </div>
+        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '5px' }}>
           <div style={{ display: 'flex', gap: '5px', width: '85%' }}><h2 style={{ color: 'var(--color-text-primary)', marginBottom: '0' }}>Administración de Faltantes ({totalCount} reportes)</h2></div>
           <div style={{ display: 'flex', gap: '5px', width: '15%' }}>

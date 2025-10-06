@@ -114,8 +114,9 @@ export default function MinimalLogin({ onLoginSuccess }: LoginProps) {
         // Forzar una actualización inmediata del estado
         window.location.reload()
       }
-    } catch (error) {
-      toast.error('Error al iniciar sesión')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al iniciar sesión'
+      toast.error(errorMessage)
       setLoading(false)
     }
   }

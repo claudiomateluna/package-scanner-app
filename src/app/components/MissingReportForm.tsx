@@ -58,7 +58,7 @@ interface CustomWindow extends Window {
   existingFotoBultoUrl?: string;
 }
 
-const MissingReportForm = ({ packageData, session, onClose, onReportSaved }: Props) => {
+const MissingReportForm = ({ packageData, onClose, onReportSaved }: Omit<Props, 'session'>) => {
   // Cleanup on unmount
   useEffect(() => {
     return () => {

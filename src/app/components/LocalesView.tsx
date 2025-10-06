@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect, CSSProperties } from 'react'
+import { useState, useEffect, useCallback, CSSProperties } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
-import { canUserManageRole } from '@/lib/roleHierarchy'
 
 interface Local {
   id: number
@@ -80,7 +79,7 @@ export default function LocalesView({ profile }: LocalesViewProps) {
 
   const canManageLocales = profile?.role === 'administrador' || profile?.role === 'Warehouse Supervisor' || profile?.role === 'Warehouse Operator'
 
-  async function fetchLocales() {
+  const fetchLocales = useCallback(async () => {
     // Verificar permisos
     if (!canManageLocales) {
       return;
@@ -116,11 +115,11 @@ export default function LocalesView({ profile }: LocalesViewProps) {
       toast.error('Error inesperado al cargar los locales: ' + ((error as Error).message || (error as Error).toString()))
     }
     setLoading(false)
-  }
+  }, [canManageLocales])
 
   useEffect(() => {
     fetchLocales()
-  }, [canManageLocales])
+  }, [canManageLocales, fetchLocales])
 
   const handleCreateLocal = async (e: React.FormEvent) => {
     e.preventDefault()

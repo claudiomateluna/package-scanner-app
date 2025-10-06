@@ -188,7 +188,7 @@ export async function PUT(request: Request) {
   )
 
   // Actualizar el local
-  const { data: _, error } = await supabaseAdmin
+  const { error } = await supabaseAdmin
     .from('locales')
     .update({
       nombre_local: nombre_local.trim(),

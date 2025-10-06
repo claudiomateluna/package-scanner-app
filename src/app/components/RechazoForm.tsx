@@ -89,7 +89,7 @@ export default function RechazoForm({
   const [showLocalesList, setShowLocalesList] = useState(false);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [ticketId, setTicketId] = useState('');
+  const [generatedTicketId, setGeneratedTicketId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -199,6 +199,7 @@ export default function RechazoForm({
         throw new Error(`Failed to generate ticket ID: ${ticketIdError.message}`);
       }
       console.log('Ticket ID generated:', ticketId);
+      setGeneratedTicketId(ticketId);
 
       const finalData = {
         ticket_id: ticketId,
@@ -290,6 +291,7 @@ export default function RechazoForm({
 
   const closeConfirmation = () => {
     setShowConfirmation(false);
+    setGeneratedTicketId('');
     setRechazoData({
       tipo_rechazo: '',
       mes: new Date().toISOString().substring(0, 7) + '-01',
@@ -327,7 +329,7 @@ export default function RechazoForm({
       {showConfirmation && (
         <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '10px', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000, textAlign: 'center' }}>
           <h3>Su Ticket es</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-error)' }}>{ticketId}</p>
+          <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-error)' }}>{generatedTicketId}</p>
           <button onClick={closeConfirmation} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '(--color-button-background)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cerrar</button>
         </div>
       )}

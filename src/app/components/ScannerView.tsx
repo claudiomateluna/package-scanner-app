@@ -82,6 +82,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
   const [isCompletingReception, setIsCompletingReception] = useState(false);
   const [receptionStartTime, setReceptionStartTime] = useState<string | null>(null);
   const [isReceptionCompleted, setIsReceptionCompleted] = useState(false); // Nuevo estado para verificar si la recepción ya fue completada
+  const [hasExistingReception, setHasExistingReception] = useState(false); // Estado para verificar si ya existe una recepción completada en la base de datos
   const [missingUnits, setMissingUnits] = useState<Record<string, number>>({});
   const [isRegistering, setIsRegistering] = useState(false);
   const [showMissingReportForm, setShowMissingReportForm] = useState(false);
@@ -158,10 +159,12 @@ export default function ScannerView({ session, profile, selection, currentView, 
       } else if (completedReceptions && completedReceptions.length > 0) {
         // La recepción ya fue completada
         setIsReceptionCompleted(true);
+        setHasExistingReception(true); // Actualizar el nuevo estado
         setCompletedReceptionData(completedReceptions[0]);
       } else {
         // La recepción no ha sido completada aún
         setIsReceptionCompleted(false);
+        setHasExistingReception(false); // Actualizar el nuevo estado
       }
       
       // Obtener paquetes esperados para el local seleccionado en la fecha seleccionada
@@ -474,6 +477,8 @@ export default function ScannerView({ session, profile, selection, currentView, 
     setShowReceptionHistory(true);
   };
 
+
+
   // Función para mostrar las estadísticas de recepciones
   const handleShowReceptionStatistics = () => {
     setShowReceptionStatistics(true);
@@ -484,6 +489,8 @@ export default function ScannerView({ session, profile, selection, currentView, 
     setShowReceptionHistory(false);
   };
 
+
+
   // Función para ocultar las estadísticas de recepciones
   const handleCloseReceptionStatistics = () => {
     setShowReceptionStatistics(false);
@@ -491,8 +498,8 @@ export default function ScannerView({ session, profile, selection, currentView, 
 
   // Manejar cuando se completa la recepción
   const handleReceptionCompleted = async () => {
-    // Verificar si ya se está completando la recepción o si ya se completó
-    if (isCompletingReception || isReceptionCompleted) {
+    // Verificar si ya se está completando la recepción
+    if (isCompletingReception) {
       return;
     }
     
@@ -504,6 +511,30 @@ export default function ScannerView({ session, profile, selection, currentView, 
     try {
       // Establecer el estado de completado para evitar múltiples clics
       setIsCompletingReception(true);
+
+      // Hacer una verificación final inmediatamente antes de la inserción para prevenir condiciones de carrera
+      const { data: finalCheck, error: finalCheckError } = await supabase
+        .from('recepciones_completadas')
+        .select('id')
+        .eq('local', selection.local)
+        .eq('fecha_recepcion', selection.fecha)
+        .limit(1);
+      
+      if (finalCheckError) {
+        console.error('Error en verificación final:', finalCheckError);
+        toast.error('Error al verificar estado de recepción');
+        setIsCompletingReception(false);
+        return;
+      }
+      
+      if (finalCheck && finalCheck.length > 0) {
+        // Ya existe una recepción completada para este local y fecha
+        toast.error('La recepción ya ha sido completada por otro usuario');
+        setIsReceptionCompleted(true);
+        setHasExistingReception(true);
+        setIsCompletingReception(false); // Restablecer estado
+        return;
+      }
       
       // Mostrar confirmación
       if (!window.confirm(`¿Estás seguro de que quieres completar esta recepción? Esta acción no se puede deshacer.`)) {
@@ -553,18 +584,55 @@ export default function ScannerView({ session, profile, selection, currentView, 
         }))
       };
 
-      // Guardar en la base de datos
+      // Intentar insertar con manejo de conflictos
       const { data, error } = await supabase
         .from('recepciones_completadas')
         .insert([receptionData])
         .select();
 
       if (error) {
-        throw error;
+        // Verificar si el error es por registro duplicado
+        if (error.code === '23505' || error.message.toLowerCase().includes('duplicate') || error.message.toLowerCase().includes('unique') || error.message.toLowerCase().includes('llave duplicada') || error.message.toLowerCase().includes('violates unique constraint')) {
+          // Ya existe una recepción completada para este local y fecha
+          toast.error('La recepción ya ha sido completada por otro usuario');
+          
+          // Verificar directamente en la base de datos para actualizar el estado
+          const { data: existingData } = await supabase
+            .from('recepciones_completadas')
+            .select('*')
+            .eq('local', selection.local)
+            .eq('fecha_recepcion', selection.fecha)
+            .limit(1);
+          
+          if (existingData && existingData.length > 0) {
+            setIsReceptionCompleted(true);
+            setHasExistingReception(true);
+            setCompletedReceptionData(existingData[0]);
+          } else {
+            // En caso de inconsistencia, verificar directamente en la base de datos
+            const { data: fallbackData } = await supabase
+              .from('recepciones_completadas')
+              .select('id')
+              .eq('local', selection.local)
+              .eq('fecha_recepcion', selection.fecha)
+              .limit(1);
+            
+            if (fallbackData && fallbackData.length > 0) {
+              setHasExistingReception(true);
+              setIsReceptionCompleted(true);
+            }
+          }
+          return;
+        } else {
+          // Otro tipo de error
+          throw error;
+        }
+      } else {
+        // Inserción exitosa
+        // Marcar la recepción como completada
+        setIsReceptionCompleted(true);
+        setHasExistingReception(true); // Actualizar el nuevo estado
       }
-
-      // Marcar la recepción como completada
-      setIsReceptionCompleted(true);
       
       // Mostrar resumen de la recepción
       if (data && data.length > 0) {
@@ -696,21 +764,21 @@ export default function ScannerView({ session, profile, selection, currentView, 
                   {/* Botón de Recepción Completada */}
                   <button 
                     onClick={handleReceptionCompleted}
-                    disabled={!(packages.length > 0 && scanned.size === packages.length) || isCompletingReception || isReceptionCompleted}
+                    disabled={!(packages.length > 0 && scanned.size === packages.length) || isCompletingReception || hasExistingReception}
                     style={{ 
                       flex: '1',
                       padding: '10px', // Reducir padding
                       borderRadius: '5px',
-                      backgroundColor: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#A1C181' : (isCompletingReception || isReceptionCompleted ? '#ffffff' : '#ffffff'),
-                      color: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? '#ffffff' : '#000000',
+                      backgroundColor: hasExistingReception || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !hasExistingReception) ? '#A1C181' : (isCompletingReception || hasExistingReception ? '#ffffff' : '#ffffff'),
+                      color: hasExistingReception || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !hasExistingReception) ? '#ffffff' : '#000000',
                       fontWeight: 'bold',
                       fontSize: '1em',
-                      border: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? 'none' : '1px solid #000000',
-                      cursor: packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !isReceptionCompleted ? 'pointer' : 'not-allowed',
-                      opacity: isReceptionCompleted || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception) ? 1 : (isCompletingReception || isReceptionCompleted ? 0.6 : 1)
+                      border: hasExistingReception || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !hasExistingReception) ? 'none' : '1px solid #000000',
+                      cursor: packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !hasExistingReception ? 'pointer' : 'not-allowed',
+                      opacity: hasExistingReception || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !hasExistingReception) ? 1 : (isCompletingReception || hasExistingReception ? 0.6 : 1)
                     }}
                   >
-                    {isCompletingReception ? 'Completando...' : (isReceptionCompleted ? 'Recepción Completada' : (packages.length > 0 && scanned.size === packages.length ? 'Recepción Completada' : 'Pendiente'))}
+                    {isCompletingReception ? 'Completando...' : (hasExistingReception ? 'Recepción Completada' : (packages.length > 0 && scanned.size === packages.length ? 'Recepción Completada' : 'Pendiente'))}
                   </button>
                   
                   {/* Botón de Historial */}
@@ -730,6 +798,8 @@ export default function ScannerView({ session, profile, selection, currentView, 
                   >
                     Historial
                   </button>
+                  
+
                   
                   {/* Botón de Estadísticas - Visible para todos excepto Store Operator */}
                   {profile?.role !== 'Store Operator' && (
@@ -1087,9 +1157,12 @@ export default function ScannerView({ session, profile, selection, currentView, 
       {/* Mostrar historial de recepciones si está activo */}
       {showReceptionHistory && (
         <ReceptionHistory 
+          local={selection.local}
           onClose={handleCloseReceptionHistory}
         />
       )}
+      
+
       
       {/* Mostrar estadísticas de recepciones si está activo */}
       {showReceptionStatistics && (
@@ -1102,7 +1175,6 @@ export default function ScannerView({ session, profile, selection, currentView, 
       {showMissingReportForm && selectedPackage && (
         <MissingReportForm
           packageData={selectedPackage}
-          session={session}
           onClose={() => setShowMissingReportForm(false)}
           onReportSaved={() => {
             // Refresh or update any necessary data

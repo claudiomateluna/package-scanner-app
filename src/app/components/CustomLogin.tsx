@@ -124,8 +124,9 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
       setLoginAttempts(0)
       toast.success('Inicio de sesión exitoso')
       onLoginSuccess()
-    } catch (error) {
-      toast.error('Error al iniciar sesión')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al iniciar sesión'
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
