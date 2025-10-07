@@ -783,7 +783,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
                       packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]))
                       || isCompletingReception || hasExistingReception}
                     style={{ 
-                      flex: '1',
+                      flex: '1.8',
                       padding: '10px', // Reducir padding
                       borderRadius: '5px',
                       backgroundColor: hasExistingReception || 

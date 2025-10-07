@@ -24,13 +24,13 @@ interface SlidingMenuProps {
   canAccessAdministracion: boolean;
   canAccessAdmFaltantes: boolean;
   canAccessGestionRechazos: boolean;
+  canAccessGestionRecepciones: boolean;
   currentView: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'recepciones-completadas' | 'ticket-search' | 'reportar-faltante';
   setCurrentView: (view: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'recepciones-completadas' | 'ticket-search' | 'reportar-faltante') => void;
   showPasswordForm: boolean;
   setShowPasswordForm: (show: boolean) => void;
   faltantesCount: number;
   rechazosCount: number;
-  recepcionesCompletadasCount: number;
   onReportarRechazo?: () => void;
   onTicketSearch?: () => void;
   onReportarFaltante?: () => void; // New prop for reporting faltantes
@@ -43,13 +43,13 @@ export default function SlidingMenu({
   canAccessAdministracion,
   canAccessAdmFaltantes,
   canAccessGestionRechazos,
+  canAccessGestionRecepciones,
   currentView,
   setCurrentView,
   showPasswordForm,
   setShowPasswordForm,
   faltantesCount,
   rechazosCount,
-  recepcionesCompletadasCount,
   onReportarRechazo,
   onTicketSearch,
   onReportarFaltante // Destructure new prop
@@ -165,11 +165,12 @@ export default function SlidingMenu({
             </button>
           )}
           {/* Historial de Recepciones Completadas - Warehouse Operator, Warehouse Supervisor, Store Supervisor, administrador */}
-          <button onClick={() => { setCurrentView('recepciones-completadas'); onClose(); }} style={{ ...buttonStyle, backgroundColor: currentView === 'recepciones-completadas' ? 'rgba(0, 0, 0, 0.1)' : 'transparent' }}>
-            <ArchiveIcon />
-            <span>Historial Recepciones</span>
-            {recepcionesCompletadasCount > 0 && <span style={notificationBadgeStyle}>{recepcionesCompletadasCount}</span>}
-          </button>
+          {canAccessGestionRecepciones && (
+            <button onClick={() => { setCurrentView('recepciones-completadas'); onClose(); }} style={{ ...buttonStyle, backgroundColor: currentView === 'recepciones-completadas' ? 'rgba(0, 0, 0, 0.1)' : 'transparent' }}>
+              <ArchiveIcon />
+              <span>Historial Recepciones</span>
+            </button>
+          )}
           {/* Cambiar Contraseña - Todos los Usuarios */}
           <button onClick={() => { setShowPasswordForm(!showPasswordForm); onClose(); }} style={buttonStyle}><KeyIcon /><span>Cambiar Contraseña</span></button>
           <button onClick={() => { handleSignOut(); onClose(); }} style={{ ...buttonStyle, marginTop: 'auto', borderBottom: 'none' }}><LogoutIcon /><span>Cerrar Sesión</span></button>
