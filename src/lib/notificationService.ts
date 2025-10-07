@@ -49,26 +49,62 @@ async function getUsersByRoles(roles: string[]): Promise<{ id: string }[]> {
 export async function createReceptionCompletedNotification(payload: CompletedReceptionPayload): Promise<Notification | null> {
   try {
     const dedupKey = `recepcion_completada:${payload.recepcion_id}`;
-    const { data: existing } = await supabase.from('notifications').select('id').eq('dedup_key', dedupKey).single();
+    
+    // Check if a notification already exists with this dedup key
+    const { data: existing } = await supabase
+      .from('notifications')
+      .select('id')
+      .eq('dedup_key', dedupKey)
+      .single();
+      
     if (existing) return null;
 
     const title = 'Recepción completada';
     const body = `En ${payload.nombre_local} se completó la recepción DN ${payload.delivery_note} por ${payload.completada_por}.`;
 
-    const { data: notification, error: insertError } = await supabase
+    // Use the database function to create the notification with proper permissions
+    const { data, error } = await supabase
+      .rpc('create_recepcion_completada_notification', {
+        p_type: 'recepcion_completada',
+        p_title: title,
+        p_body: body,
+        p_entity_type: 'recepcion',
+        p_entity_id: parseInt(payload.recepcion_id, 10), // Ensure it's a number
+        p_nombre_local: payload.nombre_local,
+        p_created_by_user_id: payload.completada_por_id,
+        p_created_by_user_name: payload.completada_por,
+        p_dedup_key: dedupKey
+      });
+
+    if (error) {
+      console.error('Error creating notification via RPC:', error);
+      return null;
+    }
+
+    const notificationId = Array.isArray(data) && data.length > 0 ? data[0] : data;
+    
+    if (!notificationId) {
+      console.warn('Notification was not created (may have been duplicate)');
+      return null;
+    }
+
+    // If notificationId is null, it means the notification already existed
+    if (!notificationId) {
+      console.log('Notification already existed (deduplication)');
+      return null;
+    }
+
+    // Since the database function already handles notification_reads, 
+    // we can fetch the complete notification data
+    const { data: notification, error: fetchError } = await supabase
       .from('notifications')
-      .insert([{ type: 'recepcion_completada', title, body, entity_type: 'recepcion', entity_id: payload.recepcion_id, nombre_local: payload.nombre_local, created_by_user_id: payload.completada_por_id, created_by_user_name: payload.completada_por, dedup_key: dedupKey }])
-      .select()
+      .select('*')
+      .eq('id', notificationId)
       .single();
 
-    if (insertError) throw insertError;
-
-    const recipientRoles = ['Warehouse Operator', 'Warehouse Supervisor', 'administrador'];
-    const recipients = await getUsersByRoles(recipientRoles);
-    const readsToInsert = recipients.map(r => ({ notification_id: notification.id, user_id: r.id }));
-
-    if (readsToInsert.length > 0) {
-      await supabase.from('notification_reads').insert(readsToInsert);
+    if (fetchError) {
+      console.error('Error fetching created notification:', fetchError);
+      return null;
     }
 
     console.log('Notification for reception completed created:', notification.id);

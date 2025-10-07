@@ -503,8 +503,15 @@ export default function ScannerView({ session, profile, selection, currentView, 
       return;
     }
     
-    if (!(packages.length > 0 && scanned.size === packages.length)) {
-      toast.error('La recepción aún no está completa')
+    // Check if all packages are either scanned or have missing/rejection reports
+    const unhandledPackages = packages.filter(pkg => {
+      return !scanned.has(pkg.OLPN) && 
+             !existingReports[pkg.OLPN] && 
+             !existingRechazos[pkg.OLPN];
+    });
+    
+    if (packages.length > 0 && unhandledPackages.length > 0) {
+      toast.error(`La recepción aún no está completa. Quedan ${unhandledPackages.length} paquetes sin manejar.`);
       return;
     }
 
@@ -727,8 +734,11 @@ export default function ScannerView({ session, profile, selection, currentView, 
                 }}>
                   <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
                     <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
-                      {/* Calcular DN/Facturas escaneadas */}
-                      {Array.from(new Set(packages.filter(pkg => scanned.has(pkg.OLPN)).map(pkg => pkg.DN))).length} / {dnProgress.length}
+                      {/* Calcular DN/Facturas escaneadas o con reporte */}
+                      {Array.from(new Set(
+                        packages.filter(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN])
+                        .map(pkg => pkg.DN)
+                      )).length} / {dnProgress.length}
                     </div>
                     <div style={{ fontSize: '0.9em', color: '#666666' }}>
                       {isWarehouseOrAdmin ? 'DN' : 'Facturas'}
@@ -737,7 +747,10 @@ export default function ScannerView({ session, profile, selection, currentView, 
                   
                   <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
                     <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
-                      {scanned.size} / {packages.length}
+                      {Array.from(new Set(
+                        packages.filter(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN])
+                        .map(pkg => pkg.OLPN)
+                      )).length} / {packages.length}
                     </div>
                     <div style={{ fontSize: '0.9em', color: '#666666' }}>
                       {isWarehouseOrAdmin ? 'OLPN' : 'Bultos'}
@@ -746,7 +759,9 @@ export default function ScannerView({ session, profile, selection, currentView, 
                   
                   <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
                     <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
-                      {packages.filter(pkg => scanned.has(pkg.OLPN)).reduce((sum, pkg) => sum + pkg.Unidades, 0)} / {packages.reduce((sum, pkg) => sum + pkg.Unidades, 0)}
+                      {packages
+                        .filter(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN])
+                        .reduce((sum, pkg) => sum + pkg.Unidades, 0)} / {packages.reduce((sum, pkg) => sum + pkg.Unidades, 0)}
                     </div>
                     <div style={{ fontSize: '0.9em', color: '#666666' }}>
                       Unidades
@@ -764,21 +779,40 @@ export default function ScannerView({ session, profile, selection, currentView, 
                   {/* Botón de Recepción Completada */}
                   <button 
                     onClick={handleReceptionCompleted}
-                    disabled={!(packages.length > 0 && scanned.size === packages.length) || isCompletingReception || hasExistingReception}
+                    disabled={!(packages.length > 0 && 
+                      packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]))
+                      || isCompletingReception || hasExistingReception}
                     style={{ 
                       flex: '1',
                       padding: '10px', // Reducir padding
                       borderRadius: '5px',
-                      backgroundColor: hasExistingReception || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !hasExistingReception) ? '#A1C181' : (isCompletingReception || hasExistingReception ? '#ffffff' : '#ffffff'),
-                      color: hasExistingReception || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !hasExistingReception) ? '#ffffff' : '#000000',
+                      backgroundColor: hasExistingReception || 
+                        (packages.length > 0 && 
+                          packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) 
+                          && !isCompletingReception && !hasExistingReception) ? '#A1C181' : (isCompletingReception || hasExistingReception ? '#ffffff' : '#ffffff'),
+                      color: hasExistingReception || 
+                        (packages.length > 0 && 
+                          packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) 
+                          && !isCompletingReception && !hasExistingReception) ? '#ffffff' : '#000000',
                       fontWeight: 'bold',
                       fontSize: '1em',
-                      border: hasExistingReception || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !hasExistingReception) ? 'none' : '1px solid #000000',
-                      cursor: packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !hasExistingReception ? 'pointer' : 'not-allowed',
-                      opacity: hasExistingReception || (packages.length > 0 && scanned.size === packages.length && !isCompletingReception && !hasExistingReception) ? 1 : (isCompletingReception || hasExistingReception ? 0.6 : 1)
+                      border: hasExistingReception || 
+                        (packages.length > 0 && 
+                          packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) 
+                          && !isCompletingReception && !hasExistingReception) ? 'none' : '1px solid #000000',
+                      cursor: packages.length > 0 && 
+                        packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) 
+                        && !isCompletingReception && !hasExistingReception ? 'pointer' : 'not-allowed',
+                      opacity: hasExistingReception || 
+                        (packages.length > 0 && 
+                          packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) 
+                          && !isCompletingReception && !hasExistingReception) ? 1 : (isCompletingReception || hasExistingReception ? 0.6 : 1)
                     }}
                   >
-                    {isCompletingReception ? 'Completando...' : (hasExistingReception ? 'Recepción Completada' : (packages.length > 0 && scanned.size === packages.length ? 'Recepción Completada' : 'Pendiente'))}
+                    {isCompletingReception ? 'Completando...' : (hasExistingReception ? 'Recepción Completada' : 
+                      (packages.length > 0 && 
+                        packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) ? 
+                        'Recepción Completada' : 'Pendiente'))}
                   </button>
                   
                   {/* Botón de Historial */}
@@ -994,8 +1028,8 @@ export default function ScannerView({ session, profile, selection, currentView, 
               <tbody>
                 {filteredPackages.map(pkg => (
                   <tr key={pkg.OLPN} style={{ 
-                      backgroundColor: scanned.has(pkg.OLPN) ? '#A1C181' : 'transparent',
-                      color: scanned.has(pkg.OLPN) ? '#000000' : '#999999',
+                      backgroundColor: (scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) ? '#A1C181' : 'transparent',
+                      color: (scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) ? '#000000' : '#999999',
                       borderBottom: '1px solid #555'
                     }}>
                     <td style={{padding: '8px', textAlign: 'center'}}>{pkg.OLPN}</td>
