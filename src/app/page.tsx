@@ -9,6 +9,7 @@ import MinimalLogin from './components/MinimalLogin'
 import FaltantesAdminView from './components/FaltantesAdminView'
 import RechazosView from './components/RechazosView'
 import RechazoFormView from './components/RechazoFormView'
+import ReceptionView from './components/ReceptionView'
 
 // Definimos los tipos de datos que usaremos en este componente padre
 type Profile = { 
@@ -26,6 +27,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [currentView, setCurrentView] = useState<AppView>('scanner')
   const [selectedPackage, setSelectedPackage] = useState<{ OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; } | null>(null)
+  const [packageDataForRechazos, setPackageDataForRechazos] = useState<{ OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; } | null>(null)
 
   useEffect(() => {
     const checkSession = async () => {
@@ -146,6 +148,8 @@ export default function Home() {
         ) : (
           <RechazosView session={session} profile={profile} />
         )
+      ) : currentView === 'recepciones-completadas' ? (
+        <ReceptionView session={session} profile={profile} />
       ) : currentView === 'ticket-search' ? (
         <div></div>
       ) : !selection && currentView === 'scanner' ? (

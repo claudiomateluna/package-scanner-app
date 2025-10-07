@@ -15,6 +15,7 @@ const KeyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height=
 const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
 const BackIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>;
 const TicketSearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>;
+const ArchiveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>;
 
 interface SlidingMenuProps {
   isOpen: boolean;
@@ -23,12 +24,13 @@ interface SlidingMenuProps {
   canAccessAdministracion: boolean;
   canAccessAdmFaltantes: boolean;
   canAccessGestionRechazos: boolean;
-  currentView: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search' | 'reportar-faltante';
-  setCurrentView: (view: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search' | 'reportar-faltante') => void;
+  currentView: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'recepciones-completadas' | 'ticket-search' | 'reportar-faltante';
+  setCurrentView: (view: 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'recepciones-completadas' | 'ticket-search' | 'reportar-faltante') => void;
   showPasswordForm: boolean;
   setShowPasswordForm: (show: boolean) => void;
   faltantesCount: number;
   rechazosCount: number;
+  recepcionesCompletadasCount: number;
   onReportarRechazo?: () => void;
   onTicketSearch?: () => void;
   onReportarFaltante?: () => void; // New prop for reporting faltantes
@@ -47,6 +49,7 @@ export default function SlidingMenu({
   setShowPasswordForm,
   faltantesCount,
   rechazosCount,
+  recepcionesCompletadasCount,
   onReportarRechazo,
   onTicketSearch,
   onReportarFaltante // Destructure new prop
@@ -111,7 +114,7 @@ export default function SlidingMenu({
 
   const notificationBadgeStyle: React.CSSProperties = {
     marginLeft: 'auto',
-    backgroundColor: '#d9534f',
+    backgroundColor: 'var(--color-error)',
     color: 'white',
     borderRadius: '10px',
     padding: '2px 8px',
@@ -157,10 +160,16 @@ export default function SlidingMenu({
           {canAccessGestionRechazos && (
             <button onClick={() => { setCurrentView('rechazos'); onClose(); }} style={{ ...buttonStyle, backgroundColor: currentView === 'rechazos' ? 'rgba(0, 0, 0, 0.1)' : 'transparent' }}>
               <RechazosIcon />
-              <span>Gestión de Rechazos</span>
+              <span>Adm. Rechazos</span>
               {rechazosCount > 0 && <span style={notificationBadgeStyle}>{rechazosCount}</span>}
             </button>
           )}
+          {/* Historial de Recepciones Completadas - Warehouse Operator, Warehouse Supervisor, Store Supervisor, administrador */}
+          <button onClick={() => { setCurrentView('recepciones-completadas'); onClose(); }} style={{ ...buttonStyle, backgroundColor: currentView === 'recepciones-completadas' ? 'rgba(0, 0, 0, 0.1)' : 'transparent' }}>
+            <ArchiveIcon />
+            <span>Historial Recepciones</span>
+            {recepcionesCompletadasCount > 0 && <span style={notificationBadgeStyle}>{recepcionesCompletadasCount}</span>}
+          </button>
           {/* Cambiar Contraseña - Todos los Usuarios */}
           <button onClick={() => { setShowPasswordForm(!showPasswordForm); onClose(); }} style={buttonStyle}><KeyIcon /><span>Cambiar Contraseña</span></button>
           <button onClick={() => { handleSignOut(); onClose(); }} style={{ ...buttonStyle, marginTop: 'auto', borderBottom: 'none' }}><LogoutIcon /><span>Cerrar Sesión</span></button>

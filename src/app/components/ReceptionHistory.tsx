@@ -405,7 +405,7 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
         border: '1px solid var(--color-border)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0, color: 'var(--color-accent)' }}>Historial de Recepciones - {local}</h2>
+          <h2 style={{ margin: 0, color: 'var(--color-accent)', fontSize: '1.6em' }}>Historial de Recepciones - {local}</h2>
           <button 
             onClick={onClose}
             style={{

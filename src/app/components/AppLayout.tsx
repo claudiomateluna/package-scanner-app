@@ -24,7 +24,7 @@ type Profile = {
   last_name?: string | null; 
   must_change_password?: boolean; // Add field to track if password change is required
 }
-export type View = 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'ticket-search' | 'reportar-faltante'; // Added ticket-search and reportar-faltante
+export type View = 'scanner' | 'admin' | 'faltantes' | 'rechazos' | 'recepciones-completadas' | 'ticket-search' | 'reportar-faltante'; // Added recepciones-completadas and others
 
 interface Props {
   session: Session;
@@ -161,6 +161,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [faltantesCount, setFaltantesCount] = useState(0);
   const [rechazosCount, setRechazosCount] = useState(0);
+  const [recepcionesCompletadasCount, setRecepcionesCompletadasCount] = useState(0);
   const [showRechazoForm, setShowRechazoForm] = useState(false); // New state for rechazo form modal
   const [showNotificationCenter, setShowNotificationCenter] = useState(false); // State for notification center
   const [mustChangePassword, setMustChangePassword] = useState(profile?.must_change_password || false); // Add state to track if password change is required
@@ -223,6 +224,25 @@ export default function AppLayout({ session, profile, onBack, children, currentV
     const channel = supabase.channel('rechazos-count').on('postgres_changes', { event: '*', schema: 'public', table: 'rechazos' }, fetchRechazosCount).subscribe();
     return () => { supabase.removeChannel(channel); }
   }, [canAccessGestionRechazos]);
+  
+  // Effect for Recepciones Completadas
+  const canAccessGestionRecepciones = ['administrador', 'Warehouse Supervisor', 'Store Supervisor', 'Warehouse Operator'].includes(userRole);
+  useEffect(() => {
+    const fetchRecepcionesCompletadasCount = async () => {
+      if (canAccessGestionRecepciones) {
+        const { count, error } = await supabase.from('recepciones_completadas').select('*', { count: 'exact', head: true });
+        if (error) {
+          console.error('Error fetching recepciones completadas count:', error);
+        } else {
+          setRecepcionesCompletadasCount(count || 0);
+        }
+      }
+    };
+
+    fetchRecepcionesCompletadasCount();
+    const channel = supabase.channel('recepciones-completadas-count').on('postgres_changes', { event: '*', schema: 'public', table: 'recepciones_completadas' }, fetchRecepcionesCompletadasCount).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [canAccessGestionRecepciones]);
 
   // Check if user must change password on component mount
   useEffect(() => {
@@ -273,8 +293,8 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   
   const getUserFirstAndLastName = () => ({ firstName: profile?.first_name || '', lastName: profile?.last_name || '' });
 
-  // Verificar si la vista actual es de administración de rechazos o faltantes
-  const isFullWidthView = currentView === 'faltantes' || currentView === 'rechazos';
+  // Verificar si la vista actual es de administración de rechazos, faltantes o recepciones completadas
+  const isFullWidthView = currentView === 'faltantes' || currentView === 'rechazos' || currentView === 'recepciones-completadas';
 
   // Handler for session timeout - redirect to login
   const handleSessionTimeout = () => {
@@ -299,6 +319,7 @@ export default function AppLayout({ session, profile, onBack, children, currentV
         setShowPasswordForm={setShowPasswordForm}
         faltantesCount={faltantesCount}
         rechazosCount={rechazosCount}
+        recepcionesCompletadasCount={recepcionesCompletadasCount}
         onReportarRechazo={() => setShowRechazoForm(true)} // New prop
         onTicketSearch={() => setCurrentView('ticket-search')} // New prop
         onReportarFaltante={() => setCurrentView('reportar-faltante')} // New prop
