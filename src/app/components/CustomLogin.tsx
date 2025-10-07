@@ -292,7 +292,7 @@ export default function CustomLogin({ onLoginSuccess }: LoginProps) {
       </div>
       
       <footer className={styles.footer}>
-        Desarrollado por Claudio Mateluna González <br /> Warehouse Local Tech
+        Desarrollado por Claudio Mateluna González <br /> Warehouse Local Techs
       </footer>
     </div>
   )

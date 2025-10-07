@@ -14,6 +14,7 @@ interface DetalleRecepcion {
   unidades: number;
   escaneado: boolean;
   faltantes: number;
+  ticket_id?: string; // ID del ticket relacionado con faltantes/sobrantes o rechazo
 }
 
 interface RecepcionCompletada {
@@ -705,7 +706,8 @@ export default function ReceptionView({ session, profile }: Props) {
                                 <th style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'left' }}>DN</th>
                                 <th style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'right' }}>Unidades</th>
                                 <th style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'center' }}>Escaneado</th>
-                                <th style={{ padding: '8px', textAlign: 'right' }}>Faltantes</th>
+                                <th style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'right' }}>Faltantes</th>
+                                <th style={{ padding: '8px', textAlign: 'left' }}>Ticket</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -717,7 +719,23 @@ export default function ReceptionView({ session, profile }: Props) {
                                   <td style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'center' }}>
                                     {detalle.escaneado ? '✓' : '✗'}
                                   </td>
-                                  <td style={{ padding: '8px', textAlign: 'right' }}>{detalle.faltantes}</td>
+                                  <td style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'right' }}>{detalle.faltantes}</td>
+                                  <td style={{ padding: '8px' }}>
+                                    {detalle.ticket_id ? (
+                                      <span style={{ 
+                                        backgroundColor: '#A1C181', 
+                                        color: 'black', 
+                                        padding: '2px 6px', 
+                                        borderRadius: '4px', 
+                                        fontSize: '12px',
+                                        fontWeight: 'bold'
+                                      }}>
+                                        #{detalle.ticket_id}
+                                      </span>
+                                    ) : (
+                                      '-'
+                                    )}
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>

@@ -50,6 +50,7 @@ interface CompletedReceptionData {
     unidades: number;
     escaneado: boolean;
     faltantes: number;
+    ticket_id?: string; // ID del ticket relacionado con faltantes/sobrantes o rechazo
   }[];
   created_at?: string;
 }
@@ -582,13 +583,19 @@ export default function ScannerView({ session, profile, selection, currentView, 
         unidades_escaneadas: totalScannedUnits,
         unidades_faltantes: totalMissingUnits,
         estado: 'completada',
-        detalles: packages.map(pkg => ({
-          olpn: pkg.OLPN,
-          dn: pkg.DN,
-          unidades: pkg.Unidades,
-          escaneado: scanned.has(pkg.OLPN),
-          faltantes: missingUnits[pkg.OLPN] || 0,
-        }))
+        detalles: packages.map(pkg => {
+          // Buscar si existe un ticket de faltante o rechazo para este paquete
+          const ticketId = existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN] || null;
+          
+          return {
+            olpn: pkg.OLPN,
+            dn: pkg.DN,
+            unidades: pkg.Unidades,
+            escaneado: scanned.has(pkg.OLPN),
+            faltantes: missingUnits[pkg.OLPN] || 0,
+            ticket_id: ticketId // Incluir el ID del ticket si existe
+          };
+        })
       };
 
       // Intentar insertar con manejo de conflictos
