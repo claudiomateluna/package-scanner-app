@@ -22,6 +22,7 @@
   --warning: #FE7F2D; /* Énfasis para advertencias */
   --naranjo: #FE7F2D; /* Naranjo */
   --gray: #666666; /* Gris */
+  --gray-dark: #333333; /* Gris Oscuro */
   --btn-bkgd: #000000; /* Fondo de botones */
   --btn-text: #FFFFFF; /* Texto de botones */
   --btn-border: #FFFFFF; /* Borde de botones */
@@ -29,25 +30,25 @@
   --btn-alt-text: #000000; /* Texto de botones contraste ligero */
   --btn-alt-border: #000000; /* Borde de botones contraste ligero */
 
-/* Paleta de colores antigua */
+/* Mapeo de variables de colores antiguas a nuevas para compatibilidad */
 
-  --color-text-primary: #000000; /* Texto principal negro */
-  --color-text-secondary: #333333; /* Texto secundario gris oscuro */
-  --color-text-tertiary: #666666; /* Texto terciario gris medio */
-  --color-border: #000000; /* Bordes gris claro */
-  --color-button-background: #000000;
-  --color-button-text: #FFFFFF;
-  --color-button-border: #FFFFFF;
-  --color-button-alternative-background: #FFFFFF;
-  --color-button-alternative-text: #000000;
-  --color-button-alternative-border: #000000;
-  --color-border-dark: #dddddd; /* Bordes gris medio */
-  --color-accent: #000000; /* Color de énfasis negro */
-  --color-accent-hover: #333333; /* Color de énfasis hover gris oscuro */
-  --color-success: #a1c181; /* Verde para éxito */
-  --color-warning: #ff9e00; /* Naranja para advertencias */
-  --color-error: #e63946; /* Rojo para errores */
-  --color-card-background: #ffffff; /* Fondo de tarjetas blanco */
+  --color-text-primary: var(--text); /* Texto principal negro */
+  --color-text-secondary: var(--gray); /* Texto secundario gris oscuro */
+  --color-text-tertiary: var(--gray); /* Texto terciario gris medio */
+  --color-border: var(--border); /* Bordes negro */
+  --color-button-background: var(--btn-bkgd);
+  --color-button-text: var(--btn-text);
+  --color-button-border: var(--btn-border);
+  --color-button-alternative-background: var(--btn-alt-bkgd);
+  --color-button-alternative-text: var(--btn-alt-text);
+  --color-button-alternative-border: var(--btn-alt-border);
+  --color-border-dark: var(--border); /* Bordes negro */
+  --color-accent: var(--negro); /* Color de énfasis negro */
+  --color-accent-hover: var(--gray); /* Color de énfasis hover gris */
+  --color-success: var(--verde); /* Verde para éxito */
+  --color-warning: var(--naranjo); /* Naranja para advertencias */
+  --color-error: var(--rojo); /* Rojo para errores */
+  --color-card-background: var(--blanco); /* Fondo de tarjetas blanco */
 }
 
 /* Estilos globales para la aplicación */

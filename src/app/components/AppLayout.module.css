@@ -4,13 +4,13 @@
 .header {
   display: flow-root;
   align-items: center;
-  border-bottom: 1px solid var(--color-text-tertiary);
+  border-bottom: 1px solid var(--gray);
   padding: 5px;
   position: sticky;
   top: 0;
-  background-color: #ffffff;
+  background-color: var(--blanco);
   z-index: 10;
-  color: #000000;
+  color: var(--text);
 }
 
 /* Contenedor del contenido del encabezado */
@@ -39,14 +39,14 @@
 .title {
   margin: 0;
   font-size: 1.5rem;
-  color: #000000;
+  color: var(--negro);
 }
 
 /* Estilo para el texto de bienvenida */
 .welcomeText {
   margin: 0;
   font-size: 1rem;
-  color: #000000;
+  color: var(--negro);
 }
 
 /* Contenedor de notificaciones */

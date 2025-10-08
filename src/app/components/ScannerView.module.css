@@ -236,7 +236,7 @@
 }
 
 .deleteButton:hover {
-  color: #c00;
+  color: var(--rojo);
 }
 
 .footer {
