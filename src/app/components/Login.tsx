@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import '@/app/globals.css'
-import styles from './CustomLogin.module.css'
+import styles from './Login.module.css'
 import { isUserLocked, incrementLoginAttempts, resetLoginAttempts, lockUser, formatTime } from '@/lib/authUtils'
 
 interface LoginProps {
@@ -20,6 +20,7 @@ export default function MinimalLogin({ onLoginSuccess }: LoginProps) {
   const [isLocked, setIsLocked] = useState(false)
   const [lockTimeout, setLockTimeout] = useState(0)
   const [isClient, setIsClient] = useState(false)
+  const [activeTab, setActiveTab] = useState('developed') // Estado para tabs del footer
 
   // Verificar si hay un bloqueo guardado en localStorage
   useEffect(() => {
@@ -126,7 +127,7 @@ export default function MinimalLogin({ onLoginSuccess }: LoginProps) {
     return (
       <div className={styles.container}>
         <div className={styles.loginBox}>
-          <div style={{ textAlign: 'center', padding: '20px' }}>
+          <div className={styles.loadingContainer}>
             Cargando...
           </div>
         </div>
@@ -139,8 +140,8 @@ export default function MinimalLogin({ onLoginSuccess }: LoginProps) {
       <div className={styles.container}>
         <div className={styles.loginBox}>
           <div className="notification-error">
-            <h3 style={{ margin: '0 0 10px 0' }}>Cuenta Bloqueada</h3>
-            <p style={{ margin: '0' }}>
+            <h3 className={styles.lockedHeader}>Cuenta Bloqueada</h3>
+            <p className={styles.lockedParagraph}>
               Demasiados intentos fallidos. 
               <br />
               Intente nuevamente en: <strong>{formatTime(lockTimeout)}</strong>
@@ -211,7 +212,46 @@ export default function MinimalLogin({ onLoginSuccess }: LoginProps) {
       </div>
       
       <footer className={styles.footer}>
-        Desarrollado por Claudio Mateluna González <br /> Warehouse Local Tech
+        {/* Tabs minimalistas */}
+        <div className={styles.tabsContainer}>
+          <button 
+            onClick={() => setActiveTab('concept')}
+            className={`${styles.tabButton} ${activeTab === 'concept' ? styles.tabButtonActive : ''}`}
+          >
+            Concept
+          </button>
+          <button 
+            onClick={() => setActiveTab('prototype')}
+            className={`${styles.tabButton} ${activeTab === 'prototype' ? styles.tabButtonActive : ''}`}
+          >
+            Prototype
+          </button>
+          <button 
+            onClick={() => setActiveTab('developed')}
+            className={`${styles.tabButton} ${activeTab === 'developed' ? styles.tabButtonActive : ''}`}
+          >
+            Developed
+          </button>
+        </div>
+        
+        {/* Contenido de los tabs */}
+        <div className={styles.tabsContent}>
+          {activeTab === 'concept' && (
+            <div>
+              Concept by <b>Andric Aular</b> | Shipping Supervisor | DC Chile
+            </div>
+          )}
+          {activeTab === 'prototype' && (
+            <div>
+              Prototype by <b>Alejandro Oñate</b> | Shipping Specialist | DC Chile
+            </div>
+          )}
+          {activeTab === 'developed' && (
+            <div>
+              Developed by <b>Claudio Mateluna González</b> | Local Tech | DC Chile
+            </div>
+          )}
+        </div>
       </footer>
     </div>
   )

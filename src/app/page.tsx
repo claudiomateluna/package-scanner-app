@@ -5,7 +5,7 @@ import { Session } from '@supabase/supabase-js'
 import ScannerView from './components/ScannerView'
 import SelectionScreenWithLocales from './components/SelectionScreenWithLocales'
 import AppLayout, { View as AppView } from './components/AppLayout'
-import MinimalLogin from './components/MinimalLogin'
+import Login from './components/Login'
 import FaltantesAdminView from './components/FaltantesAdminView'
 import RechazosView from './components/RechazosView'
 import RechazoFormView from './components/RechazoFormView'
@@ -125,7 +125,7 @@ export default function Home() {
   }
 
   if (!session || !profile) {
-    return <MinimalLogin onLoginSuccess={handleLoginSuccess} />
+    return <Login onLoginSuccess={handleLoginSuccess} />
   }
 
   return (
