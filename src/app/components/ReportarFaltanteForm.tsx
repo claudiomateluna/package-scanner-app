@@ -47,6 +47,9 @@ interface CustomWindow extends Window {
 }
 
 const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _session = session;
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {

@@ -1,7 +1,6 @@
 // src/app/components/RechazosView.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
 import RechazosAdminView from './RechazosAdminView';
 
@@ -18,6 +17,8 @@ const normalizeRole = (role: string | null) => {
 };
 
 export default function RechazosView({ session, profile, packageData }: Props) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _packageData = packageData;
   const userRole = normalizeRole(profile.role);
 
   // Verificar si el usuario puede ver la administración de rechazos
