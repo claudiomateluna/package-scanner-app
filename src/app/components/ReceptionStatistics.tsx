@@ -31,11 +31,11 @@ function StatsCard({ title, value, subtitle, color }: StatsCardProps) {
       borderRadius: '4px', 
       padding: '10px', 
       textAlign: 'center',
-      border: '1px solid #000'
+      border: '1px solid var(--clr4)'
     }}>
       <h3 style={{ 
         margin: '0 0 10px 0', 
-        color: '#000',
+        color: 'var(--clr4)',
         fontSize: '1em'
       }}>
         {title}
@@ -178,7 +178,7 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
         zIndex: 1000
       }}>
         <div style={{ 
-          backgroundColor: '#FFF', 
+          backgroundColor: 'var(--clr1)', 
           padding: '40px', 
           borderRadius: '8px',
           textAlign: 'center',
@@ -205,7 +205,7 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
       padding: '20px'
     }}>
       <div style={{ 
-        backgroundColor: '#FFF', 
+        backgroundColor: 'var(--clr1)', 
         padding: '30px', 
         borderRadius: '8px',
         maxWidth: '1000px',
@@ -215,15 +215,15 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
         color: '#000'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0, color: '#000' }}>Estadísticas de Recepciones</h2>
+          <h2 style={{ margin: 0, color: 'var(--clr4)' }}>Estadísticas de Recepciones</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <select 
               value={period}
               onChange={(e) => setPeriod(e.target.value as 'week' | 'month' | 'year')}
               style={{
                 backgroundColor: 'rgba(255,255,255,0.9)',
-                color: '#000',
-                border: '1px solid #000',
+                color: 'var(--clr4)',
+                border: '1px solid var(--clr4)',
                 borderRadius: '4px',
                 padding: '10px 10px'
               }}
@@ -236,8 +236,8 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
               onClick={onClose}
               style={{
                 backgroundColor: 'transparent',
-                border: '1px solid #000',
-                color: '#000',
+                border: '1px solid var(--clr4)',
+                color: 'var(--clr4)',
                 borderRadius: '4px',
                 padding: '8px 15px',
                 cursor: 'pointer',
@@ -261,38 +261,38 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
                 title="Recepciones Completadas" 
                 value={stats.total_receptions} 
                 subtitle="Total en el período" 
-                color="#A1C181" 
+                color="var(--clr5)" 
               />
               <StatsCard 
                 title="Paquetes Procesados"
                 value={stats.total_packages}
                 subtitle="Total escaneados"
-                color="#FE7F2D"
+                color="var(--clr7)"
               />
               <StatsCard 
                 title="Unidades Totales" 
                 value={stats.total_units}
                 subtitle="Unidades recibidas"
-                color="#A1C181"
+                color="var(--clr5)"
               />
               <StatsCard 
                 title="Unidades Faltantes" 
                 value={stats.total_missing_units} 
                 subtitle="Total en el período" 
-                color="#e63946" 
+                color="var(--clr6)" 
               />
               <StatsCard 
                 title="Tasa de Completitud" 
                 value={`${stats.avg_completion_rate}%`} 
                 subtitle="Promedio" 
-                color="#000" 
+                color="var(--clr4)" 
               />
             </div>
             
             <div style={{ marginBottom: '10px' }}>
               <h3 style={{ 
-                color: '#000', 
-                borderBottom: '1px solid #000', 
+                color: 'var(--clr4)', 
+                borderBottom: '1px solid var(--clr4)', 
                 paddingBottom: '10px',
                 marginBottom: '10px'
               }}>
@@ -304,7 +304,7 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
                 borderRadius: '4px',
                 textAlign: 'center'
               }}>
-                <div style={{ fontSize: '2.5em', fontWeight: 'bold', color: '#000' }}>
+                <div style={{ fontSize: '2.5em', fontWeight: 'bold', color: 'var(--clr4)' }}>
                   {stats.most_active_local}
                 </div>
                 <div style={{ fontSize: '1.2em', marginTop: '10px' }}>
@@ -315,8 +315,8 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
             
             <div>
               <h3 style={{ 
-                color: '#000', 
-                borderBottom: '1px solid #000', 
+                color: 'var(--clr4)', 
+                borderBottom: '1px solid var(--clr4)', 
                 paddingBottom: '10px',
                 marginBottom: '10px'
               }}>
@@ -337,7 +337,7 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
                       textAlign: 'center'
                     }}
                   >
-                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#000' }}>
+                    <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: 'var(--clr4)' }}>
                       {activity.receptions}
                     </div>
                     <div style={{ fontSize: '0.9em', marginTop: '5px' }}>
@@ -358,8 +358,8 @@ export default function ReceptionStatistics({ onClose }: ReceptionStatisticsProp
           <button
             onClick={onClose}
             style={{
-              backgroundColor: '#000',
-              color: '#FFF',
+              backgroundColor: 'var(--clr4)',
+              color: 'var(--clr1)',
               border: 'none',
               padding: '12px 20px',
               borderRadius: '4px',

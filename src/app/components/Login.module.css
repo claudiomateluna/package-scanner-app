@@ -3,7 +3,7 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: var(--color-background);
+  background-color: var(--clr1);
   background-image: url("/bkgrn.jpg");
   background-position: center;
   background-size: cover;
@@ -18,7 +18,7 @@
   padding: 40px;
   border-radius: 4px;
   text-align: center;
-  border-color: var(--border);
+  border-color: var(--clr4);
   border-width: 1px;
   border-style: solid;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -35,7 +35,7 @@
   text-align: left;
   font-weight: bold;
   margin-bottom: 5px;
-  color: var(--text);
+  color: var(--clr4);
   font-family: var(--font-cuerpo);
 }
 
@@ -43,8 +43,8 @@
   width: 100%;
   padding: 12px;
   background-color: rgba(255, 255, 255, 0.1);
-  color: var(--text);
-  border: 1px solid var(--border);
+  color: var(--clr4);
+  border: 1px solid var(--clr4);
   border-radius: 4px;
   font-size: 1em;
   box-sizing: border-box;
@@ -53,8 +53,8 @@
 
 .submitButton {
   padding: 12px 20px;
-  background-color: var(--negro);
-  color: var(--blanco);
+  background-color: var(--clr4);
+  color: var(--clr1);
   border: none;
   border-radius: 5px;
   font-weight: bold;
@@ -75,7 +75,7 @@
 }
 
 .attemptsText {
-  color: var(--text);
+  color: var(--clr4);
   font-size: 0.9em;
   margin-top: 10px;
   margin-bottom: 0;
@@ -101,12 +101,12 @@
   transform: translateX(-50%);
   text-align: center;
   font-size: 0.8em;
-  color: var(--text);
+  color: var(--clr4);
   font-family: var(--font-cuerpo);
   background-color: rgba(255, 255, 255, 0.30);
   padding: 0px;
   border-radius: 4px;
-  border-color: var(--border);
+  border-color: var(--clr4);
   border-width: 1px;
   border-style: solid;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -138,7 +138,7 @@
 .tabButton {
   padding: 4px 6px;
   background-color: transparent;
-  color: var(--blanco);
+  color: var(--clr1);
   border: none;
   border-bottom: 1px solid transparent;
   cursor: pointer;
@@ -152,9 +152,9 @@
 }
 
 .tabButtonActive {
-  background-color: var(--gray-dark);
-  color: var(--blanco);
-  border-bottom: 1px solid var(--blanco);
+  background-color: var(--clr3);
+  color: var(--clr1);
+  border-bottom: 1px solid var(--clr1);
 }
 
 .tabsContent {
@@ -164,9 +164,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--blanco);
+  color: var(--clr1);
 }
 
 .tabsContent b{
-  color: var(--text);
+  color: var(--clr4);
 }

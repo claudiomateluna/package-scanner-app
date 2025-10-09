@@ -435,7 +435,7 @@ export default function ReceptionStatisticsWithLocales({ onClose }: Props) {
         }}>
           <h2 style={{ 
             margin: 0, 
-            color: '#FE7F2D',
+            color: 'var(--clr7)',
             fontSize: '1.5em'
           }}>
             Estadísticas de Recepciones
@@ -443,8 +443,8 @@ export default function ReceptionStatisticsWithLocales({ onClose }: Props) {
           <button
             onClick={onClose}
             style={{
-              backgroundColor: '#FE7F2D',
-              color: '#233D4D',
+              backgroundColor: 'var(--clr7)',
+              color: 'var(--clr4)',
               border: 'none',
               borderRadius: '5px',
               padding: '8px 15px',
@@ -488,7 +488,7 @@ export default function ReceptionStatisticsWithLocales({ onClose }: Props) {
               }}>
                 <h3 style={{ 
                   margin: '0 0 10px 0', 
-                  color: '#FE7F2D',
+                  color: 'var(--clr7)',
                   fontSize: '1.2em'
                 }}>
                   Resumen General
@@ -518,7 +518,7 @@ export default function ReceptionStatisticsWithLocales({ onClose }: Props) {
               }}>
                 <h3 style={{ 
                   margin: '0 0 10px 0', 
-                  color: '#FE7F2D',
+                  color: 'var(--clr7)',
                   fontSize: '1.2em'
                 }}>
                   Por Tipo de Local
@@ -546,7 +546,7 @@ export default function ReceptionStatisticsWithLocales({ onClose }: Props) {
               overflowY: 'auto'
             }}>
               <h3 style={{ 
-                color: '#FE7F2D',
+                color: 'var(--clr7)',
                 fontSize: '1.3em',
                 marginBottom: '15px'
               }}>

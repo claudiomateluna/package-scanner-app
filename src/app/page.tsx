@@ -149,7 +149,7 @@ export default function Home() {
           <RechazosView session={session} profile={profile} />
         )
       ) : currentView === 'recepciones-completadas' ? (
-        <ReceptionView session={session} profile={profile} />
+        <ReceptionView profile={profile} />
       ) : currentView === 'ticket-search' ? (
         <div></div>
       ) : !selection && currentView === 'scanner' ? (

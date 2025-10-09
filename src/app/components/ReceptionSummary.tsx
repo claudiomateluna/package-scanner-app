@@ -140,7 +140,7 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
             <div>
               <strong>Estado:</strong><br/>
               <span style={{ 
-                backgroundColor: '#A1C181', 
+                backgroundColor: 'var(--clr5)', 
                 color: 'var(--color-button-text)', 
                 padding: '4px 8px', 
                 borderRadius: '4px'
@@ -229,7 +229,7 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
                       <td style={{ padding: '8px' }}>{detalle.unidades}</td>
                       <td style={{ padding: '8px' }}>
                         <span style={{ 
-                          backgroundColor: detalle.escaneado ? '#A1C181' : '#FE7F2D', 
+                          backgroundColor: detalle.escaneado ? 'var(--clr5)' : 'var(--clr7)', 
                           color: detalle.escaneado ? '#233D4D' : '#233D4D', 
                           padding: '3px 8px', 
                           borderRadius: '3px',

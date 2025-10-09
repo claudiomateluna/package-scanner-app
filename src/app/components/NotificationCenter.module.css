@@ -11,7 +11,7 @@
 }
 
 .notificationCenter {
-  background-color: #f6f6f6;
+  background-color: var(--clr1);
   width: 100%;
   max-width: 500px;
   height: 100%;
@@ -22,7 +22,7 @@
 
 .header {
   align-items: center;
-  background: no-repeat left/1.8em url('/adidas_shp.svg') var(--blanco);
+  background: no-repeat left/1.8em url('/adidas_shp.svg') var(--clr1);
   background-position: top 8px left 10px;
   display: flex;
   justify-content: space-between;
@@ -30,7 +30,7 @@
 }
 
 .header h2 {
-  color: #333;
+  color: var(--clr3);
   font-size: 1.5em;
   margin: 0 0 0 35px;
 }
@@ -38,7 +38,7 @@
 .closeButton {
   background: none;
   border: none;
-  color: #666;
+  color: var(--clr2);
   cursor: pointer;
   font-size: 1.5em;
   line-height: 0;
@@ -47,7 +47,7 @@
 }
 
 .closeButton:hover {
-  color: #333;
+  color: var(--clr3);
 }
 
 .actions {
@@ -55,9 +55,9 @@
 }
 
 .markAllButton {
-  background: #ccc;
-  border: 1px solid #999;
-  color: var(--negro);
+  background: var(--clr1);
+  border: 1px solid var(--clr1);
+  color: var(--clr4);
   cursor: pointer;
   font-size: 14px;
   padding: 5px;
@@ -67,17 +67,17 @@
 
 .markAllButton:hover {
   text-decoration: none;
-  background: var(--blanco);
+  background: var(--clr1);
 }
 
 .loading, .error, .noNotifications {
   padding: 40px 20px;
   text-align: center;
-  color: #666;
+  color: var(--clr2);
 }
 
 .error {
-  color: #d9534f;
+  color: var(--clr6);
 }
 
 .notificationList {
@@ -87,21 +87,21 @@
 
 .notificationItem {
   padding: 8px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--clr4);
   border-radius: 6px;
   margin: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .notificationItem.read {
-  background-color: #f1f1f1;
-  border-left: 3px solid #999;
-  border-bottom: 1px solid #999;
+  background-color: var(--clr1);
+  border-left: 3px solid var(--clr4);
+  border-bottom: 1px solid var(--clr4);
 }
 
 .notificationItem.unread {
-  background-color: var(--color-background);
-  border-left: 3px solid var(--color-accent);
+  background-color: var(--clr1);
+  border-left: 3px solid var(--clr4);
 }
 
 .notificationRow {
@@ -123,10 +123,10 @@
 .bellIcon {
   width: 20px;
   height: 20px;
-  color: var(--color-accent);
+  color: var(--clr4);
 }
 .bellIcon.read {
-  color: #999;
+  color: var(--clr4);
 }
 
 .notificationActions {
@@ -136,9 +136,9 @@
 }
 
 .actionButton {
-  background: var(--color-button-background);
-  color: var(--color-button-text);
-  border: 1px solid var(--color-border);
+  background: var(--clr4);
+  color: var(--clr1);
+  border: 1px solid var(--clr4);
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
@@ -152,17 +152,17 @@
 }
 
 .actionButton.read {
-  background: #999;
-  border: #999;
+  background: var(--clr4);
+  border: var(--clr4);
 }
 
 .actionButton:hover {
-  background: var(--color-accent-hover);
+  background: var(--clr2);
   transform: scale(1.05);
 }
 
 .actionButton:focus {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--clr4);
   outline-offset: 2px;
 }
 
@@ -179,12 +179,12 @@
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  color: var(--color-text-tertiary);
+  color: var(--clr2);
 }
 
 .entityType {
   font-size: 11px;
-  color: var(--color-text-tertiary);
+  color: var(--clr2);
   text-transform: uppercase;
   letter-spacing: 1px;
   line-height: 1;
@@ -200,7 +200,7 @@ p .entityType {
 .ticketId button {
   background: none;
   border: none;
-  color: var(--color-error);
+  color: var(--clr6);
   font-weight: bold;
   font-size: 13px;
   text-decoration: underline;
@@ -217,7 +217,7 @@ p .entityType {
 .notificationTitle {
   font-size: 15px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--clr4);
   margin: 0;
   padding: 0;
 }
@@ -225,20 +225,20 @@ p .entityType {
 .notificationTitle.read {
   font-size: 15px;
   font-weight: 600;
-  color: #999;
+  color: var(--clr4);
   margin: 0;
   padding: 0;
 }
 
 .bodyText {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--clr2);
   line-height: 1.4;
   margin: 0 0 8px 0;
 }
 
 .timestamp {
-  color: var(--color-text-tertiary);
+  color: var(--clr2);
   font-size: 10px;
   font-style: italic;
   margin: 0;
@@ -250,13 +250,13 @@ p .entityType {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--clr4);
 }
 
 .paginationButton {
   padding: 8px 12px;
-  background-color: var(--negro);
-  color: white;
+  background-color: var(--clr4);
+  color: var(--clr1);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -264,13 +264,13 @@ p .entityType {
 }
 
 .paginationButton:disabled {
-  background-color: #ccc;
+  background-color: var(--clr1);
   cursor: not-allowed;
 }
 
 .pageInfo {
   font-size: 14px;
-  color: #666;
+  color: var(--clr2);
 }
 
 /* Scrollbar personalizado */
@@ -279,14 +279,14 @@ p .entityType {
 }
 
 .notificationList::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--clr1);
 }
 
 .notificationList::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: var(--clr1);
   border-radius: 3px;
 }
 
 .notificationList::-webkit-scrollbar-thumb:hover {
-  background: #999;
+  background: var(--clr4);
 }

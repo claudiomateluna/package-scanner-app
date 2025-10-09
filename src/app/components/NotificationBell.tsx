@@ -99,7 +99,7 @@ export default function NotificationBell({ userId, onNotificationClick, session 
           position: 'absolute',
           top: '-8px',
           right: '-8px',
-          backgroundColor: '#d9534f',
+          backgroundColor: 'var(--clr6)',
           color: 'white',
           borderRadius: '50%',
           width: '20px',

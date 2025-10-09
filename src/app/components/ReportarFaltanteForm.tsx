@@ -796,13 +796,13 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
         }
         
         .modal-content {
-          background-color: #FFFFFF;
+          background-color: var(--clr1);
           border-radius: 4px;
           max-width: 600px;
           width: 90%;
           max-height: 95vh;
           overflow-y: auto;
-          color: #000000;
+          color: var(--clr4);
         }
         
         .modal-header {
@@ -815,7 +815,7 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
         
         .modal-header h2 {
           margin: 0;
-          color: #000000;
+          color: var(--clr4);
           line-height: 1;
         }
         
@@ -824,7 +824,7 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
           border: none;
           font-size: 24px;
           cursor: pointer;
-          color: #000000;
+          color: var(--clr4);
         }
         
         .missing-report-form {
@@ -836,7 +836,7 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
         }
         
         .form-section h3 {
-          color: #000000;
+          color: var(--clr4);
           margin-bottom: 10px;
           font-size: 1.5rem;
         }
@@ -861,15 +861,15 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
         .form-input {
           width: 100%;
           padding: 10px;
-          border: 1px solid #000000;
+          border: 1px solid var(--clr4);
           border-radius: 4px;
           background-color: rgba(255, 255, 255, 1);
-          color: #000000;
+          color: var(--clr4);
           box-sizing: border-box;
         }
         
         .form-input.readonly {
-          background-color: #000000;
+          background-color: var(--clr4);
           color: #CCCCCC;
         }
         
@@ -881,7 +881,7 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
         }
         
         .product-group {
-          border: 1px solid #000000;
+          border: 1px solid var(--clr4);
           border-radius: 4px;
           padding: 15px;
           margin-bottom: 15px;
@@ -897,7 +897,7 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
         
         .product-header h4 {
           margin: 0;
-          color: #000000;
+          color: var(--clr4);
         }
         
         .remove-product-btn {
@@ -916,7 +916,7 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
         }
         
         .add-product-btn {
-          background-color: #000000;
+          background-color: var(--clr4);
           color: white;
           border: none;
           padding: 10px 15px;
@@ -947,14 +947,14 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
         }
         
         .btn-primary {
-          background-color: #000000;
-          color: #FFFFFF;
+          background-color: var(--clr4);
+          color: var(--clr1);
         }
         
         .btn-secondary {
-          background-color: #FFFFFF;
-          color: #000000;
-          border: 1px solid #000000;
+          background-color: var(--clr1);
+          color: var(--clr4);
+          border: 1px solid var(--clr4);
         }
         
         .btn-primary:disabled, .btn-secondary:disabled {

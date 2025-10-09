@@ -22,20 +22,20 @@ interface LocalesViewProps {
 const inputStyle: CSSProperties = { 
   width: '100%',
   padding: '10px',
-  backgroundColor: '#fff',
-  color: '#000',
+  backgroundColor: 'var(--clr1)',
+  color: 'var(--clr4)',
   borderTopWidth: '1px',
   borderTopStyle: 'solid',
-  borderTopColor: '#000',
+  borderTopColor: 'var(--clr4)',
   borderBottomWidth: '1px',
   borderBottomStyle: 'solid',
-  borderBottomColor: '#000',
+  borderBottomColor: 'var(--clr4)',
   borderLeftWidth: '1px',
   borderLeftStyle: 'solid',
-  borderLeftColor: '#000',
+  borderLeftColor: 'var(--clr4)',
   borderRightWidth: '1px',
   borderRightStyle: 'solid',
-  borderRightColor: '#000',
+  borderRightColor: 'var(--clr4)',
   borderRadius: '4px',
   boxSizing: 'border-box',
   margin: '5px'
@@ -43,8 +43,8 @@ const inputStyle: CSSProperties = {
 
 const buttonStyle: CSSProperties = { 
   padding: '10px 15px', 
-  backgroundColor: '#000000', 
-  color: '#fff', 
+  backgroundColor: 'var(--clr4)', 
+  color: 'var(--clr1)', 
   border: 'none', 
   borderRadius: '5px', 
   cursor: 'pointer' 
@@ -53,16 +53,16 @@ const buttonStyle: CSSProperties = {
 const cardStyle: CSSProperties = { 
   borderTopWidth: '1px',
   borderTopStyle: 'solid',
-  borderTopColor: '#000',
+  borderTopColor: 'var(--clr4)',
   borderBottomWidth: '1px',
   borderBottomStyle: 'solid',
-  borderBottomColor: '#000',
+  borderBottomColor: 'var(--clr4)',
   borderLeftWidth: '1px',
   borderLeftStyle: 'solid',
-  borderLeftColor: '#000',
+  borderLeftColor: 'var(--clr4)',
   borderRightWidth: '1px',
   borderRightStyle: 'solid',
-  borderRightColor: '#000',
+  borderRightColor: 'var(--clr4)',
   padding: '16px', 
   borderRadius: '4px', 
   marginTop: '24px' 
@@ -343,7 +343,7 @@ export default function LocalesView({ profile }: LocalesViewProps) {
                   setNombreLocal('')
                   setTipoLocal('RTL')
                 }} 
-                style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', color: '#ccc'}}
+                style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: 'var(--clr1)', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--clr1)', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: 'var(--clr1)', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: 'var(--clr1)', color: 'var(--clr1)'}}
               >
                 Cancelar
               </button>
@@ -378,19 +378,19 @@ export default function LocalesView({ profile }: LocalesViewProps) {
             <div key={local.id} style={{ 
               borderTopWidth: '1px',
               borderTopStyle: 'solid',
-              borderTopColor: '#000',
+              borderTopColor: 'var(--clr4)',
               borderBottomWidth: '1px',
               borderBottomStyle: 'solid',
-              borderBottomColor: '#000',
+              borderBottomColor: 'var(--clr4)',
               borderLeftWidth: '1px',
               borderLeftStyle: 'solid',
-              borderLeftColor: '#000',
+              borderLeftColor: 'var(--clr4)',
               borderRightWidth: '1px',
               borderRightStyle: 'solid',
-              borderRightColor: '#000',
+              borderRightColor: 'var(--clr4)',
               padding: '10px', 
               borderRadius: '4px',
-              backgroundColor: '#FFF',
+              backgroundColor: 'var(--clr1)',
               boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
               position: 'relative'
             }}>
@@ -427,7 +427,7 @@ export default function LocalesView({ profile }: LocalesViewProps) {
                   <button 
                     type="button" 
                     onClick={cancelEditing} 
-                    style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', color: '#ccc'}}
+                    style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: 'var(--clr1)', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--clr1)', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: 'var(--clr1)', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: 'var(--clr1)', color: 'var(--clr1)'}}
                   >
                     Cancelar
                   </button>
@@ -439,7 +439,7 @@ export default function LocalesView({ profile }: LocalesViewProps) {
                   <div style={{ position: 'relative' }}>
                     <h3 style={{ 
                       margin: '0 0 10px 0', 
-                      color: '#000',
+                      color: 'var(--clr4)',
                       fontSize: '1.4rem'
                     }}>
                       {local.nombre_local}
@@ -448,8 +448,8 @@ export default function LocalesView({ profile }: LocalesViewProps) {
                       position: 'absolute',
                       top: '0',
                       right: '0',
-                      backgroundColor: '#000',
-                      color: '#fff',
+                      backgroundColor: 'var(--clr4)',
+                      color: 'var(--clr1)',
                       padding: '10px 10px',
                       borderRadius: '4px',
                       fontSize: '0.8rem',
@@ -462,13 +462,13 @@ export default function LocalesView({ profile }: LocalesViewProps) {
                   <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                     <button 
                       onClick={() => startEditing(local)} 
-                      style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#000', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#000', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#000', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#000', color: '#000'}}
+                      style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: 'var(--clr4)', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--clr4)', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: 'var(--clr4)', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: 'var(--clr4)', color: 'var(--clr4)'}}
                     >
                       Editar
                     </button>
                     <button 
                       onClick={() => handleDeleteLocal(local.id, local.nombre_local)} 
-                      style={{...buttonStyle, backgroundColor: '#e63946', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#e63946', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#e63946', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#e63946', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#e63946', color: '#fff'}}
+                      style={{...buttonStyle, backgroundColor: 'var(--clr6)', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: 'var(--clr6)', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--clr6)', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: 'var(--clr6)', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: 'var(--clr6)', color: 'var(--clr1)'}}
                     >
                       Eliminar
                     </button>

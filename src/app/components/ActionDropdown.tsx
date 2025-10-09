@@ -48,7 +48,7 @@ export default function ActionDropdown({
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: '4px',
-          backgroundColor: 'var(--color-button-background)',
+          backgroundColor: 'var(--clr4)',
           margin: '-2px 0px'
         }}
         aria-label="Acciones"
@@ -56,21 +56,21 @@ export default function ActionDropdown({
         <div style={{ 
           width: '4px', 
           height: '4px', 
-          backgroundColor: 'var(--color-button-text)', 
+          backgroundColor: 'var(--clr1)', 
           borderRadius: '50%', 
           margin: '1px 0' 
         }}></div>
         <div style={{ 
           width: '4px', 
           height: '4px', 
-          backgroundColor: 'var(--color-button-text)', 
+          backgroundColor: 'var(--clr1)', 
           borderRadius: '50%', 
           margin: '1px 0' 
         }}></div>
         <div style={{ 
           width: '4px', 
           height: '4px', 
-          backgroundColor: 'var(--color-button-text)', 
+          backgroundColor: 'var(--clr1)', 
           borderRadius: '50%', 
           margin: '1px 0' 
         }}></div>
@@ -83,8 +83,8 @@ export default function ActionDropdown({
             position: 'absolute',
             right: 0,
             top: '100%',
-            backgroundColor: 'var(--color-button-background)',
-            border: '1px solid var(--color-button-text)',
+            backgroundColor: 'var(--clr4)',
+            border: '1px solid var(--clr1)',
             borderRadius: '4px',
             boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
             zIndex: 1000,
@@ -105,7 +105,7 @@ export default function ActionDropdown({
               padding: '10px',
               border: 'none',
               backgroundColor: 'transparent',
-              color: 'var(--color-button-text)',
+              color: 'var(--clr1)',
               textAlign: 'left',
               cursor: 'pointer',
               fontSize: '14px',
@@ -113,7 +113,7 @@ export default function ActionDropdown({
           >
             {faltantesTicket && (
               <span style={{ 
-                backgroundColor: '#233D4D', 
+                backgroundColor: 'var(--clr4)', 
                 color: 'white', 
                 padding: '2px 6px', 
                 borderRadius: '4px', 
@@ -139,7 +139,7 @@ export default function ActionDropdown({
               padding: '10px',
               border: 'none',
               backgroundColor: 'transparent',
-              color: 'var(--color-button-text)',
+              color: 'var(--clr1)',
               textAlign: 'left',
               cursor: 'pointer',
               fontSize: '14px',
@@ -147,7 +147,7 @@ export default function ActionDropdown({
           >
             {rechazosTicket && (
               <span style={{ 
-                backgroundColor: '#233D4D', 
+                backgroundColor: 'var(--clr4)', 
                 color: 'white', 
                 padding: '2px 6px', 
                 borderRadius: '4px', 

@@ -30,7 +30,7 @@ Actualmente estamos trabajando en un problema con el botón de eliminar usuarios
 10. Habilitamos permisos para que usuarios Warehouse Supervisor puedan asignar locales a usuarios Warehouse
 11. Implementamos detección de dispositivos móviles (iPad, iPhone, Android) para usar la cámara como lector de códigos de barras
 12. Realizamos cambios estéticos en la aplicación:
-    - Actualizamos la paleta de colores (fondo #233D4D, texto #CCCCCC, énfasis #FE7F2D, progreso #A1C181)
+    - Actualizamos la paleta de colores (fondo #FFFFFF, énfasis, texto y bordes #000000, progreso #A1C181)
     - Cambiamos el nombre de "Scanner App" a "Recepciones"
     - Reemplazamos el botón "Scanner" con un icono de código de barras
     - Actualizamos el texto de bienvenida para mostrar "Bienvenido Nombre Apellido"

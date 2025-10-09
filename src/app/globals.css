@@ -6,49 +6,16 @@
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   --font-cuerpo: 'fontCuerpo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  
-/* Paleta de colores actualizada */
 
-  --bkgd: #ffffff; /* Fondo blanco */
-  --blanco: #ffffff; /* Blanco */
-  --color-background: #ffffff; /* Fondo blanco */
-  --text: #000000; /* Texto principal negro */
-  --negro: #000000; /* Negro */
-  --border: #000000; /* Color de Bordes */
-  --success: #A1C181; /* Énfasis para éxito */
-  --verde: #A1C181; /* Verde */
-  --error: #e63946; /* Énfasis para errores */
-  --rojo: #e63946; /* Rojo */
-  --warning: #FE7F2D; /* Énfasis para advertencias */
-  --naranjo: #FE7F2D; /* Naranjo */
-  --gray: #666666; /* Gris */
-  --gray-dark: #333333; /* Gris Oscuro */
-  --btn-bkgd: #000000; /* Fondo de botones */
-  --btn-text: #FFFFFF; /* Texto de botones */
-  --btn-border: #FFFFFF; /* Borde de botones */
-  --btn-alt-bkgd: #FFFFFF; /* Fondo de botones contraste ligero */
-  --btn-alt-text: #000000; /* Texto de botones contraste ligero */
-  --btn-alt-border: #000000; /* Borde de botones contraste ligero */
+/* Paleta de colores definitiva */
 
-/* Mapeo de variables de colores antiguas a nuevas para compatibilidad */
-
-  --color-text-primary: var(--text); /* Texto principal negro */
-  --color-text-secondary: var(--gray); /* Texto secundario gris oscuro */
-  --color-text-tertiary: var(--gray); /* Texto terciario gris medio */
-  --color-border: var(--border); /* Bordes negro */
-  --color-button-background: var(--btn-bkgd);
-  --color-button-text: var(--btn-text);
-  --color-button-border: var(--btn-border);
-  --color-button-alternative-background: var(--btn-alt-bkgd);
-  --color-button-alternative-text: var(--btn-alt-text);
-  --color-button-alternative-border: var(--btn-alt-border);
-  --color-border-dark: var(--border); /* Bordes negro */
-  --color-accent: var(--negro); /* Color de énfasis negro */
-  --color-accent-hover: var(--gray); /* Color de énfasis hover gris */
-  --color-success: var(--verde); /* Verde para éxito */
-  --color-warning: var(--naranjo); /* Naranja para advertencias */
-  --color-error: var(--rojo); /* Rojo para errores */
-  --color-card-background: var(--blanco); /* Fondo de tarjetas blanco */
+  --clr1: #FFFFFF; /* Blanco - Fondo - Fondo Botones Alternativo - Fondo Tarjetas - Texto Botones - Borde Botones */
+  --clr2: #666666; /* Gris - Texto Secundario - Color de Acento Hover */
+  --clr3: #333333; /* Gris Oscuro - Texto Terciario */
+  --clr4: #000000; /* Negro - Color Acento - Texto - Bordes - Texto Botones Alternativo - Fondo Botones - Borde Botones Alternativo */
+  --clr5: #A1C181; /* Verde - Éxitos */
+  --clr6: #e63946; /* Rojo - Errores - Fondo Tickets */
+  --clr7: #FE7F2D; /* Naranjo - Advertencias */
 }
 
 /* Estilos globales para la aplicación */
@@ -58,8 +25,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: var(--font-cuerpo);
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
+  background-color: var(--clr1);
+  color: var(--clr4);
   min-height: 100vh;
 }
 
@@ -67,7 +34,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-titulo);
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--clr4);
   margin-top: 0;
 }
 
@@ -108,21 +75,21 @@ h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-background);
+  background: var(--clr1);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-accent);
+  background: var(--clr4);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent-hover);
+  background: var(--clr2);
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-accent) var(--color-background);
+  scrollbar-color: var(--clr4) var(--clr1);
 }

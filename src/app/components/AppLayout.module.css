@@ -4,13 +4,13 @@
 .header {
   display: flow-root;
   align-items: center;
-  border-bottom: 1px solid var(--gray);
+  border-bottom: 1px solid var(--clr2);
   padding: 5px;
   position: sticky;
   top: 0;
-  background-color: var(--blanco);
+  background-color: var(--clr1);
   z-index: 10;
-  color: var(--text);
+  color: var(--clr4);
 }
 
 /* Contenedor del contenido del encabezado */
@@ -39,14 +39,14 @@
 .title {
   margin: 0;
   font-size: 1.5rem;
-  color: var(--negro);
+  color: var(--clr4);
 }
 
 /* Estilo para el texto de bienvenida */
 .welcomeText {
   margin: 0;
   font-size: 1rem;
-  color: var(--negro);
+  color: var(--clr4);
 }
 
 /* Contenedor de notificaciones */
@@ -57,9 +57,9 @@
 
 /* Estilo para el botón de contraseña */
 .button {
-  background-color: var(--color-button-background);
-  color: var(--color-button-text);
-  border: 1px solid var(--color-button-border);
+  background-color: var(--clr1);
+  color: var(--clr1);
+  border: 1px solid var(--clr1);
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
@@ -69,9 +69,9 @@
 
 /* Estilo para el botón secundario */
 .buttonSecondary {
-  background-color: var(--color-button-alternative-background);
-  color: var(--color-button-alternative-text);
-  border: 1px solid var(--color-button-alternative-border);
+  background-color: var(--clr1);
+  color: var(--clr1);
+  border: 1px solid var(--clr1);
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
@@ -83,19 +83,19 @@
   max-width: 500px;
   margin: 10px auto;
   padding: 10px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--clr4);
   border-radius: 4px;
-  background-color: var(--color-card-background);
+  background-color: var(--clr1);
 }
 
 /* Estilo para los inputs */
 .input {
   padding: 10px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--clr4);
   border-radius: 4px;
   font-size: 1rem;
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
+  background-color: var(--clr1);
+  color: var(--clr4);
 }
 
 /* Estilo para el contenido principal */
@@ -108,4 +108,77 @@
 /* Estilo para la vista de ancho completo */
 .fullWidth {
   max-width: 100%;
+}
+
+/* Estilos para ChangePasswordForm */
+.passwordFormTitle {
+  margin-top: 0;
+}
+
+.passwordFormContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.passwordInputError {
+  border-color: var(--clr6);
+}
+
+.passwordErrorText {
+  color: var(--clr6);
+  font-size: 0.8em;
+  margin-top: 5px;
+}
+
+.passwordInstructions {
+  font-size: 0.75em;
+  color: var(--clr2);
+  margin-top: 5px;
+}
+
+.buttonContainer {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+/* Estilos para el modal de rechazo */
+.rechazoModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.rechazoModalContent {
+  background-color: var(--clr1);
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.rechazoModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.closeModalButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--clr4);
 }

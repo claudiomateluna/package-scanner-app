@@ -116,19 +116,18 @@ const ChangePasswordForm = ({ onDone, onCancel }: { onDone: () => void, onCancel
   return (
     <div className={styles.formContainer}>
       <form onSubmit={handleSubmit}>
-        <h4 style={{marginTop: 0}}>Cambiar mi contraseña</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '400px' }}>
+        <h4 className={styles.passwordFormTitle}>Cambiar mi contraseña</h4>
+        <div className={styles.passwordFormContainer}>
           <input 
             type="password" 
             placeholder="Nueva contraseña" 
             value={newPassword} 
             onChange={handlePasswordChange} 
             required 
-            className={styles.input} 
-            style={{ borderColor: passwordError ? '#e63946' : '#ccc' }}
+            className={`${styles.input} ${passwordError ? styles.passwordInputError : ''}`}
           />
-          {passwordError && <div style={{ color: '#e63946', fontSize: '0.8em', marginTop: '5px' }}>{passwordError}</div>}
-          <div style={{ fontSize: '0.75em', color: '#6c757d', marginTop: '5px' }}>
+          {passwordError && <div className={styles.passwordErrorText}>{passwordError}</div>}
+          <div className={styles.passwordInstructions}>
             La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
           </div>
           <input 
@@ -139,7 +138,7 @@ const ChangePasswordForm = ({ onDone, onCancel }: { onDone: () => void, onCancel
             required 
             className={styles.input} 
           />
-          <div style={{marginTop: '10px', display: 'flex', gap: '10px'}}>
+          <div className={styles.buttonContainer}>
             <button type="submit" className={styles.button} disabled={!!passwordError}>Guardar</button>
             <button 
               type="button" 
@@ -265,13 +264,13 @@ export default function AppLayout({ session, profile, onBack, children, currentV
   // const headerStyle: CSSProperties = { 
   //   display: 'flow-root',
   //   alignItems: 'center',
-  //   borderBottom: '1px solid var (--color-text-tertiary)',
+  //   borderBottom: '1px solid var (--clr3)',
   //   padding: '5px',
   //   position: 'sticky',
   //   top: 0,
-  //   backgroundColor: '#ffffff',
+  //   backgroundColor: 'var(--clr1)',
   //   zIndex: 10,
-  //   color: '#000000'
+  //   color: 'var(--clr4)'
   // };
   
   const getUserFirstAndLastName = () => ({ firstName: profile?.first_name || '', lastName: profile?.last_name || '' });
@@ -370,38 +369,13 @@ export default function AppLayout({ session, profile, onBack, children, currentV
           />
         ) : showRechazoForm ? (
           // Render the RechazoForm in a modal
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 2000
-          }}>
-            <div style={{
-              backgroundColor: 'var(--color-card-background)',
-              padding: '20px',
-              borderRadius: '8px',
-              maxWidth: '600px',
-              width: '90%',
-              maxHeight: '90vh',
-              overflowY: 'auto'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div className={styles.rechazoModalOverlay}>
+            <div className={styles.rechazoModalContent}>
+              <div className={styles.rechazoModalHeader}>
                 <h2>Reportar Rechazo</h2>
                 <button 
                   onClick={() => setShowRechazoForm(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '1.5rem',
-                    cursor: 'pointer',
-                    color: 'var(--color-text-primary)'
-                  }}
+                  className={styles.closeModalButton}
                 >
                   ×
                 </button>

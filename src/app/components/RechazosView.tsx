@@ -35,7 +35,7 @@ export default function RechazosView({ session, profile, packageData }: Props) {
 
   return (
     <div style={{ padding: '0px' }}>
-      <RechazosAdminView session={session} profile={profile} />
+      <RechazosAdminView session={session} />
     </div>
   );
 }

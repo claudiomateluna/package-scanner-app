@@ -19,7 +19,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--color-text-tertiary);
+  background-color: var(--clr2);
   -webkit-transition: .4s;
   transition: .4s;
   border-radius: 28px;
@@ -32,18 +32,18 @@
   width: 20px;
   left: 4px;
   bottom: 4px;
-  background-color: var(--color-card-background);
+  background-color: var(--clr1);
   -webkit-transition: .4s;
   transition: .4s;
   border-radius: 50%;
 }
 
 input:checked + .slider {
-  background-color: var(--color-accent);
+  background-color: var(--clr4);
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px var(--color-accent);
+  box-shadow: 0 0 1px var(--clr4);
 }
 
 input:checked + .slider:before {

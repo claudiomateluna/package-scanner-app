@@ -1,11 +1,20 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Session } from '@supabase/supabase-js';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  ColumnDef,
+  flexRender,
+  SortingState,
+  ColumnFiltersState,
+} from '@tanstack/react-table';
 
 // Definir tipos para las recepciones completadas
 interface DetalleRecepcion {
@@ -39,11 +48,10 @@ interface RecepcionCompletada {
 }
 
 interface Props {
-  session: Session;
   profile: { role: string | null };
 }
 
-export default function ReceptionView({ session, profile }: Props) {
+export default function ReceptionView({ profile }: Props) {
   // Estados para la funcionalidad principal
   const [recepciones, setRecepciones] = useState<RecepcionCompletada[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,6 +66,10 @@ export default function ReceptionView({ session, profile }: Props) {
   const [localFilter, setLocalFilter] = useState<string>('');
   const [localSearchTerm, setLocalSearchTerm] = useState<string>('');
   const [showLocalDropdown, setShowLocalDropdown] = useState<boolean>(false);
+  
+  // Estados para ordenamiento y filtros de columnas
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   
   // Referencia para el dropdown
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -241,7 +253,7 @@ export default function ReceptionView({ session, profile }: Props) {
     if (canAccessGestionRecepciones) {
       fetchRecepciones();
     }
-  }, [localFilter, canAccessGestionRecepciones]);
+  }, [filteredSearchTerm, startDate, endDate, localFilter, canAccessGestionRecepciones]);
   
   // Efecto para manejar la filtración local cuando cambian los filtros
   useEffect(() => {
@@ -356,17 +368,106 @@ export default function ReceptionView({ session, profile }: Props) {
     toast.success('Datos exportados a CSV');
   };
 
+  // Definición de columnas para React Table
+  const columns: ColumnDef<RecepcionCompletada>[] = [
+    { 
+      accessorKey: 'local', 
+      header: 'Local', 
+      minSize: 100,
+      maxSize: 150,
+      cell: info => info.getValue() as string
+    },
+    { 
+      accessorKey: 'fecha_recepcion', 
+      header: 'Fecha Recepción', 
+      minSize: 100,
+      maxSize: 150,
+      cell: info => formatDateOnly(info.getValue() as string)
+    },
+    { 
+      accessorKey: 'olpn_escaneadas', 
+      header: 'OLPN', 
+      minSize: 80,
+      maxSize: 120,
+      cell: info => {
+        const row = info.row.original;
+        return `${row.olpn_escaneadas}/${row.olpn_esperadas}`;
+      }
+    },
+    { 
+      accessorKey: 'dn_escaneadas', 
+      header: 'DNs', 
+      minSize: 80,
+      maxSize: 120,
+      cell: info => {
+        const row = info.row.original;
+        return `${row.dn_escaneadas}/${row.dn_esperadas}`;
+      }
+    },
+    { 
+      accessorKey: 'unidades_escaneadas', 
+      header: 'Unidades', 
+      minSize: 90,
+      maxSize: 130,
+      cell: info => {
+        const row = info.row.original;
+        return `${row.unidades_escaneadas}/${row.unidades_esperadas}`;
+      }
+    },
+    { 
+      accessorKey: 'detalles', 
+      header: 'Faltantes', 
+      minSize: 90,
+      maxSize: 130,
+      cell: info => {
+        const detalles = info.getValue() as DetalleRecepcion[] | undefined;
+        return detalles ? detalles.filter(detalle => !detalle.escaneado).length : 0;
+      }
+    },
+    { 
+      accessorKey: 'estado', 
+      header: 'Estado', 
+      minSize: 80,
+      maxSize: 120,
+      cell: info => {
+        const estado = info.getValue() as string;
+        return (
+          <span style={{
+            padding: '4px 8px',
+            borderRadius: '4px',
+            backgroundColor: estado === 'completada' ? 'var(--clr5)' : 'var(--clr7)',
+            color: 'black',
+            fontWeight: 'bold'
+          }}>
+            {estado}
+          </span>
+        );
+      }
+    },
+    { 
+      accessorKey: 'fecha_hora_completada', 
+      header: 'Completada', 
+      minSize: 120,
+      maxSize: 180,
+      cell: info => formatDate(info.getValue() as string)
+    }
+  ];
+
+  // Configuración de React Table
+  const table = useReactTable({
+    data: recepciones,
+    columns,
+    state: { sorting, columnFilters },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    enableSorting: true,
+    enableFilters: true,
+  });
+
   // Si no tiene permiso, mostrar mensaje
-  if (!canAccessGestionRecepciones) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h2 style={{ color: 'var(--color-text-primary)' }}>Acceso Denegado</h2>
-        <p style={{ color: 'var(--color-text-secondary)' }}>
-          No tienes permisos para acceder al historial de recepciones completadas.
-        </p>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
@@ -386,15 +487,15 @@ export default function ReceptionView({ session, profile }: Props) {
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '100%', overflowX: 'auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ color: 'var(--color-text-primary)', marginBottom: '0' }}>Recepciones Completadas</h2>
+    <div style={{ padding: '5px', maxWidth: '100%', overflowX: 'auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+        <h2 style={{ color: 'var(--clr4)', marginBottom: '0' }}>Recepciones Completadas</h2>
         <button 
           onClick={exportToCSV}
           style={{
             padding: '8px 16px',
-            backgroundColor: 'var(--color-accent)',
-            color: 'var(--color-card-background)',
+            backgroundColor: 'var(--clr4)',
+            color: 'var(--clr1)',
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer',
@@ -408,13 +509,13 @@ export default function ReceptionView({ session, profile }: Props) {
       {/* Filtros */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+        gridTemplateColumns: 'repeat(4, 1fr)', 
         gap: '10px', 
         marginBottom: '20px',
         padding: '10px',
-        backgroundColor: 'var(--color-card-background)',
+        backgroundColor: 'var(--clr1)',
         borderRadius: '4px',
-        border: '1px solid var(--color-border)'
+        border: '1px solid var(--clr4)'
       }}>
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Buscar</label>
@@ -427,10 +528,10 @@ export default function ReceptionView({ session, profile }: Props) {
               minWidth: '95%',
               maxWidth: '100%',
               padding: '8px',
-              border: '1px solid var(--color-border)',
+              border: '1px solid var(--clr4)',
               borderRadius: '4px',
-              backgroundColor: 'var(--color-card-background)',
-              color: 'var(--color-text-primary)'
+              backgroundColor: 'var(--clr1)',
+              color: 'var(--clr4)'
             }}
           />
         </div>
@@ -449,10 +550,10 @@ export default function ReceptionView({ session, profile }: Props) {
               minWidth: '95%',
               maxWidth: '100%',
               padding: '8px',
-              border: '1px solid var(--color-border)',
+              border: '1px solid var(--clr4)',
               borderRadius: '4px',
-              backgroundColor: 'var(--color-card-background)',
-              color: 'var(--color-text-primary)',
+              backgroundColor: 'var(--clr1)',
+              color: 'var(--clr4)',
               boxSizing: 'border-box'
             }}
             onFocus={() => setShowLocalDropdown(true)}
@@ -500,7 +601,7 @@ export default function ReceptionView({ session, profile }: Props) {
                 top: '30px', // Ajuste para alinearse con el input de texto
                 background: 'none',
                 border: 'none',
-                color: 'var(--color-text-secondary)',
+                color: 'var(--clr2)',
                 cursor: 'pointer',
                 fontSize: '16px',
                 fontWeight: 'bold'
@@ -519,8 +620,8 @@ export default function ReceptionView({ session, profile }: Props) {
               maxHeight: '200px',
               overflowY: 'auto',
               zIndex: 1000,
-              backgroundColor: 'var(--color-card-background)',
-              border: '1px solid var(--color-border)',
+              backgroundColor: 'var(--clr1)',
+              border: '1px solid var(--clr4)',
               borderRadius: '4px',
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
               marginTop: '2px'
@@ -539,16 +640,16 @@ export default function ReceptionView({ session, profile }: Props) {
                     style={{
                       padding: '8px',
                       cursor: 'pointer',
-                      borderBottom: '1px solid var(--color-border)',
-                      backgroundColor: local.nombre_local === localFilter ? 'var(--color-accent)' : 'transparent',
-                      color: local.nombre_local === localFilter ? 'var(--color-card-background)' : 'var(--color-text-primary)'
+                      borderBottom: '1px solid var(--clr4)',
+                      backgroundColor: local.nombre_local === localFilter ? 'var(--clr4)' : 'transparent',
+                      color: local.nombre_local === localFilter ? 'var(--clr1)' : 'var(--clr4)'
                     }}
                   >
                     {local.nombre_local}
                   </div>
                 ))
               ) : (
-                <div style={{ padding: '8px', color: 'var(--color-text-secondary)' }}>
+                <div style={{ padding: '8px', color: 'var(--clr3)' }}>
                   No se encontraron locales
                 </div>
               )}
@@ -556,7 +657,7 @@ export default function ReceptionView({ session, profile }: Props) {
           )}
           {/* Input oculto para mantener el valor seleccionado */}
           {!localSearchTerm && localFilter && (
-            <div style={{ marginTop: '4px', color: 'var(--color-text-primary)' }}>
+            <div style={{ marginTop: '4px', color: 'var(--clr4)' }}>
               Seleccionado: {localFilter}
             </div>
           )}
@@ -572,10 +673,10 @@ export default function ReceptionView({ session, profile }: Props) {
               minWidth: '95%',
               maxWidth: '100%',
               padding: '7px',
-              border: '1px solid var(--color-border)',
+              border: '1px solid var(--clr4)',
               borderRadius: '4px',
-              backgroundColor: 'var(--color-card-background)',
-              color: 'var(--color-text-primary)'
+              backgroundColor: 'var(--clr1)',
+              color: 'var(--clr4)'
             }}
           />
         </div>
@@ -590,10 +691,10 @@ export default function ReceptionView({ session, profile }: Props) {
               minWidth: '95%',
               maxWidth: '100%',
               padding: '7px',
-              border: '1px solid var(--color-border)',
+              border: '1px solid var(--clr4)',
               borderRadius: '4px',
-              backgroundColor: 'var(--color-card-background)',
-              color: 'var(--color-text-primary)'
+              backgroundColor: 'var(--clr1)',
+              color: 'var(--clr4)'
             }}
           />
         </div>
@@ -601,74 +702,103 @@ export default function ReceptionView({ session, profile }: Props) {
 
       {/* Tabla de recepciones */}
       <div className="scroll-container" style={{ 
-        maxHeight: '60vh', 
+        maxHeight: '73vh', 
         overflowY: 'auto', 
-        border: '1px solid var(--color-border)',
+        border: '1px solid var(--clr4)',
         borderRadius: '4px'
       }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ backgroundColor: 'var(--color-background)', borderBottom: '2px solid var(--color-border)' }}>
-              <th style={{ padding: '10px', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Local</th>
-              <th style={{ padding: '10px', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Fecha Recepción</th>
-              <th style={{ padding: '10px', textAlign: 'right', borderRight: '1px solid var(--color-border)' }}>OLPN</th>
-              <th style={{ padding: '10px', textAlign: 'right', borderRight: '1px solid var(--color-border)' }}>DNs</th>
-              <th style={{ padding: '10px', textAlign: 'right', borderRight: '1px solid var(--color-border)' }}>Unidades</th>
-              <th style={{ padding: '10px', textAlign: 'right', borderRight: '1px solid var(--color-border)' }}>Faltantes</th>
-              <th style={{ padding: '10px', textAlign: 'left', borderRight: '1px solid var(--color-border)' }}>Estado</th>
-              <th style={{ padding: '10px', textAlign: 'left' }}>Completada</th>
-            </tr>
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id} style={{ backgroundColor: 'var(--clr1)', borderBottom: '2px solid var(--clr4)' }}>
+                {headerGroup.headers.map(header => (
+                  <th 
+                    key={header.id} 
+                    colSpan={header.colSpan} 
+                    style={{ 
+                      position: 'relative',
+                      width: header.id === 'local' ? '280px' : 'auto',
+                      padding: '5px', 
+                      textAlign: header.id === 'local' ? 'left' : 'center',
+                      borderRight: '1px solid var(--clr4)',
+                      minWidth: header.column.columnDef.minSize ? `${header.column.columnDef.minSize}px` : 'auto'
+                    }}
+                  >
+                    <div 
+                      {...{
+                        className: header.column.getCanSort() ? 'cursor-pointer select-none' : '',
+                        onClick: header.column.getToggleSortingHandler(),
+                      }}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: header.id === 'local' ? 'flex-start' : 'center' }}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {{
+                        asc: ' 🔼',
+                        desc: ' 🔽',
+                      }[header.column.getIsSorted() as string] ?? null}
+                    </div>
+                    {header.column.getCanFilter() ? (
+                      <div style={{ marginTop: '5px' }}>
+                        <input
+                          type="text"
+                          value={(header.column.getFilterValue() ?? '') as string}
+                          onChange={e => header.column.setFilterValue(e.target.value)}
+                          placeholder={`Filtrar...`}
+                          style={{
+                            width: '80%',
+                            padding: '4px',
+                            borderRadius: '4px',
+                            border: '1px solid var(--clr4)',
+                            backgroundColor: 'var(--clr1)',
+                            color: 'var(--clr4)',
+                            fontSize: '0.8em'
+                          }}
+                          onClick={e => e.stopPropagation()}
+                        />
+                      </div>
+                    ) : null}
+                  </th>
+                ))}
+              </tr>
+            ))}
           </thead>
           <tbody>
-            {recepciones.map((recepcion) => (
-              <React.Fragment key={recepcion.id}>
+            {table.getRowModel().rows.map(row => (
+              <React.Fragment key={row.id}>
                 <tr 
-                  onClick={() => setExpandedRecepcionId(expandedRecepcionId === recepcion.id ? null : recepcion.id)}
+                  onClick={() => setExpandedRecepcionId(expandedRecepcionId === row.original.id ? null : row.original.id)}
                   style={{ 
-                    borderBottom: '1px solid var(--color-border)',
-                    backgroundColor: expandedRecepcionId === recepcion.id ? 'var(--color-card-background)' : 'transparent',
+                    borderBottom: '1px solid var(--clr4)',
+                    backgroundColor: expandedRecepcionId === row.original.id ? 'var(--clr1)' : 'transparent',
                     cursor: 'pointer'
                   }}
                 >
-                  <td style={{ padding: '10px', borderRight: '1px solid var(--color-border)' }}>{recepcion.local}</td>
-                  <td style={{ padding: '10px', borderRight: '1px solid var(--color-border)' }}>{formatDateOnly(recepcion.fecha_recepcion)}</td>
-                  <td style={{ padding: '10px', borderRight: '1px solid var(--color-border)', textAlign: 'right' }}>
-                    {recepcion.olpn_escaneadas}/{recepcion.olpn_esperadas}
-                  </td>
-                  <td style={{ padding: '10px', borderRight: '1px solid var(--color-border)', textAlign: 'right' }}>
-                    {recepcion.dn_escaneadas}/{recepcion.dn_esperadas}
-                  </td>
-                  <td style={{ padding: '10px', borderRight: '1px solid var(--color-border)', textAlign: 'right' }}>
-                    {recepcion.unidades_escaneadas}/{recepcion.unidades_esperadas}
-                  </td>
-                  <td style={{ padding: '10px', borderRight: '1px solid var(--color-border)', textAlign: 'right' }}>
-                    {recepcion.detalles ? recepcion.detalles.filter(detalle => !detalle.escaneado).length : 0}
-                  </td>
-                  <td style={{ padding: '10px', borderRight: '1px solid var(--color-border)' }}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      backgroundColor: recepcion.estado === 'completada' ? '#A1C181' : '#F4C287',
-                      color: 'black',
-                      fontWeight: 'bold'
-                    }}>
-                      {recepcion.estado}
-                    </span>
-                  </td>
-                  <td style={{ padding: '10px' }}>{formatDate(recepcion.fecha_hora_completada)}</td>
+                  {row.getVisibleCells().map(cell => (
+                    <td 
+                      key={cell.id} 
+                      style={{ 
+                        width: cell.column.getSize(), 
+                        padding: '5px',
+                        textAlign: cell.column.id === 'fecha_recepcion' || cell.column.id === 'olpn_escaneadas' || cell.column.id === 'dn_escaneadas' || cell.column.id === 'unidades_escaneadas' || cell.column.id === 'detalles' || cell.column.id === 'estado' || cell.column.id === 'fecha_hora_completada' ? 'center' : 'left',
+                        borderRight: '1px solid var(--clr4)'
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
                 </tr>
                 
                 {/* Fila expandida con detalles */}
-                {expandedRecepcionId === recepcion.id && (
+                {expandedRecepcionId === row.original.id && (
                   <tr>
                     <td colSpan={8} style={{ padding: '0' }}>
                       <div style={{ 
                         padding: '15px', 
-                        backgroundColor: 'var(--color-card-background)',
-                        border: '1px solid var(--color-border)',
+                        backgroundColor: 'var(--clr1)',
+                        border: '1px solid var(--clr4)',
                         borderTop: 'none'
                       }}>
-                        <h4 style={{ margin: '0 0 10px 0', color: 'var(--color-text-primary)' }}>
+                        <h4 style={{ margin: '0 0 10px 0', color: 'var(--clr4)' }}>
                           Detalles de la Recepción
                         </h4>
                         
@@ -679,51 +809,51 @@ export default function ReceptionView({ session, profile }: Props) {
                           marginBottom: '15px'
                         }}>
                           <div>
-                            <strong>Usuario que completó:</strong> {recepcion.first_name} {recepcion.last_name}
+                            <strong>Usuario que completó:</strong> {row.original.first_name} {row.original.last_name}
                           </div>
                           <div>
-                            <strong>Inicio de recepción:</strong> {formatDate(recepcion.fecha_hora_inicio)}
+                            <strong>Inicio de recepción:</strong> {formatDate(row.original.fecha_hora_inicio)}
                           </div>
                           <div>
-                            <strong>Fecha registro:</strong> {formatDate(recepcion.created_at)}
+                            <strong>Fecha registro:</strong> {formatDate(row.original.created_at)}
                           </div>
                         </div>
                         
-                        <h5 style={{ margin: '15px 0 10px 0', color: 'var(--color-text-primary)' }}>
-                          Paquetes ({recepcion.detalles.length} items)
+                        <h5 style={{ margin: '15px 0 10px 0', color: 'var(--clr4)' }}>
+                          Paquetes ({row.original.detalles.length} items)
                         </h5>
                         
                         <div className="scroll-container" style={{ 
                           maxHeight: '300px', 
                           overflowY: 'auto', 
-                          border: '1px solid var(--color-border)',
+                          border: '1px solid var(--clr4)',
                           borderRadius: '4px'
                         }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
-                              <tr style={{ backgroundColor: 'var(--color-background)' }}>
-                                <th style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'left' }}>OLPN</th>
-                                <th style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'left' }}>DN</th>
-                                <th style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'right' }}>Unidades</th>
-                                <th style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'center' }}>Escaneado</th>
-                                <th style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'right' }}>Faltantes</th>
-                                <th style={{ padding: '8px', textAlign: 'left' }}>Ticket</th>
+                              <tr style={{ backgroundColor: 'var(--clr4)', color: 'var(--clr1)' }}>
+                                <th style={{ padding: '8px', borderRight: '1px solid var(--clr1)', textAlign: 'left' }}>OLPN</th>
+                                <th style={{ padding: '8px', borderRight: '1px solid var(--clr1)', textAlign: 'center' }}>DN</th>
+                                <th style={{ padding: '8px', borderRight: '1px solid var(--clr1)', textAlign: 'center' }}>Unidades</th>
+                                <th style={{ padding: '8px', borderRight: '1px solid var(--clr1)', textAlign: 'center' }}>Escaneado</th>
+                                <th style={{ padding: '8px', borderRight: '1px solid var(--clr1)', textAlign: 'center' }}>Faltantes</th>
+                                <th style={{ padding: '8px', textAlign: 'center' }}>Ticket</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {recepcion.detalles.map((detalle, index) => (
-                                <tr key={index} style={{ borderBottom: index < recepcion.detalles.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
-                                  <td style={{ padding: '8px', borderRight: '1px solid var(--color-border)' }}>{detalle.olpn}</td>
-                                  <td style={{ padding: '8px', borderRight: '1px solid var(--color-border)' }}>{detalle.dn}</td>
-                                  <td style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'right' }}>{detalle.unidades}</td>
-                                  <td style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'center' }}>
+                              {row.original.detalles.map((detalle, index) => (
+                                <tr key={index} style={{ borderBottom: index < row.original.detalles.length - 1 ? '1px solid var(--clr4)' : 'none' }}>
+                                  <td style={{ padding: '8px', borderRight: '1px solid var(--clr4)' }}>{detalle.olpn}</td>
+                                  <td style={{ padding: '8px', borderRight: '1px solid var(--clr4)' }}>{detalle.dn}</td>
+                                  <td style={{ padding: '8px', borderRight: '1px solid var(--clr4)', textAlign: 'center' }}>{detalle.unidades}</td>
+                                  <td style={{ padding: '8px', borderRight: '1px solid var(--clr4)', textAlign: 'center' }}>
                                     {detalle.escaneado ? '✓' : '✗'}
                                   </td>
-                                  <td style={{ padding: '8px', borderRight: '1px solid var(--color-border)', textAlign: 'right' }}>{detalle.faltantes}</td>
+                                  <td style={{ padding: '8px', borderRight: '1px solid var(--clr4)', textAlign: 'center' }}>{detalle.faltantes}</td>
                                   <td style={{ padding: '8px' }}>
                                     {detalle.ticket_id ? (
                                       <span style={{ 
-                                        backgroundColor: '#A1C181', 
+                                        backgroundColor: 'var(--clr5)', 
                                         color: 'black', 
                                         padding: '2px 6px', 
                                         borderRadius: '4px', 
@@ -752,14 +882,14 @@ export default function ReceptionView({ session, profile }: Props) {
       </div>
       
       {recepciones.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-secondary)' }}>
+        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--clr2)' }}>
           <p>No se encontraron recepciones completadas</p>
         </div>
       )}
       
       <style jsx>{`
         .scroll-container {
-          -ms-overflow-style: var(--color-scrollbar); /* IE and Edge */
+          -ms-overflow-style: var(--clr4); /* IE and Edge */
           scrollbar-width: thin; /* Firefox */
         }
         
@@ -769,17 +899,17 @@ export default function ReceptionView({ session, profile }: Props) {
         }
         
         .scroll-container::-webkit-scrollbar-track {
-          background: var(--color-background);
+          background: var(--clr1);
           border-radius: 4px;
         }
         
         .scroll-container::-webkit-scrollbar-thumb {
-          background: var(--color-accent);
+          background: var(--clr4);
           border-radius: 4px;
         }
         
         .scroll-container::-webkit-scrollbar-thumb:hover {
-          background: #FE7F2D;
+          background: var(--clr7);
         }
       `}</style>
     </div>

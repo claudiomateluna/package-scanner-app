@@ -154,11 +154,11 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
         zIndex: 1000
       }}>
         <div style={{ 
-          backgroundColor: 'var(--color-background)', 
+          backgroundColor: 'var(--clr1)', 
           padding: '40px', 
           borderRadius: '8px',
           textAlign: 'center',
-          color: '#CCCCCC'
+          color: 'var(--clr2)'
         }}>
           <h2>Cargando historial de recepciones...</h2>
         </div>
@@ -182,26 +182,26 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
         padding: '20px'
       }}>
         <div style={{ 
-          backgroundColor: 'var(--color-background)', 
+          backgroundColor: 'var(--clr1)', 
           padding: '30px', 
           borderRadius: '8px',
           maxWidth: '900px',
           width: '100%',
           maxHeight: '90vh',
           overflowY: 'auto',
-          color: 'var(--color-text-primary)',
-          border: '1px solid var(--color-border)'
+          color: 'var(--clr4)',
+          border: '1px solid var(--clr4)'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2 style={{ margin: 0, color: 'var(--color-accent)' }}>Detalle de Recepción</h2>
+            <h2 style={{ margin: 0, color: 'var(--clr4)' }}>Detalle de Recepción</h2>
             <div>
               <button 
                 onClick={() => setSelectedReception(null)}
                 style={{
                   marginRight: '10px',
                   backgroundColor: 'transparent',
-                  border: '1px solid var(--color-text-primary)',
-                  color: 'var(--color-text-primary)',
+                  border: '1px solid var(--clr4)',
+                  color: 'var(--clr4)',
                   borderRadius: '5px',
                   padding: '8px 15px',
                   cursor: 'pointer',
@@ -214,8 +214,8 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
                 onClick={onClose}
                 style={{
                   backgroundColor: 'transparent',
-                  border: '1px solid var(--color-text-primary)',
-                  color: 'var(--color-text-primary)',
+                  border: '1px solid var(--clr4)',
+                  color: 'var(--clr4)',
                   borderRadius: '5px',
                   padding: '8px 15px',
                   cursor: 'pointer',
@@ -228,7 +228,7 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
           </div>
           
           <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ color: 'var(--color-accent)', borderBottom: '1px solid var(--color-border)', paddingBottom: '10px' }}>
+            <h3 style={{ color: 'var(--clr4)', borderBottom: '1px solid var(--clr4)', paddingBottom: '10px' }}>
               Información General
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px' }}>
@@ -257,8 +257,8 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
               <div>
                 <strong>Estado:</strong> 
                 <span style={{ 
-                  backgroundColor: 'var(--color-success)', 
-                  color: 'var(--color-background)', 
+                  backgroundColor: 'var(--clr5)', 
+                  color: 'var(--clr1)', 
                   padding: '3px 8px', 
                   borderRadius: '3px',
                   marginLeft: '8px'
@@ -270,7 +270,7 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
           </div>
           
           <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ color: 'var(--color-text-primary)', borderBottom: '1px solid var(--color-text-primary)', paddingBottom: '10px' }}>
+            <h3 style={{ color: 'var(--clr4)', borderBottom: '1px solid var(--clr4)', paddingBottom: '10px' }}>
               Estadísticas
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginTop: '15px' }}>
@@ -280,7 +280,7 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
                 borderRadius: '5px',
                 textAlign: 'center'
               }}>
-                <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
+                <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--clr4)' }}>
                   {selectedReception.olpn_escaneadas} / {selectedReception.olpn_esperadas}
                 </div>
                 <div>OLPN/Bultos</div>
@@ -292,7 +292,7 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
                 borderRadius: '5px',
                 textAlign: 'center'
               }}>
-                <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
+                <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--clr4)' }}>
                   {selectedReception.dn_escaneadas} / {selectedReception.dn_esperadas}
                 </div>
                 <div>DN/Facturas</div>
@@ -304,7 +304,7 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
                 borderRadius: '5px',
                 textAlign: 'center'
               }}>
-                <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
+                <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--clr4)' }}>
                   {selectedReception.unidades_escaneadas} / {selectedReception.unidades_esperadas}
                 </div>
                 <div>Unidades</div>
@@ -315,7 +315,7 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
                 borderRadius: '5px',
                 textAlign: 'center'
               }}>
-                <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--color-error)' }}>
+                <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--clr6)' }}>
                   {selectedReception.unidades_faltantes || 0}
                 </div>
                 <div>Unidades Faltantes</div>
@@ -324,19 +324,19 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
           </div>
           
           <div>
-            <h3 style={{ color: 'var(--color-text-primary)', borderBottom: '1px solid var(--color-text-primary)', paddingBottom: '10px' }}>
+            <h3 style={{ color: 'var(--clr4)', borderBottom: '1px solid var(--clr4)', paddingBottom: '10px' }}>
               Detalles de Paquetes
             </h3>
             <div style={{ 
               maxHeight: '300px', 
               overflowY: 'auto',
               marginTop: '15px',
-              border: '1px solid var(--color-text-primary)',
+              border: '1px solid var(--clr4)',
               borderRadius: '5px'
             }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderBottom: '1px solid #CCCCCC' }}>
+                  <tr style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderBottom: '1px solid var(--clr2)' }}>
                     <th style={{ padding: '10px', textAlign: 'left' }}>OLPN/Bulto</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>DN/Factura</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>Unidades</th>
@@ -349,7 +349,7 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
                     <tr 
                       key={index} 
                       style={{ 
-                        borderBottom: '1px solid #555',
+                        borderBottom: '1px solid var(--clr4)',
                         backgroundColor: detalle.escaneado ? 'rgba(161, 193, 129, 0.2)' : 'transparent'
                       }}
                     >
@@ -359,8 +359,8 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
                       <td style={{ padding: '8px' }}>{detalle.faltantes || 0}</td>
                       <td style={{ padding: '8px' }}>
                         <span style={{ 
-                          backgroundColor: detalle.escaneado ? 'var(--color-success)' : 'var(--color-error)', 
-                          color: detalle.escaneado ? 'var(--color-text-primary)' : 'var(--color-text-primary)', 
+                          backgroundColor: detalle.escaneado ? 'var(--clr5)' : 'var(--clr6)', 
+                          color: detalle.escaneado ? 'var(--clr4)' : 'var(--clr4)', 
                           padding: '3px 8px', 
                           borderRadius: '3px',
                           fontSize: '0.8em'
@@ -394,24 +394,24 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
       padding: '20px'
     }}>
       <div style={{ 
-        backgroundColor: 'var(--color-background)', 
+        backgroundColor: 'var(--clr1)', 
         padding: '30px', 
         borderRadius: '8px',
         maxWidth: '900px',
         width: '100%',
         maxHeight: '90vh',
         overflowY: 'auto',
-        color: 'var(--color-text-primary)',
-        border: '1px solid var(--color-border)'
+        color: 'var(--clr4)',
+        border: '1px solid var(--clr4)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0, color: 'var(--color-accent)', fontSize: '1.6em' }}>Historial de Recepciones - {local}</h2>
+          <h2 style={{ margin: 0, color: 'var(--clr4)', fontSize: '1.6em' }}>Historial de Recepciones - {local}</h2>
           <button 
             onClick={onClose}
             style={{
               backgroundColor: 'transparent',
-              border: '1px solid var(--color-text-primary)',
-              color: 'var(--color-text-primary)',
+              border: '1px solid var(--clr4)',
+              color: 'var(--clr4)',
               borderRadius: '5px',
               padding: '8px 15px',
               cursor: 'pointer',
@@ -431,12 +431,12 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
           <div style={{ 
             maxHeight: '600px', 
             overflowY: 'auto',
-            border: '1px solid #000',
+            border: '1px solid var(--clr4)',
             borderRadius: '5px'
           }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderBottom: '1px solid #CCCCCC' }}>
+                <tr style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderBottom: '1px solid var(--clr2)' }}>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Fecha Recepción</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Fecha/Hora Completada</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>OLPN</th>
@@ -449,7 +449,7 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
               </thead>
               <tbody>
                 {receptions.map((reception: CompletedReception) => (
-                  <tr key={reception.id} style={{ borderBottom: '1px solid #555' }}>
+                  <tr key={reception.id} style={{ borderBottom: '1px solid var(--clr4)' }}>
                     <td style={{ padding: '10px' }}>
                       {(() => {
                         const date = new Date(reception.fecha_recepcion);
@@ -466,8 +466,8 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
                     <td style={{ padding: '10px' }}>{reception.unidades_faltantes || 0}</td>
                     <td style={{ padding: '10px' }}>
                       <span style={{ 
-                        backgroundColor: 'var(--color-success)', 
-                        color: 'var(--color-background)', 
+                        backgroundColor: 'var(--clr5)', 
+                        color: 'var(--clr1)', 
                         padding: '5px', 
                         borderRadius: '4px',
                         fontSize: '0.8em'
@@ -479,9 +479,9 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
                       <button
                         onClick={() => setSelectedReception(reception)}
                         style={{
-                          backgroundColor: 'var(--color-button-background)',
-                          color: 'var(--color-button-text)',
-                          border: '1px solid var(--color-button-border)',
+                          backgroundColor: 'var(--clr4)',
+                          color: 'var(--clr1)',
+                          border: '1px solid var(--clr1)',
                           borderRadius: '4px',
                           padding: '5px',
                           cursor: 'pointer',
@@ -506,9 +506,9 @@ export default function ReceptionHistory({ local, onClose }: ReceptionHistoryPro
           <button
             onClick={onClose}
             style={{
-              backgroundColor: 'var(--color-button-background)',
-              color: 'var(--color-button-text)',
-              border: '1px solid var(--color-button-border)',
+              backgroundColor: 'var(--clr4)',
+              color: 'var(--clr1)',
+              border: '1px solid var(--clr1)',
               padding: '12px 30px',
               borderRadius: '5px',
               cursor: 'pointer',

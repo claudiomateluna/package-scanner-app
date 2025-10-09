@@ -8,9 +8,9 @@
 .selector {
   width: 100%;
   padding: 12px;
-  background-color: var(--blanco);
-  color: var(--text);
-  border: 1px solid var(--border);
+  background-color: var(--clr1);
+  color: var(--clr4);
+  border: 1px solid var(--clr4);
   border-radius: 4px;
   font-size: 1em;
   box-sizing: border-box;
@@ -21,17 +21,17 @@
 }
 
 .selectorPlaceholder {
-  color: var(--color-text-tertiary);
+  color: var(--clr2);
   flex: 1;
 }
 
 .selectorText {
-  color: var(--color-text-primary);
+  color: var(--clr4);
   flex: 1;
 }
 
 .arrow {
-  color: var(--color-text-tertiary);
+  color: var(--clr2);
   font-size: 0.8em;
 }
 
@@ -40,8 +40,8 @@
   top: 100%;
   left: 0;
   right: 0;
-  background-color: var(--color-card-background);
-  border: 1px solid var(--color-border);
+  background-color: var(--clr1);
+  border: 1px solid var(--clr4);
   border-radius: 4px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -56,9 +56,9 @@
   width: 100%;
   padding: 10px;
   border: none;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-card-background);
-  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--clr4);
+  background-color: var(--clr1);
+  color: var(--clr4);
   font-size: 1em;
   box-sizing: border-box;
 }
@@ -71,22 +71,22 @@
 .listItem {
   padding: 10px;
   cursor: pointer;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-card-background);
-  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--clr4);
+  background-color: var(--clr1);
+  color: var(--clr4);
 }
 
 .listItem:hover {
-  background-color: var(--color-background);
+  background-color: var(--clr1);
 }
 
 .listItem.selected {
-  background-color: var(--color-accent-light);
-  color: var(--color-accent);
+  background-color: var(--clr4);
+  color: var(--clr4);
 }
 
 .noResults {
   padding: 10px;
   text-align: center;
-  color: var(--color-text-tertiary);
+  color: var(--clr2);
 }

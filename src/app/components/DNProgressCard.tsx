@@ -4,12 +4,12 @@ import { CSSProperties } from 'react';
 
 // --- Paleta de Colores ---
 const colors = {
-  background: '#233d4d',
-  foreground: '#000000',
-  accent: '#000000',
-  scannedGreen: '#a1c181',
-  contrastText: '#000000',
-  darkContrastText: '#000000'
+  background: 'var(--clr1)',
+  foreground: 'var(--clr4)',
+  accent: 'var(--clr4)',
+  scannedGreen: 'var(--clr5)',
+  contrastText: 'var(--clr4)',
+  darkContrastText: 'var(--clr4)'
 };
 
 interface Props {
@@ -25,7 +25,7 @@ export default function DNProgressCard({ dn, totalPackages, scannedPackages, isS
   const styles: { [key: string]: CSSProperties } = {
     card: {
       position: 'relative',
-      backgroundColor: '#FFFFFF',
+      backgroundColor: 'var(--clr1)',
       borderRadius: '4px',
       overflow: 'hidden', // Para que la barra de progreso no se salga de los bordes redondeados
       marginBottom: '5px', // Margen de 5px entre elementos

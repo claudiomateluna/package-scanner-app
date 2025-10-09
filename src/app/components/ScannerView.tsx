@@ -18,7 +18,6 @@ import { useRouter } from 'next/navigation';
 import '../globals.css';
 import styles from './ScannerView.module.css';
 import './scrollbarStyles.css';
-import './ScannerView.css';
 
 // --- Tipos de Datos ---
 type Profile = { role: string | null; }
@@ -395,7 +394,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
   // Si no hay selección, mostramos un mensaje
   if (hasNoSelection) {
     return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
+      <div className={styles.selectionMessageContainer}>
         <h3>Por favor, selecciona un local y una fecha para continuar</h3>
         <p>Utiliza el botón Volver para regresar a la pantalla de selección</p>
       </div>
@@ -688,7 +687,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
   }
 
   if (loading) return <div>Cargando datos para {selection.local} en fecha {selection.fecha}...</div>
-  if (error) return <div><p style={{color: 'red'}}><b>Error:</b> {error}</p></div>
+  if (error) return <div><p className={styles.errorMessage}><b>Error:</b> {error}</p></div>
 
   const getTableHeaders = () => {
     switch (profile?.role) {
@@ -709,68 +708,53 @@ export default function ScannerView({ session, profile, selection, currentView, 
   const isSkaOperator = profile?.role === 'SKA Operator';
 
   return (
-    <div className="scanner-view-container">
-      <main style={{ display: 'flex', gap: '10px', flexDirection: isPhone ? 'column' : 'row' }} className="scanner-main-layout">
-        <div id='Izquierda' style={{ width: isPhone || isSkaOperator ? '100%' : '63%' }}>
+    <div className={styles.scannerViewContainer}>
+      <main className={isPhone ? styles.scannerMainLayoutPhone : styles.scannerMainLayout}>
+        <div id='Izquierda' className={
+          isSkaOperator 
+            ? styles.leftColumnSkaOperator 
+            : (isPhone ? styles.leftColumnPhone : styles.leftColumn)
+        }>
           {/* Cuadro Resumen */}
           {!isSkaOperator && (
-            <div id='CuadroResumen' style={{ 
-              backgroundColor: '#ffffff',
-              borderRadius: '4px',
-              padding: '5px',
-              border: '1px solid #000000',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-            }}>
-                <h3 style={{
-                  margin: '0 0 5px 0',
-                  color: '#000000',
-                  textAlign: 'center',
-                  fontSize: '1.2em'
-                }}>
+            <div id='CuadroResumen' className={styles.summaryContainer}>
+                <h3 className={styles.summaryTitle}>
                   {selection.local} - {selection.fecha}
                 </h3>
                 
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-around',
-                  textAlign: 'center',
-                  flexWrap: 'wrap',
-                  gap: '5px'
-                }}>
-                  <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
-                    <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
+                <div className={styles.summaryIndicators}>
+                  <div className={styles.summaryIndicator}> {/* Reducir márgenes */}
+                    <div className={styles.summaryIndicatorValue}>
                       {/* Calcular DN/Facturas escaneadas o con reporte */}
                       {Array.from(new Set(
                         packages.filter(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN])
                         .map(pkg => pkg.DN)
                       )).length} / {dnProgress.length}
                     </div>
-                    <div style={{ fontSize: '0.9em', color: '#666666' }}>
+                    <div className={styles.summaryIndicatorLabel}>
                       {isWarehouseOrAdmin ? 'DN' : 'Facturas'}
                     </div>
                   </div>
                   
-                  <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
-                    <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
+                  <div className={styles.summaryIndicator}> {/* Reducir márgenes */}
+                    <div className={styles.summaryIndicatorValue}>
                       {Array.from(new Set(
                         packages.filter(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN])
                         .map(pkg => pkg.OLPN)
                       )).length} / {packages.length}
                     </div>
-                    <div style={{ fontSize: '0.9em', color: '#666666' }}>
+                    <div className={styles.summaryIndicatorLabel}>
                       {isWarehouseOrAdmin ? 'OLPN' : 'Bultos'}
                     </div>
                   </div>
                   
-                  <div style={{ margin: '5px', minWidth: '80px' }}> {/* Reducir márgenes */}
-                    <div style={{ fontSize: '1.8em', fontWeight: 'bold', color: '#000000' }}>
+                  <div className={styles.summaryIndicator}> {/* Reducir márgenes */}
+                    <div className={styles.summaryIndicatorValue}>
                       {packages
                         .filter(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN])
                         .reduce((sum, pkg) => sum + pkg.Unidades, 0)} / {packages.reduce((sum, pkg) => sum + pkg.Unidades, 0)}
                     </div>
-                    <div style={{ fontSize: '0.9em', color: '#666666' }}>
+                    <div className={styles.summaryIndicatorLabel}>
                       Unidades
                     </div>
                   </div>
@@ -796,17 +780,17 @@ export default function ScannerView({ session, profile, selection, currentView, 
                       backgroundColor: hasExistingReception || 
                         (packages.length > 0 && 
                           packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) 
-                          && !isCompletingReception && !hasExistingReception) ? '#A1C181' : (isCompletingReception || hasExistingReception ? '#ffffff' : '#ffffff'),
+                          && !isCompletingReception && !hasExistingReception) ? 'var(--clr5)' : (isCompletingReception || hasExistingReception ? 'var(--clr1)' : 'var(--clr1)'),
                       color: hasExistingReception || 
                         (packages.length > 0 && 
                           packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) 
-                          && !isCompletingReception && !hasExistingReception) ? '#ffffff' : '#000000',
+                          && !isCompletingReception && !hasExistingReception) ? 'var(--clr1)' : 'var(--clr4)',
                       fontWeight: 'bold',
                       fontSize: '1em',
                       border: hasExistingReception || 
                         (packages.length > 0 && 
                           packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) 
-                          && !isCompletingReception && !hasExistingReception) ? 'none' : '1px solid #000000',
+                          && !isCompletingReception && !hasExistingReception) ? 'none' : '1px solid var(--clr4)',
                       cursor: packages.length > 0 && 
                         packages.every(pkg => scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) 
                         && !isCompletingReception && !hasExistingReception ? 'pointer' : 'not-allowed',
@@ -829,8 +813,8 @@ export default function ScannerView({ session, profile, selection, currentView, 
                       flex: '1',
                       padding: '10px',
                       borderRadius: '5px',
-                      backgroundColor: '#000000',
-                      color: '#ffffff',
+                      backgroundColor: 'var(--clr4)',
+                      color: 'var(--clr1)',
                       fontWeight: 'bold',
                       fontSize: '1em',
                       border: 'none',
@@ -850,8 +834,8 @@ export default function ScannerView({ session, profile, selection, currentView, 
                         flex: '1',
                         padding: '10px',
                         borderRadius: '5px',
-                        backgroundColor: '#000000',
-                        color: '#ffffff',
+                        backgroundColor: 'var(--clr4)',
+                        color: 'var(--clr1)',
                         fontWeight: 'bold',
                         fontSize: '1em',
                         border: 'none',
@@ -868,26 +852,26 @@ export default function ScannerView({ session, profile, selection, currentView, 
             // --- VISTA MÓVIL --- 
             <>
               {/* Mostrar siempre el input manual y botones en dispositivos móviles */}
-              <div style={{ display: 'flex', gap: '5px', margin: '20px 0 0 0' }}>
+              <div className={styles.scanningSectionContainer}>
                 <input 
                   type="text" 
                   placeholder={`Escanear ${tableHeaders.col1}...`}
                   value={scannedOlpn}
                   onChange={(e) => setScannedOlpn(e.target.value)}
-                  style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#000000', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#000000', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#000000', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#000000', borderRadius: '5px'}}
+                  className={styles.manualInput}
                   onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister(scannedOlpn)}
                   disabled={!canScan}
                 />
                 <button 
                   onClick={() => handleRegister(scannedOlpn)} 
-                  style={{padding: '5px', backgroundColor: canScan ? '#000000' : '#cccccc', color: '#FFFFFF', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '5px', cursor: canScan ? 'pointer' : 'not-allowed', fontWeight: 'bold'}}
+                  className={canScan ? styles.registerButton : styles.registerButtonDisabled}
                   disabled={!canScan}
                 >
                   Registrar
                 </button>
                 <button 
                   onClick={() => setUseBarcodeScanner(true)}
-                  style={{padding: '2px', backgroundColor: '#FFFFFF', color: '#000000', border: 'none', borderRadius: '4px', cursor: 'pointer', borderColor: '#000000', borderWidth: '1px', borderStyle: 'solid'}}
+                  className={styles.barcodeButton}
                   title="Usar escáner de código de barras"
                 >
                   <Image 
@@ -901,20 +885,12 @@ export default function ScannerView({ session, profile, selection, currentView, 
               
               {/* Mostrar escáner de código de barras cuando esté activo */}
               {useBarcodeScanner && (
-                <div style={{ marginBottom: '20px', marginTop: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <div className={styles.activeScannerContainer}>
+                  <div className={styles.scannerHeaderContainer}>
                     <h4>Escáner de Código de Barras</h4>
                     <button
                       onClick={() => setUseBarcodeScanner(false)}
-                      style={{
-                        padding: '5px 10px',
-                        backgroundColor: '#233D4D',
-                        color: '#CCCCCC',
-                        border: '1px solid #CCCCCC',
-                        borderRadius: '3px',
-                        cursor: 'pointer',
-                        fontSize: '12px'
-                      }}
+                      className={styles.manualInputButton}
                     >
                       Usar Input Manual
                     </button>
@@ -927,26 +903,26 @@ export default function ScannerView({ session, profile, selection, currentView, 
             // --- VISTA ESCRITORIO ---
             <>
               {/* Mostrar siempre el input manual y botones en vista de escritorio */}
-              <div style={{ display: 'flex', gap: '5px', margin: '20px 0 0 0' }}>
+              <div className={styles.scanningSectionContainer}>
                 <input 
                   type="text" 
                   placeholder={`Escanear ${tableHeaders.col1}...`} 
                   value={scannedOlpn} 
                   onChange={(e) => setScannedOlpn(e.target.value)} 
-                  style={{fontSize: '1em', padding: '10px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#000', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#000', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#000', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#000', borderRadius: '4px'}}
+                  className={styles.manualInputDesktop}
                   onKeyPress={(e) => e.key === 'Enter' && canScan && handleRegister(scannedOlpn)}
                   disabled={!canScan}
                 />
                 <button 
                   onClick={() => handleRegister(scannedOlpn)} 
-                  style={{padding: '5px 10px', backgroundColor: canScan ? '#000000' : '#cccccc', color: '#FFFFFF', border: 'none', borderTopWidth: 0, borderBottomWidth: 0, borderLeftWidth: 0, borderRightWidth: 0, borderRadius: '4px', cursor: canScan ? 'pointer' : 'not-allowed', fontWeight: 'bold'}}
+                  className={canScan ? styles.registerButtonDesktop : styles.registerButtonDisabledDesktop}
                   disabled={!canScan}
                 >
                   Registrar
                 </button>
                 <button 
                   onClick={() => setUseBarcodeScanner(true)}
-                  style={{padding: '3px 2px 1px 2px', backgroundColor: '#FFFFFF', color: '#000000', border: 'none', borderRadius: '4px', cursor: 'pointer', borderColor: '#000000', borderWidth: '1px', borderStyle: 'solid'}}
+                  className={styles.barcodeButtonDesktop}
                   title="Usar escáner de código de barras"
                 >
                   <Image 
@@ -960,20 +936,12 @@ export default function ScannerView({ session, profile, selection, currentView, 
               
               {/* Mostrar escáner de código de barras cuando esté activo */}
               {useBarcodeScanner && (
-                <div style={{ marginBottom: '20px', marginTop: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <div className={styles.activeScannerContainer}>
+                  <div className={styles.scannerHeaderContainer}>
                     <h4>Escáner de Código de Barras</h4>
                     <button
                       onClick={() => setUseBarcodeScanner(false)}
-                      style={{
-                        padding: '5px 10px',
-                        backgroundColor: '#233D4D',
-                        color: '#CCCCCC',
-                        border: '1px solid #CCCCCC',
-                        borderRadius: '3px',
-                        cursor: 'pointer',
-                        fontSize: '12px'
-                      }}
+                      className={styles.manualInputButtonDesktop}
                     >
                       Usar Input Manual
                     </button>
@@ -987,20 +955,20 @@ export default function ScannerView({ session, profile, selection, currentView, 
           )}
           
 
-          <h4 style={{ color: '#000000' }}>Paquetes Esperados ({scanned.size} / {packages.length})</h4>
+          <h4 className={styles.expectedPackagesHeader}>Paquetes Esperados ({scanned.size} / {packages.length})</h4>
           {/* Search input for packages */}
-          <div style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
+          <div className={styles.searchContainer}>
             <input
               type="text"
               placeholder={`Buscar por ${tableHeaders.col1} o ${tableHeaders.col2}...`}
               value={packageSearchTerm}
               onChange={(e) => setPackageSearchTerm(e.target.value)}
-              style={{fontSize: '1em', padding: '8px', flexGrow: 1, backgroundColor: '#fff', color: '#000', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#000000', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#000000', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#000000', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#000000', borderRadius: '5px'}}
+              className={styles.searchInput}
             />
             {packageSearchTerm && (
               <button 
                 onClick={() => setPackageSearchTerm('')} 
-                style={{padding: '8px 12px', backgroundColor: '#000000', color: '#FFFFFF', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold'}}
+                className={styles.clearSearchButton}
               >
                 Limpiar
               </button>
@@ -1011,39 +979,39 @@ export default function ScannerView({ session, profile, selection, currentView, 
             overflowY: 'auto', 
             borderTopWidth: '1px', 
             borderTopStyle: 'solid', 
-            borderTopColor: '#000000', 
+            borderTopColor: 'var(--clr4)', 
             borderBottomWidth: '1px', 
             borderBottomStyle: 'solid', 
-            borderBottomColor: '#000000', 
+            borderBottomColor: 'var(--clr4)', 
             borderLeftWidth: '1px', 
             borderLeftStyle: 'solid', 
-            borderLeftColor: '#000000', 
+            borderLeftColor: 'var(--clr4)', 
             borderRightWidth: '1px', 
             borderRightStyle: 'solid', 
-            borderRightColor: '#000000', 
+            borderRightColor: 'var(--clr4)', 
             borderRadius: '4px'
           }}>
-            <table style={{width: '100%', borderCollapse: 'collapse'}}>
+            <table className={styles.packagesTable}>
               <thead>
-                <tr style={{borderBottom: '1px solid #000000'}}>
-                  <th style={{padding: '8px', textAlign: 'center', color: '#000000'}}>{tableHeaders.col1}</th>
-                  <th style={{padding: '8px', textAlign: 'center', width: '150px', color: '#000000'}}>{tableHeaders.col2}</th>
-                  <th style={{padding: '8px', textAlign: 'center', width: '120px', color: '#000000'}}>ud.</th>
-                  <th style={{padding: '8px', textAlign: 'center', width: '120px', color: '#000000'}}>Acciones</th>
+                <tr className={styles.packagesTableHeaderRow}>
+                  <th className={styles.packagesTableHeaderCell}>{tableHeaders.col1}</th>
+                  <th className={`${styles.packagesTableHeaderCell} ${styles.packagesTableHeaderCellDN}`}>{tableHeaders.col2}</th>
+                  <th className={`${styles.packagesTableHeaderCell} ${styles.packagesTableHeaderCellUD}`}>ud.</th>
+                  <th className={`${styles.packagesTableHeaderCell} ${styles.packagesTableHeaderCellActions}`}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredPackages.map(pkg => (
-                  <tr key={pkg.OLPN} style={{ 
-                      backgroundColor: (scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) ? '#A1C181' : 'transparent',
-                      color: (scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) ? '#000000' : '#999999',
-                      borderBottom: '1px solid #555'
-                    }}>
-                    <td style={{padding: '8px', textAlign: 'center'}}>{pkg.OLPN}</td>
-                    <td style={{padding: '8px', textAlign: 'center'}}>{pkg.DN}</td>
-                    <td style={{padding: '8px', textAlign: 'center'}}>{pkg.Unidades}</td>
-                    <td style={{padding: '8px', textAlign: 'center'}}>
-                      <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', alignItems: 'center' }}>
+                  <tr key={pkg.OLPN} className={
+                    (scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) 
+                      ? styles.packagesTableRowScanned 
+                      : styles.packagesTableRow
+                  }>
+                    <td className={styles.packagesTableCell}>{pkg.OLPN}</td>
+                    <td className={styles.packagesTableCell}>{pkg.DN}</td>
+                    <td className={styles.packagesTableCell}>{pkg.Unidades}</td>
+                    <td className={styles.packagesTableCellActions}>
+                      <div className={styles.packagesTableActionsContainer}>
                         {/* Show ticket numbers if they exist and make them clickable */}
                         {existingReports[pkg.OLPN] && (
                           <span 
@@ -1051,16 +1019,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
                               setSelectedTicketId(existingReports[pkg.OLPN]);
                               setShowTicketViewer(true);
                             }}
-                            style={{ 
-                              backgroundColor: 'var(--color-error)', 
-                              color: 'var(--color-button-text)', 
-                              padding: '4px 6px', 
-                              borderRadius: '4px', 
-                              fontSize: '12px',
-                              fontWeight: 'bold',
-                              cursor: 'pointer',
-                              textDecoration: 'underline'
-                            }}
+                            className={styles.ticketSpan}
                           >
                             {existingReports[pkg.OLPN]}
                           </span>
@@ -1071,16 +1030,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
                               setSelectedTicketId(existingRechazos[pkg.OLPN]);
                               setShowTicketViewer(true);
                             }}
-                            style={{ 
-                              backgroundColor: 'var(--color-error)', 
-                              color: 'var(--color-button-text)', 
-                              padding: '4px 6px', 
-                              borderRadius: '4px', 
-                              fontSize: '12px',
-                              fontWeight: 'bold',
-                              cursor: 'pointer',
-                              textDecoration: 'underline'
-                            }}
+                            className={styles.ticketSpan}
                           >
                             {existingRechazos[pkg.OLPN]}
                           </span>
@@ -1109,34 +1059,15 @@ export default function ScannerView({ session, profile, selection, currentView, 
 
         {/* Columna derecha con Resumen y Progreso por DN */}
         {!isSkaOperator && !isPhone && (
-        <div id='Derecha' style={{ width: isPhone ? '100%' : '37%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div id='Derecha' className={styles.rightColumn}>
           
           
           {/* Progreso por DN */}
-          <div id='ProgresoPorDN' style={{ 
-            backgroundColor: 'var(--color-background)', 
-            borderRadius: '4px', 
-            padding: '10px', 
-            flex: '1',
-            display: 'flex',
-            flexDirection: 'column',
-            maxHeight: '82vh',
-            border: '1px solid var(--color-text-tertiary)'
-          }}>
-            <h3 style={{ 
-              margin: '0 0 15px 0', 
-              color: 'var(--color-text-primary)', 
-              textAlign: 'center',
-              fontSize: '1.2em'
-            }}>
+          <div id='ProgresoPorDN' className={styles.progressContainer}>
+            <h3 className={styles.progressTitle}>
               Progreso por {isWarehouseOrAdmin ? 'DN' : 'Factura'}
             </h3>
-            <div className="scroll-container" style={{ 
-              maxHeight: '100%', 
-              overflowY: 'auto', 
-              paddingRight: '10px',
-              flex: '1'
-            }}>
+            <div className={`scroll-container ${styles.progressScrollContainer}`}>
               {dnProgress.map(item => (
                 <DNProgressCard 
                   key={item.dn}
@@ -1153,26 +1084,11 @@ export default function ScannerView({ session, profile, selection, currentView, 
         
         {/* Progreso por DN en dispositivos móviles */}
         {!isSkaOperator && isPhone && (
-          <div id='ProgresoPorDN' style={{ 
-            backgroundColor: 'var(--color-background)', 
-            borderRadius: '8px', 
-            padding: '10px',
-            marginTop: '10px',
-            border: '1px solid var(--color-text-tertiary)'
-          }}>
-            <h3 style={{ 
-              margin: '0 0 15px 0', 
-              color: 'var(--color-text-primary)', 
-              textAlign: 'center',
-              fontSize: '1.2em'
-            }}>
+          <div id='ProgresoPorDN' className={styles.progressContainerMobile}>
+            <h3 className={styles.progressTitle}>
               Progreso por {isWarehouseOrAdmin ? 'DN' : 'Factura'}
             </h3>
-            <div className="scroll-container" style={{ 
-              maxHeight: '40vh', 
-              overflowY: 'auto', 
-              paddingRight: '10px'
-            }}>
+            <div className={`scroll-container ${styles.progressScrollContainerMobile}`}>
               {dnProgress.map(item => (
                 <DNProgressCard 
                   key={item.dn}

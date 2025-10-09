@@ -240,7 +240,7 @@ export default function FaltantesAdminView({ session }: Props) {
       id: 'acciones',
       header: 'Acciones',
       minSize: 100,
-      cell: ({ row }) => <button onClick={() => handleEditClick(row.original)} style={{ padding: '6px 12px', backgroundColor: 'var(--color-button-background)', color: 'var(--color-button-text)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Editar</button>
+      cell: ({ row }) => <button onClick={() => handleEditClick(row.original)} style={{ padding: '6px 12px', backgroundColor: 'var(--clr4)', color: 'var(--clr1)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Editar</button>
     }
   ];
 
@@ -319,20 +319,20 @@ export default function FaltantesAdminView({ session }: Props) {
   };
 
   if (error) {
-    return <div style={{ padding: '20px', color: 'var(--color-error)' }}>Error: {error}</div>;
+    return <div style={{ padding: '20px', color: 'var(--clr6)' }}>Error: {error}</div>;
   }
 
   return (
     <>
       <style>{`
         .resizer { position: absolute; right: 0; top: 0; height: 100%; width: 5px; background: rgba(0, 0, 0, 0.5); cursor: col-resize; user-select: none; touch-action: none; opacity: 0; }
-        .resizer.isResizing { background: var(--color-accent); opacity: 1; }
+        .resizer.isResizing { background: var(--clr4); opacity: 1; }
         th:hover .resizer { opacity: 1; }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-        .modal-content { background-color: var(--color-card-background); padding: 25px; border-radius: 8px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background-color: var(--clr1); padding: 25px; border-radius: 8px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; }
         .modal-form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
         .modal-form-grid label { font-weight: bold; margin-bottom: 5px; display: block; }
-        .modal-form-grid input, .modal-form-grid select, .modal-form-grid textarea { width: 100%; padding: 8px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-card-background); color: var(--color-text-primary); }
+        .modal-form-grid input, .modal-form-grid select, .modal-form-grid textarea { width: 100%; padding: 8px; border: 1px solid var(--clr4); border-radius: 4px; background-color: var(--clr1); color: var(--clr4); }
         table { table-layout: fixed; }
       `}</style>
       
@@ -344,14 +344,14 @@ export default function FaltantesAdminView({ session }: Props) {
             alignItems: 'center', 
             height: '60px', 
             width: '100%',
-            color: 'var(--color-text-primary)',
+            color: 'var(--clr4)',
             fontSize: '16px'
           }}>
             Cargando datos...
           </div>
         )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '5px' }}>
-          <div style={{ display: 'flex', gap: '5px', width: '85%' }}><h2 style={{ color: 'var(--color-text-primary)', marginBottom: '0' }}>Administración de Faltantes ({totalCount} reportes)</h2></div>
+          <div style={{ display: 'flex', gap: '5px', width: '85%' }}><h2 style={{ color: 'var(--clr4)', marginBottom: '0' }}>Administración de Faltantes ({totalCount} reportes)</h2></div>
           <div style={{ display: 'flex', gap: '5px', width: '15%' }}>
                 <Image src="/descargarCsv1.svg" alt="Descargar CSV" width={80} height={50} style={{marginBottom:'0'}} onClick={handleExportToCSV} />
           </div>
@@ -364,20 +364,20 @@ export default function FaltantesAdminView({ session }: Props) {
             placeholder="Buscar en toda la tabla..." 
             style={{ 
               padding: '8px', 
-              border: '1px solid var(--color-border)', 
+              border: '1px solid var(--clr4)', 
               borderRadius: '4px', 
               width: '100%', 
-              backgroundColor: 'var(--color-card-background)', 
-              color: 'var(--color-text-primary)' 
+              backgroundColor: 'var(--clr1)', 
+              color: 'var(--clr4)' 
             }} 
           />
         </div>
         
-        <div style={{ width: '100%', overflowX: 'auto' }}>
+        <div style={{ width: '100%', overflowX: 'auto', maxHeight: '72vh' }}>
           <table style={{ width: table.getTotalSize(), borderCollapse: 'collapse' }}>
             <thead>
               {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id} style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-primary)' }}>
+                <tr key={headerGroup.id} style={{ backgroundColor: 'var(--clr1)', color: 'var(--clr4)' }}>
                   {headerGroup.headers.map(header => (
                     <th 
                       key={header.id} 
@@ -411,9 +411,9 @@ export default function FaltantesAdminView({ session }: Props) {
                               marginTop: '5px', 
                               padding: '4px', 
                               borderRadius: '4px', 
-                              border: '1px solid var(--color-border)', 
-                              backgroundColor: 'var(--color-card-background)', 
-                              color: 'var(--color-text-primary)' 
+                              border: '1px solid var(--clr4)', 
+                              backgroundColor: 'var(--clr1)', 
+                              color: 'var(--clr4)' 
                             }} 
                             onClick={e => e.stopPropagation()} 
                           />
@@ -433,7 +433,7 @@ export default function FaltantesAdminView({ session }: Props) {
             </thead>
             <tbody>
               {table.getRowModel().rows.map(row => (
-                <tr key={row.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                <tr key={row.id} style={{ borderBottom: '1px solid var(--clr4)' }}>
                   {row.getVisibleCells().map(cell => (
                     <td 
                       key={cell.id} 
@@ -466,7 +466,7 @@ export default function FaltantesAdminView({ session }: Props) {
                      value={editingFaltante.ticket_id || ''} 
                      onChange={handleModalChange} 
                      readOnly
-                     style={{ backgroundColor: '#f0f0f0' }}
+                     style={{ backgroundColor: 'var(--clr1)' }}
                    />
                  </div>
                  
@@ -607,7 +607,7 @@ export default function FaltantesAdminView({ session }: Props) {
                      value={editingFaltante.foto_olpn || ''} 
                      onChange={handleModalChange} 
                      readOnly
-                     style={{ backgroundColor: '#f0f0f0' }}
+                     style={{ backgroundColor: 'var(--clr1)' }}
                      placeholder="Ruta del archivo en storage"
                    />
                  </div>
@@ -620,7 +620,7 @@ export default function FaltantesAdminView({ session }: Props) {
                      value={editingFaltante.foto_bulto || ''} 
                      onChange={handleModalChange} 
                      readOnly
-                     style={{ backgroundColor: '#f0f0f0' }}
+                     style={{ backgroundColor: 'var(--clr1)' }}
                      placeholder="Ruta del archivo en storage"
                    />
                  </div>
@@ -662,8 +662,8 @@ export default function FaltantesAdminView({ session }: Props) {
                  </div>
               </div>
               <div style={{ marginTop: '25px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button onClick={handleModalClose} style={{ padding: '10px 20px', backgroundColor: 'var(--color-button-alternative-background)', color: 'var(--color-button-alternative-text)', border: '1px solid var(--color-button-alternative-border)', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
-                <button onClick={handleSaveChanges} style={{ padding: '10px 20px', backgroundColor: 'var(--color-success)', color: 'var(--color-card-background)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Guardar Cambios</button>
+                <button onClick={handleModalClose} style={{ padding: '10px 20px', backgroundColor: 'var(--clr1)', color: 'var(--clr4)', border: '1px solid var(--clr4)', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+                <button onClick={handleSaveChanges} style={{ padding: '10px 20px', backgroundColor: 'var(--clr5)', color: 'var(--clr1)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Guardar Cambios</button>
               </div>
             </div>
           </div>

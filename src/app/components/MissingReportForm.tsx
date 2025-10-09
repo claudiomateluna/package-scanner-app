@@ -1077,13 +1077,13 @@ const MissingReportForm = ({ packageData, onClose, onReportSaved }: Omit<Props, 
         }
         
         .modal-content {
-          background-color: #FFFFFF;
+          background-color: var(--clr1);
           border-radius: 4px;
           max-width: 600px;
           width: 90%;
           max-height: 95vh;
           overflow-y: auto;
-          color: #000000;
+          color: var(--clr4);
         }
         
         .modal-header {
@@ -1091,12 +1091,12 @@ const MissingReportForm = ({ packageData, onClose, onReportSaved }: Omit<Props, 
           justify-content: space-between;
           align-items: center;
           padding: 10px;
-          border-bottom: 1px solid #000000;
+          border-bottom: 1px solid var(--clr4);
         }
         
         .modal-header h2 {
           margin: 0;
-          color: #000000;
+          color: var(--clr4);
           line-height: 1;
         }
         
@@ -1105,7 +1105,7 @@ const MissingReportForm = ({ packageData, onClose, onReportSaved }: Omit<Props, 
           border: none;
           font-size: 24px;
           cursor: pointer;
-          color: #000000;
+          color: var(--clr4);
         }
         
         .missing-report-form {
@@ -1117,7 +1117,7 @@ const MissingReportForm = ({ packageData, onClose, onReportSaved }: Omit<Props, 
         }
         
         .form-section h3 {
-          color: #000000;
+          color: var(--clr4);
           margin-bottom: 10px;
           font-size: 1.5rem;
         }
@@ -1142,31 +1142,31 @@ const MissingReportForm = ({ packageData, onClose, onReportSaved }: Omit<Props, 
         .form-input {
           width: 100%;
           padding: 10px;
-          border: 1px solid #000000;
+          border: 1px solid var(--clr4);
           border-radius: 4px;
           background-color: rgba(255, 255, 255, 1);
-          color: #000000;
+          color: var(--clr4);
           box-sizing: border-box;
         }
         
         .form-input.readonly {
-          background-color: #000000;
-          color: #CCCCCC;
+          background-color: var(--clr4);
+          color: var(--clr2);
         }
         
         .error {
-          color: #ff0000;
+          color: var(--clr6);
           font-size: 14px;
           margin-top: 5px;
           display: block;
         }
         
         .product-group {
-          border: 1px solid #000000;
+          border: 1px solid var(--clr4);
           border-radius: 4px;
           padding: 15px;
           margin-bottom: 15px;
-          background-color: #f9f9f9;
+          background-color: var(--clr1);
         }
         
         .product-header {
@@ -1178,11 +1178,11 @@ const MissingReportForm = ({ packageData, onClose, onReportSaved }: Omit<Props, 
         
         .product-header h4 {
           margin: 0;
-          color: #000000;
+          color: var(--clr4);
         }
         
         .remove-product-btn {
-          background-color: #ff4444;
+          background-color: var(--clr6);
           color: white;
           border: none;
           padding: 5px 10px;
@@ -1197,7 +1197,7 @@ const MissingReportForm = ({ packageData, onClose, onReportSaved }: Omit<Props, 
         }
         
         .add-product-btn {
-          background-color: #000000;
+          background-color: var(--clr4);
           color: white;
           border: none;
           padding: 10px 15px;
@@ -1228,14 +1228,14 @@ const MissingReportForm = ({ packageData, onClose, onReportSaved }: Omit<Props, 
         }
         
         .btn-primary {
-          background-color: #000000;
-          color: #FFFFFF;
+          background-color: var(--clr4);
+          color: var(--clr1);
         }
         
         .btn-secondary {
-          background-color: #FFFFFF;
-          color: #000000;
-          border: 1px solid #000000;
+          background-color: var(--clr1);
+          color: var(--clr4);
+          border: 1px solid var(--clr4);
         }
         
         .btn-primary:disabled, .btn-secondary:disabled {
@@ -1246,7 +1246,7 @@ const MissingReportForm = ({ packageData, onClose, onReportSaved }: Omit<Props, 
         small {
           display: block;
           margin-top: 5px;
-          color: #999999;
+          color: var(--clr2);
           font-size: 12px;
         }
         

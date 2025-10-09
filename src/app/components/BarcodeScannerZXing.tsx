@@ -172,7 +172,7 @@ export default function BarcodeScannerZXing({
     overlayDiv.style.top = `${(cropY / video.videoHeight) * 100}%`;
     overlayDiv.style.width = `${(cropWidth / video.videoWidth) * 100}%`;
     overlayDiv.style.height = `${(cropHeight / video.videoHeight) * 100}%`;
-    overlayDiv.style.border = '2px solid #000000';
+    overlayDiv.style.border = '2px solid var(--clr4)';
     overlayDiv.style.borderRadius = '0.5rem';
     overlayDiv.style.pointerEvents = 'none';
     overlayDiv.style.boxSizing = 'border-box';
@@ -186,7 +186,7 @@ export default function BarcodeScannerZXing({
       scanLine.style.left = '0';
       scanLine.style.right = '0';
       scanLine.style.height = '2px';
-      scanLine.style.backgroundColor = '#000000';
+      scanLine.style.backgroundColor = 'var(--clr4)';
       scanLine.style.boxShadow = '0 0 10px rgba(254, 127, 45, 0.8)';
       scanLine.style.animation = 'scanLineMove 2s ease-in-out infinite';
       scanLineRef.current = scanLine;
@@ -264,10 +264,10 @@ export default function BarcodeScannerZXing({
         ></div>
       </div>
 
-      {error && <p style={{ color: 'var(--color-error)', marginTop: '1rem', fontSize: '0.875rem' }}>{error}</p>}
+      {error && <p style={{ color: 'var(--clr6)', marginTop: '1rem', fontSize: '0.875rem' }}>{error}</p>}
 
       <p style={{
-        color: 'var(--color-text-secondary)',
+        color: 'var(--clr2)',
         fontSize: '0.875rem',
         textAlign: 'center'
       }}>
@@ -277,7 +277,7 @@ export default function BarcodeScannerZXing({
       <h3 style={{
         fontSize: '1rem',
         fontWeight: 'semibold',
-        color: 'var(--color-text-primary)',
+        color: 'var(--clr4)',
         display: 'none'
       }}>
         Área de Escaneo Focalizada:
@@ -286,7 +286,7 @@ export default function BarcodeScannerZXing({
       <canvas
         ref={displayCroppedCanvasRef}
         style={{
-          border: '2px solid var(--color-accent)',
+          border: '2px solid var(--clr4)',
           borderRadius: '0.5rem',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
           maxWidth: '100%',
@@ -307,10 +307,10 @@ export default function BarcodeScannerZXing({
       </p>
         <div style={{
           padding: '1rem',
-          border: '2px dashed var(--color-success)',
+          border: '2px dashed var(--clr5)',
           borderRadius: '0.5rem',
-          backgroundColor: 'var(--color-card-background)',
-          color: 'var(--color-text-primary)',
+          backgroundColor: 'var(--clr1)',
+          color: 'var(--clr4)',
           fontSize: '1rem',
           fontWeight: '500',
           textAlign: 'center',

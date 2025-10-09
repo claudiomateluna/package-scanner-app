@@ -62,12 +62,12 @@ export default class ChunkErrorBoundary extends Component<Props, State> {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100vh',
-          backgroundColor: '#233D4D',
-          color: '#CCCCCC',
+          backgroundColor: 'var(--clr4)',
+          color: 'var(--clr2)',
           padding: '20px',
           textAlign: 'center'
         }}>
-          <h2 style={{ color: '#FE7F2D', marginBottom: '20px' }}>Actualizando aplicación...</h2>
+          <h2 style={{ color: 'var(--clr7)', marginBottom: '20px' }}>Actualizando aplicación...</h2>
           <p>Se está cargando una nueva versión de la aplicación.</p>
           <p>Por favor, espere un momento...</p>
           <div style={{
@@ -75,7 +75,7 @@ export default class ChunkErrorBoundary extends Component<Props, State> {
             width: '50px',
             height: '50px',
             border: '5px solid rgba(254, 127, 45, 0.3)',
-            borderTop: '5px solid #FE7F2D',
+            borderTop: '5px solid var(--clr7)',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite'
           }}></div>

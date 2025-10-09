@@ -159,11 +159,11 @@ export default function FaltanteRow({ item, session, profile, onImageClick, onUp
       <td style={tdStyle}>
         {isEditing ? (
           <div style={{ display: 'flex', gap: '5px' }}>
-            <button onClick={handleSave} style={{padding:'10px 12px', background:'#000', color:'white', borderRadius: '4px', border:'1px solid #000'}}>Guardar</button>
-            <button onClick={handleCancel} style={{padding:'10px 12px', background:'#FFF', color:'#000', borderRadius: '4px', border:'1px solid #000'}}>Cancelar</button>
+            <button onClick={handleSave} style={{padding:'10px 12px', background:'var(--clr4)', color:'var(--clr1)', borderRadius: '4px', border:'1px solid var(--clr4)'}}>Guardar</button>
+            <button onClick={handleCancel} style={{padding:'10px 12px', background:'var(--clr1)', color:'var(--clr4)', borderRadius: '4px', border:'1px solid var(--clr4)'}}>Cancelar</button>
           </div>
         ) : (
-          <button onClick={() => setIsEditing(true)} style={{padding:'10px 12px', background:'#000', color:'white', borderRadius: '4px', border:'none'}}>Editar</button>
+          <button onClick={() => setIsEditing(true)} style={{padding:'10px 12px', background:'var(--clr4)', color:'var(--clr1)', borderRadius: '4px', border:'none'}}>Editar</button>
         )}
       </td>
     </tr>

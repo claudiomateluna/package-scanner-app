@@ -37,20 +37,20 @@ const styles: { [key: string]: CSSProperties } = {
     width: '100%',
     maxWidth: '500px',
     padding: '20px',
-    backgroundColor: 'var(--color-card-background)',
+    backgroundColor: 'var(--clr1)',
     borderRadius: '4px',
-    border: '1px solid var(--color-border)',
+    border: '1px solid var(--clr4)',
     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
     boxSizing: 'border-box' // Añadido para prevenir desbordamiento
   },
   title: {
-    color: 'var(--color-text-primary)',
+    color: 'var(--clr4)',
     textAlign: 'center',
     marginBottom: '10px'
   },
   buttonPrimary: {
-    backgroundColor: 'var(--color-button-background)',
-    color: 'var(--color-button-text)',
+    backgroundColor: 'var(--clr4)',
+    color: 'var(--clr1)',
     border: 'none',
     padding: '12px 20px',
     cursor: 'pointer',
@@ -64,20 +64,20 @@ const styles: { [key: string]: CSSProperties } = {
     width: '100%',
     padding: '12px',
     marginTop: '8px',
-    backgroundColor: '(--color-background)',
-    color: '(--color-text-primary)',
+    backgroundColor: 'var(--clr1)',
+    color: 'var(--clr4)',
     borderTopWidth: '1px',
     borderTopStyle: 'solid',
-    borderTopColor: '(--color-border)',
+    borderTopColor: 'var(--clr4)',
     borderBottomWidth: '1px',
     borderBottomStyle: 'solid',
-    borderBottomColor: '(--color-border)',
+    borderBottomColor: 'var(--clr4)',
     borderLeftWidth: '1px',
     borderLeftStyle: 'solid',
-    borderLeftColor: '(--color-border)',
+    borderLeftColor: 'var(--clr4)',
     borderRightWidth: '1px',
     borderRightStyle: 'solid',
-    borderRightColor: '(--color-border)',
+    borderRightColor: 'var(--clr4)',
     borderRadius: '4px',
     fontSize: '1em',
     boxSizing: 'border-box' // Añadido para prevenir desbordamiento
@@ -87,7 +87,7 @@ const styles: { [key: string]: CSSProperties } = {
     textAlign: 'left',
     fontWeight: 'bold',
     marginBottom: '5px',
-    color: '(--color-text-primary)'
+    color: 'var(--clr4)'
   },
   filterContainer: {
     display: 'flex',
@@ -98,16 +98,16 @@ const styles: { [key: string]: CSSProperties } = {
   filterButton: {
     padding: '6px 12px',
     backgroundColor: 'transparent',
-    color: '(--color-text-primary)',
-    border: '1px solid var(--color-text-primary)',
+    color: 'var(--clr4)',
+    border: '1px solid var(--clr4)',
     borderRadius: '5px',
     cursor: 'pointer',
     fontSize: '0.9em'
   },
   activeFilterButton: {
-    backgroundColor: '#FE7F2D',
-    color: '#233D4D',
-    border: '1px solid #FE7F2D'
+    backgroundColor: 'var(--clr7)',
+    color: 'var(--clr4)',
+    border: '1px solid var(--clr7)'
   }
 };
 
@@ -333,8 +333,8 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
             onClick={() => window.dispatchEvent(new CustomEvent('openRechazoForm'))}
             style={{
               ...styles.buttonPrimary,
-              backgroundColor: 'var(--color-error)',
-              color: 'var(--color-button-text)'
+              backgroundColor: 'var(--clr6)',
+              color: 'var(--clr1)'
             }}
           >
             Reportar Rechazo

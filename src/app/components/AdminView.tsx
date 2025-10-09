@@ -35,20 +35,20 @@ type Profile = ProfileData;
 const inputStyle: CSSProperties = { 
   width: '100%',
   padding: '10px',
-  backgroundColor: '#fff',
-  color: '#000',
+  backgroundColor: 'var(--clr1)',
+  color: 'var(--clr4)',
   borderTopWidth: '1px',
   borderTopStyle: 'solid',
-  borderTopColor: '#ccc',
+  borderTopColor: 'var(--clr4)',
   borderBottomWidth: '1px',
   borderBottomStyle: 'solid',
-  borderBottomColor: '#ccc',
+  borderBottomColor: 'var(--clr4)',
   borderLeftWidth: '1px',
   borderLeftStyle: 'solid',
-  borderLeftColor: '#ccc',
+  borderLeftColor: 'var(--clr4)',
   borderRightWidth: '1px',
   borderRightStyle: 'solid',
-  borderRightColor: '#ccc',
+  borderRightColor: 'var(--clr4)',
   borderRadius: '5px',
   boxSizing: 'border-box',
   margin: '5px'
@@ -56,8 +56,8 @@ const inputStyle: CSSProperties = {
 
 const buttonStyle: CSSProperties = { 
   padding: '10px 15px', 
-  backgroundColor: '#000', 
-  color: '#FFF', 
+  backgroundColor: 'var(--clr4)',
+  color: 'var(--clr1)', 
   border: 'none', 
   borderRadius: '5px', 
   cursor: 'pointer' 
@@ -66,16 +66,16 @@ const buttonStyle: CSSProperties = {
 const cardStyle: CSSProperties = { 
   borderTopWidth: '1px',
   borderTopStyle: 'solid',
-  borderTopColor: '#555',
+  borderTopColor: 'var(--clr4)',
   borderBottomWidth: '1px',
   borderBottomStyle: 'solid',
-  borderBottomColor: '#555',
+  borderBottomColor: 'var(--clr4)',
   borderLeftWidth: '1px',
   borderLeftStyle: 'solid',
-  borderLeftColor: '#555',
+  borderLeftColor: 'var(--clr4)',
   borderRightWidth: '1px',
   borderRightStyle: 'solid',
-  borderRightColor: '#555',
+  borderRightColor: 'var(--clr4)',
   padding: '16px', 
   borderRadius: '8px', 
   marginTop: '24px' 
@@ -294,23 +294,23 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
       <div style={{ 
         borderTopWidth: '1px',
         borderTopStyle: 'solid',
-        borderTopColor: '#A1C181',
+        borderTopColor: 'var(--clr5)',
         borderBottomWidth: '1px',
         borderBottomStyle: 'solid',
-        borderBottomColor: '#A1C181',
+        borderBottomColor: 'var(--clr5)',
         borderLeftWidth: '1px',
         borderLeftStyle: 'solid',
-        borderLeftColor: '#A1C181',
+        borderLeftColor: 'var(--clr5)',
         borderRightWidth: '1px',
         borderRightStyle: 'solid',
-        borderRightColor: '#A1C181',
+        borderRightColor: 'var(--clr5)',
         padding: '16px', 
         borderRadius: '8px', 
         marginTop: '8px' 
       }}>
         <h4>Permiso denegado</h4>
         <p>No tienes permisos para editar usuarios con ese rol.</p>
-        <button onClick={onCancel} style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', color: '#ccc'}}>Cancelar</button>
+        <button onClick={onCancel} style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: 'var(--clr1)', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--clr1)', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: 'var(--clr1)', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: 'var(--clr1)', color: 'var(--clr1)'}}>Cancelar</button>
       </div>
     );
   }
@@ -319,16 +319,16 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
     <div style={{ 
       borderTopWidth: '1px',
       borderTopStyle: 'solid',
-      borderTopColor: '#A1C181',
+      borderTopColor: 'var(--clr5)',
       borderBottomWidth: '1px',
       borderBottomStyle: 'solid',
-      borderBottomColor: '#A1C181',
+      borderBottomColor: 'var(--clr5)',
       borderLeftWidth: '1px',
       borderLeftStyle: 'solid',
-      borderLeftColor: '#A1C181',
+      borderLeftColor: 'var(--clr5)',
       borderRightWidth: '1px',
       borderRightStyle: 'solid',
-      borderRightColor: '#A1C181',
+      borderRightColor: 'var(--clr5)',
       padding: '16px', 
       borderRadius: '8px', 
       marginTop: '8px' 
@@ -343,10 +343,10 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
               onChange={e => handleFieldChange('email', e.target.value)} 
               style={{
                 ...inputStyle,
-                borderColor: errors.email ? '#e63946' : '#ccc'
+                borderColor: errors.email ? 'var(--clr6)' : 'var(--clr5)'
               }} 
             />
-            {errors.email && <div style={{ color: '#e63946', fontSize: '0.8em', marginTop: '5px' }}>{errors.email}</div>}
+            {errors.email && <div style={{ color: 'var(--clr6)', fontSize: '0.8em', marginTop: '5px' }}>{errors.email}</div>}
           </label>
         </div>
         
@@ -358,10 +358,10 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
               onChange={e => handleFieldChange('first_name', e.target.value)} 
               style={{
                 ...inputStyle,
-                borderColor: errors.first_name ? '#e63946' : '#ccc'
+                borderColor: errors.first_name ? 'var(--clr6)' : 'var(--clr1)'
               }} 
             />
-            {errors.first_name && <div style={{ color: '#e63946', fontSize: '0.8em', marginTop: '5px' }}>{errors.first_name}</div>}
+            {errors.first_name && <div style={{ color: 'var(--clr6)', fontSize: '0.8em', marginTop: '5px' }}>{errors.first_name}</div>}
           </label>
         </div>
         
@@ -373,10 +373,10 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
               onChange={e => handleFieldChange('last_name', e.target.value)} 
               style={{
                 ...inputStyle,
-                borderColor: errors.last_name ? '#e63946' : '#ccc'
+                borderColor: errors.last_name ? 'var(--clr6)' : 'var(--clr1)'
               }} 
             />
-            {errors.last_name && <div style={{ color: '#e63946', fontSize: '0.8em', marginTop: '5px' }}>{errors.last_name}</div>}
+            {errors.last_name && <div style={{ color: 'var(--clr6)', fontSize: '0.8em', marginTop: '5px' }}>{errors.last_name}</div>}
           </label>
         </div>
         
@@ -398,10 +398,10 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
               }} 
               style={{
                 ...inputStyle,
-                borderColor: errors.password ? '#e63946' : '#ccc'
+                borderColor: errors.password ? 'var(--clr6)' : 'var(--clr1)'
               }} 
             />
-            {errors.password && <div style={{ color: '#e63946', fontSize: '0.8em', marginTop: '5px' }}>{errors.password}</div>}
+            {errors.password && <div style={{ color: 'var(--clr6)', fontSize: '0.8em', marginTop: '5px' }}>{errors.password}</div>}
           </label>
         </div>
         
@@ -441,16 +441,16 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
                   overflowY: 'auto', 
                   borderTopWidth: '1px', 
                   borderTopStyle: 'solid', 
-                  borderTopColor: '#000', 
+                  borderTopColor: 'var(--clr4)', 
                   borderBottomWidth: '1px', 
                   borderBottomStyle: 'solid', 
-                  borderBottomColor: '#000', 
+                  borderBottomColor: 'var(--clr4)', 
                   borderLeftWidth: '1px', 
                   borderLeftStyle: 'solid', 
-                  borderLeftColor: '#000', 
+                  borderLeftColor: 'var(--clr4)', 
                   borderRightWidth: '1px', 
                   borderRightStyle: 'solid', 
-                  borderRightColor: '#000', 
+                  borderRightColor: 'var(--clr4)', 
                   padding: '10px', 
                   borderRadius: '5px',
                   display: 'grid',
@@ -477,7 +477,7 @@ function EditProfileForm({ profile, onSave, onCancel, currentUserRole, currentUs
         
         <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
           <button type="submit" style={buttonStyle}>Guardar Cambios</button>
-          <button type="button" onClick={onCancel} style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: '#ccc', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: '#ccc', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: '#ccc', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: '#ccc', color: '#ccc'}}>Cancelar</button>
+          <button type="button" onClick={onCancel} style={{...buttonStyle, backgroundColor: 'transparent', borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: 'var(--clr1)', borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'var(--clr1)', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: 'var(--clr1)', borderRightWidth: '1px', borderRightStyle: 'solid', borderRightColor: 'var(--clr1)', color: 'var(--clr1)'}}>Cancelar</button>
         </div>
       </form>
     </div>
@@ -563,7 +563,7 @@ export default function AdminView({ profile }: AdminViewProps) {
     const parts = text.split(regex);
     
     return parts.map((part, index) => 
-      regex.test(part) ? <mark key={index} style={{ backgroundColor: '#000', color: '#FFF' }}>{part}</mark> : part
+      regex.test(part) ? <mark key={index} style={{ backgroundColor: 'var(--clr4)', color: 'var(--clr1)' }}>{part}</mark> : part
     );
   };
 
@@ -851,16 +851,16 @@ export default function AdminView({ profile }: AdminViewProps) {
       {/* Tabs */}
       <div style={{ 
         display: 'flex', 
-        borderBottom: '1px solid #000',
+        borderBottom: '1px solid var(--clr4)',
         marginBottom: '20px'
       }}>
         <button
           onClick={() => setActiveTab('users')}
           style={{
             ...buttonStyle,
-            backgroundColor: activeTab === 'users' ? '#000' : 'transparent',
-            color: activeTab === 'users' ? '#FFF' : '#000',
-            borderBottom: activeTab === 'users' ? '3px solid #000' : 'none',
+            backgroundColor: activeTab === 'users' ? 'var(--clr4)' : 'transparent',
+            color: activeTab === 'users' ? 'var(--clr1)' : 'var(--clr4)',
+            borderBottom: activeTab === 'users' ? '3px solid var(--clr4)' : 'none',
             borderRadius: '5px 5px 0 0',
             marginRight: '5px'
           }}
@@ -872,9 +872,9 @@ export default function AdminView({ profile }: AdminViewProps) {
             onClick={() => setActiveTab('locales')}
             style={{
               ...buttonStyle,
-              backgroundColor: activeTab === 'locales' ? '#000' : 'transparent',
-              color: activeTab === 'locales' ? '#FFF' : '#000',
-              borderBottom: activeTab === 'locales' ? '3px solid #000' : 'none',
+              backgroundColor: activeTab === 'locales' ? 'var(--clr4)' : 'transparent',
+              color: activeTab === 'locales' ? 'var(--clr1)' : 'var(--clr4)',
+              borderBottom: activeTab === 'locales' ? '3px solid var(--clr4)' : 'none',
               borderRadius: '5px 5px 0 0'
             }}
           >
@@ -985,16 +985,16 @@ export default function AdminView({ profile }: AdminViewProps) {
                         overflowY: 'auto', 
                         borderTopWidth: '1px', 
                         borderTopStyle: 'solid', 
-                        borderTopColor: '#ccc', 
+                        borderTopColor: 'var(--clr1)', 
                         borderBottomWidth: '1px', 
                         borderBottomStyle: 'solid', 
-                        borderBottomColor: '#ccc', 
+                        borderBottomColor: 'var(--clr1)', 
                         borderLeftWidth: '1px', 
                         borderLeftStyle: 'solid', 
-                        borderLeftColor: '#ccc', 
+                        borderLeftColor: 'var(--clr1)', 
                         borderRightWidth: '1px', 
                         borderRightStyle: 'solid', 
-                        borderRightColor: '#ccc', 
+                        borderRightColor: 'var(--clr1)', 
                         padding: '10px', 
                         borderRadius: '5px',
                         display: 'grid',
@@ -1056,42 +1056,42 @@ export default function AdminView({ profile }: AdminViewProps) {
               <div key={p.id} style={{ 
                 borderTopWidth: '1px',
                 borderTopStyle: 'solid',
-                borderTopColor: '#000',
+                borderTopColor: 'var(--clr4)',
                 borderBottomWidth: '1px',
                 borderBottomStyle: 'solid',
-                borderBottomColor: '#000',
+                borderBottomColor: 'var(--clr4)',
                 borderLeftWidth: '1px',
                 borderLeftStyle: 'solid',
-                borderLeftColor: '#000',
+                borderLeftColor: 'var(--clr4)',
                 borderRightWidth: '1px',
                 borderRightStyle: 'solid',
-                borderRightColor: '#000',
+                borderRightColor: 'var(--clr4)',
                 padding: '16px', 
                 borderRadius: '8px',
-                backgroundColor: '#FFF',
+                backgroundColor: 'var(--clr1)',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
-                    <h4 style={{ margin: '0 0 10px 0', color: '#000' }}>
+                    <h4 style={{ margin: '0 0 10px 0', color: 'var(--clr4)' }}>
                       {highlightText(p.first_name, userSearchTerm) || 'N/A'} {highlightText(p.last_name, userSearchTerm) || 'N/A'}
                     </h4>
-                    <p style={{ margin: '5px 0', color: '#000' }}>
+                    <p style={{ margin: '5px 0', color: 'var(--clr4)' }}>
                       <strong>Email:</strong> {highlightText(p.email, userSearchTerm) || 'Email no disponible'}
                     </p>
-                    <p style={{ margin: '5px 0', color: '#000' }}>
+                    <p style={{ margin: '5px 0', color: 'var(--clr4)' }}>
                       <strong>Rol:</strong> <span style={{ 
                         padding: '2px 6px', 
                         borderRadius: '4px', 
-                        backgroundColor: p.role === 'administrador' ? '#e63946' : 
+                        backgroundColor: p.role === 'administrador' ? 'var(--clr6)' : 
                                        p.role === 'Warehouse Supervisor' ? '#457b9d' : 
                                        p.role === 'Warehouse Operator' ? '#8ac926' : 
                                        p.role === 'Store Supervisor' ? '#ff9e00' : 
                                        '#9d4edd',
-                        color: '#fff'
+                        color: 'var(--clr1)'
                       }}>{highlightText(p.role, userSearchTerm)}</span>
                     </p>
-                    <p style={{ margin: '5px 0', color: '#000' }}>
+                    <p style={{ margin: '5px 0', color: 'var(--clr4)' }}>
                       <strong>Locales:</strong> {p.assigned_locals && p.assigned_locals.length > 0 ? 
                         p.assigned_locals.map(local => highlightText(local, userSearchTerm)).reduce((prev, curr, idx) => idx === 0 ? [curr] : [...prev, ', ', curr], [] as ReactNode[]) : 'N/A'}
                     </p>
@@ -1101,7 +1101,7 @@ export default function AdminView({ profile }: AdminViewProps) {
                       width: '20px', 
                       height: '20px', 
                       borderRadius: '50%', 
-                      backgroundColor: '#000',
+                      backgroundColor: 'var(--clr4)',
                       animation: 'pulse 1.5s infinite'
                     }} />
                   )}
@@ -1120,17 +1120,17 @@ export default function AdminView({ profile }: AdminViewProps) {
                       backgroundColor: 'transparent', 
                       borderTopWidth: '1px', 
                       borderTopStyle: 'solid', 
-                      borderTopColor: '#000', 
+                      borderTopColor: 'var(--clr4)', 
                       borderBottomWidth: '1px', 
                       borderBottomStyle: 'solid', 
-                      borderBottomColor: '#000', 
+                      borderBottomColor: 'var(--clr4)', 
                       borderLeftWidth: '1px', 
                       borderLeftStyle: 'solid', 
-                      borderLeftColor: '#000', 
+                      borderLeftColor: 'var(--clr4)', 
                       borderRightWidth: '1px', 
                       borderRightStyle: 'solid', 
-                      borderRightColor: '#000', 
-                      color: '#000',
+                      borderRightColor: 'var(--clr4)', 
+                      color: 'var(--clr4)',
                       padding: '8px 12px',
                       fontSize: '0.9em'
                     }}
@@ -1143,20 +1143,20 @@ export default function AdminView({ profile }: AdminViewProps) {
                       onClick={() => handleDeleteUser(p.id, p.email || 'Usuario', p.role || '', p.local_asignado || null)} 
                       style={{
                         ...buttonStyle, 
-                        backgroundColor: '#e63946', 
+                        backgroundColor: 'var(--clr6)', 
                         borderTopWidth: '1px', 
                         borderTopStyle: 'solid', 
-                        borderTopColor: '#e63946', 
+                        borderTopColor: 'var(--clr6)', 
                         borderBottomWidth: '1px', 
                         borderBottomStyle: 'solid', 
-                        borderBottomColor: '#e63946', 
+                        borderBottomColor: 'var(--clr6)', 
                         borderLeftWidth: '1px', 
                         borderLeftStyle: 'solid', 
-                        borderLeftColor: '#e63946', 
+                        borderLeftColor: 'var(--clr6)', 
                         borderRightWidth: '1px', 
                         borderRightStyle: 'solid', 
-                        borderRightColor: '#e63946', 
-                        color: '#fff',
+                        borderRightColor: 'var(--clr6)', 
+                        color: 'var(--clr1)',
                         padding: '8px 12px',
                         fontSize: '0.9em'
                       }}
