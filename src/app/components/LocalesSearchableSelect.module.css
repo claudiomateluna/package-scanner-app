@@ -81,8 +81,8 @@
 }
 
 .listItem.selected {
-  background-color: var(--clr4);
-  color: var(--clr4);
+  background-color: var(--clr3);
+  color: var(--clr1);
 }
 
 .noResults {
