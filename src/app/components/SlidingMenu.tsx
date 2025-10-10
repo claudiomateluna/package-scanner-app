@@ -116,10 +116,9 @@ export default function SlidingMenu({
     marginLeft: 'auto',
     backgroundColor: 'var(--clr6)',
     color: 'var(--clr1)',
-    borderRadius: '10px',
-    padding: '2px 8px',
-    fontSize: '12px',
-    fontWeight: 'bold'
+    borderRadius: '12px',
+    padding: '3px',
+    fontSize: '11px'
   };
 
   return (
