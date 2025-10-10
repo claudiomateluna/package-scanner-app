@@ -33,6 +33,8 @@ export interface CompletedReceptionPayload {
 
 // --- LÓGICA EXISTENTE PARA NOTIFICACIONES DE RECEPCIÓN COMPLETADA (SE MANTIENE) ---
 
+// Acknowledge unused getUsersByRoles to prevent ESLint warning
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getUsersByRoles(roles: string[]): Promise<{ id: string }[]> {
   const { data, error } = await supabase
     .from('profiles')

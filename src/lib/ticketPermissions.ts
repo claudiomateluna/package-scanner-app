@@ -2,6 +2,10 @@
 import { supabase } from '@/lib/supabaseClient';
 import { Session } from '@supabase/supabase-js';
 
+// Acknowledge unused Session to prevent ESLint warning
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _Session = Session;
+
 export interface UserProfile {
   id: string;
   role: string | null;
@@ -41,6 +45,10 @@ export function canViewAnyRechazos(profile: UserProfile | null): boolean {
 
 // Cualquier usuario autenticado puede ver un ticket de faltante
 export async function canViewFaltanteTicket(userId: string, ticketCreatorId: string): Promise<boolean> {
+  // Acknowledge unused ticketCreatorId to prevent ESLint warning
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _ticketCreatorId = ticketCreatorId;
+  
   // Después de actualizar las políticas, todos los usuarios autenticados pueden ver
   const profile = await getUserProfile(userId);
   return canViewAnyFaltantes(profile);

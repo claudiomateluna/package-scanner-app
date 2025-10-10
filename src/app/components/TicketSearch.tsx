@@ -22,7 +22,7 @@ export default function TicketSearch({ session }: TicketSearchProps) {
 
   return (
     <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h2 style={{ textAlign: 'center', color: 'var(--color-text-primary)' }}>
+      <h2 style={{ textAlign: 'center', color: 'var(--clr4)' }}>
         Buscar Ticket
       </h2>
       <form onSubmit={handleSubmit} style={{ 
@@ -39,18 +39,18 @@ export default function TicketSearch({ session }: TicketSearchProps) {
           style={{
             flex: 1,
             padding: '12px',
-            border: '1px solid var(--color-border)',
+            border: '1px solid var(--clr4)',
             borderRadius: '4px',
-            backgroundColor: 'var(--color-card-background)',
-            color: 'var(--color-text-primary)'
+            backgroundColor: 'var(--clr1)',
+            color: 'var(--clr4)'
           }}
         />
         <button
           type="submit"
           style={{
             padding: '12px 20px',
-            backgroundColor: 'var(--color-button-background)',
-            color: 'var(--color-button-text)',
+            backgroundColor: 'var(--clr4)',
+            color: 'var(--clr1)',
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer',
@@ -62,12 +62,12 @@ export default function TicketSearch({ session }: TicketSearchProps) {
       </form>
       
       <div style={{ 
-        backgroundColor: 'var(--color-card-background)',
+        backgroundColor: 'var(--clr1)',
         padding: '20px',
         borderRadius: '4px',
-        border: '1px solid var(--color-border)'
+        border: '1px solid var(--clr4)'
       }}>
-        <h3 style={{ marginTop: 0, color: 'var(--color-text-primary)' }}>
+        <h3 style={{ marginTop: 0, color: 'var(--clr4)' }}>
           Instrucciones
         </h3>
         <ul style={{ paddingLeft: '20px' }}>

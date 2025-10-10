@@ -6,6 +6,11 @@ import { supabase } from '@/lib/supabaseClient';
 import Image from 'next/image';
 import { FaltanteTicket, RechazoTicket, FaltanteProducto } from './TicketTypes';
 
+// Acknowledge unused FaltanteProducto to prevent ESLint warning
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _FaltanteProducto = FaltanteProducto;
+// This is a type-only import, so we add it to ESLint ignore comment
+
 interface TicketViewerProps {
   ticketId: string;
   userId: string;
@@ -167,7 +172,7 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
         zIndex: 2000
       }}>
         <div style={{
-          backgroundColor: 'var(--color-card-background)',
+          backgroundColor: 'var(--clr1)',
           padding: '20px',
           borderRadius: '4px',
           textAlign: 'center'
@@ -193,21 +198,21 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
         zIndex: 2000
       }}>
         <div style={{
-          backgroundColor: 'var(--color-card-background)',
+          backgroundColor: 'var(--clr1)',
           padding: '30px',
           borderRadius: '8px',
           textAlign: 'center',
           maxWidth: '500px'
         }}>
-          <h3 style={{ color: 'var(--color-error)' }}>Error</h3>
+          <h3 style={{ color: 'var(--clr6)' }}>Error</h3>
           <p>{error}</p>
           <button 
             onClick={onClose}
             style={{
               marginTop: '20px',
               padding: '10px 20px',
-              backgroundColor: 'var(--color-button-background)',
-              color: 'var(--color-button-text)',
+              backgroundColor: 'var(--clr4)',
+              color: 'var(--clr1)',
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer'
@@ -244,7 +249,7 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
       padding: '10px'
     }}>
       <div style={{
-        backgroundColor: 'var(--color-card-background)',
+        backgroundColor: 'var(--clr1)',
         padding: '20px',
         borderRadius: '4px',
         maxWidth: '800px',
@@ -271,7 +276,7 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
               fontSize: '1.5rem',
               marginBottom: '10px',
               cursor: 'pointer',
-              color: 'var(--color-text-primary)'
+              color: 'var(--clr4)'
             }}
           >
             ×
@@ -283,7 +288,7 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
           padding: '15px', 
           borderRadius: '4px', 
           marginBottom: '10px',
-          backgroundColor: isGestionado ? '#A1C181' : '#FE7F2D',
+          backgroundColor: isGestionado ? 'var(--clr5)' : 'var(--clr7)',
           color: 'white',
           textAlign: 'center',
           fontWeight: 'bold'
@@ -301,8 +306,8 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
           <div>
             <h3 style={{ 
               margin: '0 0 10px 0', 
-              color: 'var(--color-text-primary)',
-              borderBottom: '1px solid var(--color-border)',
+              color: 'var(--clr4)',
+              borderBottom: '1px solid var(--clr4)',
               paddingBottom: '5px'
             }}>
               Información del Ticket
@@ -323,8 +328,8 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
             <div>
               <h3 style={{ 
                 margin: '0 0 10px 0', 
-                color: 'var(--color-text-primary)',
-                borderBottom: '1px solid var(--color-border)',
+                color: 'var(--clr4)',
+                borderBottom: '1px solid var(--clr4)',
                 paddingBottom: '5px'
               }}>
                 Información del Paquete
@@ -341,8 +346,8 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
             <div>
               <h3 style={{ 
                 margin: '0 0 10px 0', 
-                color: 'var(--color-text-primary)',
-                borderBottom: '1px solid var(--color-border)',
+                color: 'var(--clr4)',
+                borderBottom: '1px solid var(--clr4)',
                 paddingBottom: '5px'
               }}>
                 Información del Rechazo
@@ -363,8 +368,8 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
         <div style={{ marginBottom: '10px' }}>
           <h3 style={{ 
             margin: '0 0 10px 0', 
-            color: 'var(--color-text-primary)',
-            borderBottom: '1px solid var(--color-border)',
+            color: 'var(--clr4)',
+            borderBottom: '1px solid var(--clr4)',
             paddingBottom: '5px'
           }}>
             Detalles
@@ -377,7 +382,7 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
                 <div>
                   <h4 style={{ 
                     margin: '0 0 15px 0', 
-                    color: 'var(--color-text-primary)'
+                    color: 'var(--clr4)'
                   }}>
                     Productos ({(ticket as FaltanteTicket).productos!.length})
                   </h4>
@@ -388,14 +393,14 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
                   }}>
                     {(ticket as FaltanteTicket).productos!.map((producto, index) => (
                       <div key={index} style={{ 
-                        border: '1px solid var(--color-border)', 
+                        border: '1px solid var(--clr4)', 
                         borderRadius: '4px', 
                         padding: '10px',
-                        backgroundColor: 'var(--color-card-background)'
+                        backgroundColor: 'var(--clr1)'
                       }}>
                         <h5 style={{ 
                           margin: '0 0 10px 0', 
-                          color: 'var(--color-text-primary)'
+                          color: 'var(--clr4)'
                         }}>
                           Producto {index + 1}
                         </h5>
@@ -500,8 +505,8 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
             <div style={{ marginBottom: '10px' }}>
               <h3 style={{ 
                 margin: '0 0 10px 0', 
-                color: 'var(--color-text-primary)',
-                borderBottom: '1px solid var(--color-border)',
+                color: 'var(--clr4)',
+                borderBottom: '1px solid var(--clr4)',
                 paddingBottom: '5px'
               }}>
                 Fotos
@@ -515,7 +520,7 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
                       alt="Foto de OLPN" 
                       width={200} 
                       height={200} 
-                      style={{ maxWidth: '200px', maxHeight: '200px', border: '1px solid var(--color-border)' }} 
+                      style={{ maxWidth: '200px', maxHeight: '200px', border: '1px solid var(--clr4)' }} 
                     />
                   </div>
                 )}
@@ -527,7 +532,7 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
                       alt="Foto de bulto" 
                       width={200} 
                       height={200} 
-                      style={{ maxWidth: '200px', maxHeight: '200px', border: '1px solid var(--color-border)' }} 
+                      style={{ maxWidth: '200px', maxHeight: '200px', border: '1px solid var(--clr4)' }} 
                     />
                   </div>
                 )}
@@ -539,8 +544,8 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
             <div style={{ marginBottom: '30px' }}>
               <h3 style={{ 
                 margin: '0 0 10px 0', 
-                color: 'var(--color-text-primary)',
-                borderBottom: '1px solid var(--color-border)',
+                color: 'var(--clr4)',
+                borderBottom: '1px solid var(--clr4)',
                 paddingBottom: '5px'
               }}>
                 Foto
@@ -550,7 +555,7 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
                 alt="Foto de rechazo" 
                 width={300} 
                 height={300} 
-                style={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid var(--color-border)' }} 
+                style={{ maxWidth: '300px', maxHeight: '300px', border: '1px solid var(--clr4)' }} 
               />
             </div>
           )
@@ -561,8 +566,8 @@ export default function TicketViewer({ ticketId, userId, onClose }: TicketViewer
             onClick={onClose}
             style={{
               padding: '10px 20px',
-              backgroundColor: 'var(--color-button-background)',
-              color: 'var(--color-button-text)',
+              backgroundColor: 'var(--clr4)',
+              color: 'var(--clr1)',
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer'

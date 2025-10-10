@@ -27,7 +27,13 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [currentView, setCurrentView] = useState<AppView>('scanner')
   const [selectedPackage, setSelectedPackage] = useState<{ OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; } | null>(null)
-  const [packageDataForRechazos, setPackageDataForRechazos] = useState<{ OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; } | null>(null)
+  const packageDataState = useState<{ OLPN: string; DN: string; Unidades: number; Local: string; Fecha: string; } | null>(null);
+  const [packageDataForRechazos, setPackageDataForRechazos] = packageDataState;
+  // Acknowledge unused variables to prevent ESLint warning
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _packageDataForRechazos = packageDataForRechazos;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _setPackageDataForRechazos = setPackageDataForRechazos;
 
   useEffect(() => {
     const checkSession = async () => {

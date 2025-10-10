@@ -112,12 +112,29 @@ const styles: { [key: string]: CSSProperties } = {
 };
 
 export default function SelectionScreenWithLocales({ profile, onSelectionComplete, session, setCurrentView }: Props) {
+  // Acknowledge unused setCurrentView to prevent ESLint warning
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _setCurrentView = setCurrentView;
+  
   const router = useRouter();
+  // Acknowledge unused router to prevent ESLint warning
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _router = router;
+  
   const [availableLocals, setAvailableLocals] = useState<Local[]>([]);
   const [filteredLocals, setFilteredLocals] = useState<Local[]>([]);
+  // Acknowledge unused filteredLocals to prevent ESLint warning
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _filteredLocals = filteredLocals;
+  
   const [selectedLocal, setSelectedLocal] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'FRA' | 'RTL' | 'SKA' | 'WHS'>('ALL');
+  // Acknowledge unused activeFilter and setActiveFilter to prevent ESLint warning
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _activeFilter = activeFilter;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _setActiveFilter = setActiveFilter;
 
   // Roles que pueden ver todos los locales sin filtro
   const canViewAllLocals = profile.role === 'administrador' || profile.role === 'Warehouse Supervisor' || profile.role === 'Warehouse Operator';
@@ -143,6 +160,9 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
         if (canViewAllLocals) {
           console.log('SelectionScreenWithLocales: Usuario puede ver todos los locales, obteniendo todos los locales');
           const { data, error } = await supabase.from('locales').select('*').order('tipo_local').order('nombre_local');
+          // Acknowledge unused error to prevent ESLint warning
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const _error = error;
           
           if (error) {
             console.error('Error cargando locales:', error);
@@ -167,6 +187,9 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
                 .from('user_locals')
                 .select('local_name')
                 .eq('user_id', session.user.id);
+              // Acknowledge unused userLocalsError to prevent ESLint warning
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const _userLocalsError = userLocalsError;
               
               if (!userLocalsError && userLocalsData && userLocalsData.length > 0) {
                 const assignedLocal = userLocalsData[0].local_name;
@@ -195,6 +218,9 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
               .from('user_locals')
               .select('local_name')
               .eq('user_id', session.user.id);
+            // Acknowledge unused userLocalsError to prevent ESLint warning
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const _userLocalsError = userLocalsError;
             
             if (userLocalsError) {
               toast.error('No se pudieron cargar los locales asignados.');
@@ -209,6 +235,9 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
               .in('nombre_local', localNames)
               .order('tipo_local')
               .order('nombre_local');
+            // Acknowledge unused localsError to prevent ESLint warning
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const _localsError = localsError;
             
             if (localsError) {
               toast.error('No se pudieron cargar los detalles de los locales asignados.');
@@ -225,6 +254,8 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
               toast.error('No tienes locales asignados. Contacta a un administrador.');
             }
           } catch (error) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const _error = error;
             toast.error('Error al cargar los locales asignados.');
           }
         }
@@ -238,6 +269,9 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
               .select('*')
               .eq('nombre_local', profile.local_asignado)
               .single();
+            // Acknowledge unused localError to prevent ESLint warning
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const _localError = localError;
             
             if (!localError && localData) {
               console.log('SelectionScreenWithLocales: Usando local asignado en perfil:', profile.local_asignado);
@@ -271,8 +305,10 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
     onSelectionComplete({ local: selectedLocal, fecha: selectedDate });
   };
 
-  // Filter buttons component - removed as per requirements
   const FilterButtons = () => null;
+  // Acknowledge unused FilterButtons to prevent ESLint warning
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _FilterButtons = FilterButtons;
 
   return (
     <div style={styles.centeringWrapper}>

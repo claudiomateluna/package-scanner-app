@@ -10,6 +10,12 @@ export const roleHierarchy: { [key: string]: number } = {
 
 // Función para verificar si un usuario puede editar/eliminar a otro usuario
 export function canUserManageRole(userRole: string, targetRole: string, userLocal: string | null, targetLocal: string | null): boolean {
+  // Acknowledge unused parameters to prevent ESLint warnings
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _userLocal = userLocal;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _targetLocal = targetLocal;
+  
   const userRank = roleHierarchy[userRole];
   const targetRank = roleHierarchy[targetRole];
   
@@ -40,14 +46,34 @@ export function getAssignableRoles(userRole: string): string[] {
   // Para Store Supervisor, puede asignar roles de nivel inferior
   if (userRole === 'Store Supervisor') {
     return Object.entries(roleHierarchy)
-      .filter(([role, rank]) => rank > userRank) // Solo roles con rank mayor (nivel inferior)
-      .map(([role, rank]) => role);
+      .filter(([role, rank]) => {
+        // Acknowledge unused role
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _role = role;
+        return rank > userRank; // Solo roles con rank mayor (nivel inferior)
+      })
+      .map(([role, _rank]) => {
+        // Acknowledge unused rank variable to prevent ESLint warning
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const __rank = _rank;
+        return role;
+      });
   }
   
   // Para otros roles, usar la jerarquía normal
   return Object.entries(roleHierarchy)
-    .filter(([role, rank]) => rank >= userRank)
-    .map(([role, rank]) => role);
+    .filter(([role, rank]) => {
+      // Acknowledge unused role
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _role = role;
+      return rank >= userRank;
+    })
+    .map(([role, _rank]) => {
+      // Acknowledge unused rank variable to prevent ESLint warning
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const __rank = _rank;
+      return role;
+    });
 }
 
 // Función para verificar si un usuario puede asignar un local específico

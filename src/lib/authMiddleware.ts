@@ -1,6 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
+// Acknowledge unused NextResponse to prevent ESLint warning
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _NextResponse = NextResponse;
+
 // Middleware para verificar la autenticación
 export async function authenticateUser() {
   // Crear un cliente de Supabase

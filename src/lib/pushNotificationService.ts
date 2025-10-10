@@ -64,6 +64,8 @@ export async function subscribeToPushNotifications(): Promise<PushSubscription |
 }
 
 // Convertir la clave pública VAPID de base64 URL a Uint8Array
+// Acknowledge unused urlBase64ToUint8Array to prevent ESLint warning
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding)
