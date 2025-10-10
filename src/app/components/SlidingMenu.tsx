@@ -103,9 +103,9 @@ export default function SlidingMenu({
     alignItems: 'center',
     gap: '10px',
     padding: '15px',
-    color: '#000000',
+    color: 'var(--clr4)',
     border: 'none',
-    borderBottom: '1px solid #dddddd',
+    borderBottom: '1px solid var(--clr2)',
     cursor: 'pointer',
     textAlign: 'left',
     fontSize: '16px',
@@ -114,8 +114,8 @@ export default function SlidingMenu({
 
   const notificationBadgeStyle: React.CSSProperties = {
     marginLeft: 'auto',
-    backgroundColor: 'var(--color-error)',
-    color: 'white',
+    backgroundColor: 'var(--clr6)',
+    color: 'var(--clr1)',
     borderRadius: '10px',
     padding: '2px 8px',
     fontSize: '12px',
@@ -125,10 +125,10 @@ export default function SlidingMenu({
   return (
     <>
       {isOpen && <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999, opacity: 1, transition: 'opacity 0.3s ease' }} />}
-      <div id="sliding-menu" style={{ position: 'fixed', top: 0, left: 0, width: '280px', height: '100%', backgroundColor: '#ffffff', zIndex: 1000, transform: isOpen ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 0.3s ease', boxShadow: '2px 0 5px rgba(0, 0, 0, 0.5)', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #dddddd' }}>
+      <div id="sliding-menu" style={{ position: 'fixed', top: 0, left: 0, width: '280px', height: '100%', backgroundColor: 'var(--clr1)', zIndex: 1000, transform: isOpen ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 0.3s ease', boxShadow: '2px 0 5px rgba(0, 0, 0, 0.5)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid var(--clr2)' }}>
           <Image src="/adidas_shp.svg" alt="Adidas Logo" width={40} height={40} />
-          <h2 style={{ margin: 0, color: '#000000' }}>Recepciones</h2>
+          <h2 style={{ margin: 0, color: 'var(--clr4)' }}>Recepciones</h2>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', padding: '10px', flex: 1 }}>
           {onBack && <button onClick={() => { onBack(); onClose(); }} style={buttonStyle}><BackIcon /><span>Volver</span></button>}
