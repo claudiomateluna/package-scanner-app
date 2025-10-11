@@ -329,8 +329,8 @@ export default function RechazoForm({
       {showConfirmation && (
         <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'white', padding: '10px', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', zIndex: 1000, textAlign: 'center' }}>
           <h3>Su Ticket es</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-error)' }}>{generatedTicketId}</p>
-          <button onClick={closeConfirmation} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '(--color-button-background)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cerrar</button>
+          <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--clr6))' }}>{generatedTicketId}</p>
+          <button onClick={closeConfirmation} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '(var(--clr4))', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cerrar</button>
         </div>
       )}
       {showConfirmation && <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999 }} onClick={closeConfirmation} />}
@@ -338,7 +338,7 @@ export default function RechazoForm({
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Tipo de Rechazo *</label>
-            <select name="tipo_rechazo" value={rechazoData.tipo_rechazo} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}>
+            <select name="tipo_rechazo" value={rechazoData.tipo_rechazo} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }}>
               <option value="">Seleccione tipo</option>
               <option value="Completo">Completo</option>
               <option value="Parcial">Parcial</option>
@@ -346,33 +346,33 @@ export default function RechazoForm({
           </div>
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Mes *</label>
-            <input type="text" value={formatMonthInSpanish(rechazoData.mes)} readOnly style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px', backgroundColor: '#f5f5f5' }} />
+            <input type="text" value={formatMonthInSpanish(rechazoData.mes)} readOnly style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px', backgroundColor: '#f5f5f5' }} />
             <input type="date" name="mes" value={rechazoData.mes} onChange={handleChange} required style={{ display: 'none' }} />
           </div>
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Fecha *</label>
-            <input type="date" name="fecha" value={rechazoData.fecha} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <input type="date" name="fecha" value={rechazoData.fecha} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }} />
           </div>
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Hora *</label>
-            <input type="time" name="hora" value={rechazoData.hora} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <input type="time" name="hora" value={rechazoData.hora} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }} />
           </div>
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Folio Referencia *</label>
-            <input type="text" name="folio" value={rechazoData.folio} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <input type="text" name="folio" value={rechazoData.folio} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }} />
           </div>
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>{isStoreUser ? 'Guía de Despacho' : 'Orden de Compra'} *</label>
-            <input type="text" name="oc" value={rechazoData.oc} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <input type="text" name="oc" value={rechazoData.oc} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }} />
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Cliente *</label>
             <div style={{ position: 'relative' }}>
-              <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onFocus={() => setShowLocalesList(true)} placeholder="Buscar cliente..." style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+              <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onFocus={() => setShowLocalesList(true)} placeholder="Buscar cliente..." style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }} />
               {showLocalesList && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, maxHeight: '200px', overflowY: 'auto', backgroundColor: 'white', border: '1px solid #ccc', borderRadius: '4px', zIndex: 100 }}>
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, maxHeight: '200px', overflowY: 'auto', backgroundColor: 'white', border: '1px solid var(--clr2)', borderRadius: '4px', zIndex: 100 }}>
                   {filteredLocales.map((local) => (
-                    <div key={local.nombre_local} onClick={() => handleLocaleSelect(local)} style={{ padding: '10px', cursor: 'pointer', borderBottom: '1px solid #eee' }} onMouseDown={(e) => e.preventDefault()}>
+                    <div key={local.nombre_local} onClick={() => handleLocaleSelect(local)} style={{ padding: '10px', cursor: 'pointer', borderBottom: '1px solid var(--clr2)' }} onMouseDown={(e) => e.preventDefault()}>
                       {local.nombre_local} ({local.tipo_local})
                     </div>
                   ))}
@@ -384,18 +384,18 @@ export default function RechazoForm({
           {profile.role === 'Administrador' && (
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Cliente Final</label>
-              <input type="text" name="cliente_final" value={rechazoData.cliente_final} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+              <input type="text" name="cliente_final" value={rechazoData.cliente_final} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }} />
             </div>
           )}
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Motivo *</label>
-            <textarea name="motivo" value={rechazoData.motivo} onChange={handleChange} required rows={4} style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <textarea name="motivo" value={rechazoData.motivo} onChange={handleChange} required rows={4} style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }} />
           </div>
           {profile.role === 'Administrador' && (
             <>
               <div>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Responsabilidad Directa</label>
-                <select name="responsabilidad" value={rechazoData.responsabilidad} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}>
+                <select name="responsabilidad" value={rechazoData.responsabilidad} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }}>
                   <option value="">Seleccione responsabilidad</option>
                   <option value="Customer">Customer</option>
                   <option value="Transporte">Transporte</option>
@@ -406,7 +406,7 @@ export default function RechazoForm({
               {rechazoData.responsabilidad === 'CD' && (
                 <div>
                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Responsabilidad por Área</label>
-                  <select name="responsabilidad_area" value={rechazoData.responsabilidad_area} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}>
+                  <select name="responsabilidad_area" value={rechazoData.responsabilidad_area} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }}>
                     <option value="">Seleccione área</option>
                     <option value="Shipping">Shipping</option>
                     <option value="QA">QA</option>
@@ -421,44 +421,44 @@ export default function RechazoForm({
           )}
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Unidades Rechazadas</label>
-            <input type="number" name="unidades_rechazadas" value={rechazoData.unidades_rechazadas || ''} onChange={handleChange} min="0" style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <input type="number" name="unidades_rechazadas" value={rechazoData.unidades_rechazadas || ''} onChange={handleChange} min="0" style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }} />
           </div>
           {profile.role === 'Administrador' && (
             <div>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Unidades Totales</label>
-              <input type="number" name="unidades_totales" value={rechazoData.unidades_totales || ''} onChange={handleChange} min="0" style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: '4px', backgroundColor: 'var(--color-card-background)', color: 'var(--color-text-primary)' }} />
+              <input type="number" name="unidades_totales" value={rechazoData.unidades_totales || ''} onChange={handleChange} min="0" style={{ width: '100%', padding: '8px', border: '1px solid var(--clr4))', borderRadius: '4px', backgroundColor: 'var(--clr1))', color: 'var(--clr4))' }} />
             </div>
           )}
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Bultos Rechazados</label>
-            <input type="number" name="bultos_rechazados" value={rechazoData.bultos_rechazados || ''} onChange={handleChange} min="0" style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <input type="number" name="bultos_rechazados" value={rechazoData.bultos_rechazados || ''} onChange={handleChange} min="0" style={{ width: '100%', padding: '8px', border: '1px solid var(--clr2)', borderRadius: '4px' }} />
           </div>
           {profile.role === 'Administrador' && (
             <div>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Bultos Totales</label>
-              <input type="number" name="bultos_totales" value={rechazoData.bultos_totales || ''} onChange={handleChange} min="0" style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: '4px', backgroundColor: 'var(--color-card-background)', color: 'var(--color-text-primary)' }} />
+              <input type="number" name="bultos_totales" value={rechazoData.bultos_totales || ''} onChange={handleChange} min="0" style={{ width: '100%', padding: '8px', border: '1px solid var(--clr4))', borderRadius: '4px', backgroundColor: 'var(--clr1))', color: 'var(--clr4))' }} />
             </div>
           )}
           {profile.role === 'Administrador' && (
             <div>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Transporte</label>
-              <input type="text" name="transporte" value={rechazoData.transporte} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: '4px', backgroundColor: 'var(--color-card-background)', color: 'var(--color-text-primary)' }} />
+              <input type="text" name="transporte" value={rechazoData.transporte} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid var(--clr4))', borderRadius: '4px', backgroundColor: 'var(--clr1))', color: 'var(--clr4))' }} />
             </div>
           )}
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Foto (JPG)</label>
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/jpeg, image/jpg" style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: '4px', backgroundColor: 'var(--color-card-background)', color: 'var(--color-text-primary)' }} />
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/jpeg, image/jpg" style={{ width: '100%', padding: '8px', border: '1px solid var(--clr4))', borderRadius: '4px', backgroundColor: 'var(--clr1))', color: 'var(--clr4))' }} />
             {fotoPreview && (
               <div style={{ marginTop: '10px' }}>
-                <Image src={fotoPreview} alt="Preview" width={200} height={200} style={{ maxWidth: '200px', maxHeight: '200px', border: '1px solid var(--color-border)' }} />
+                <Image src={fotoPreview} alt="Preview" width={200} height={200} style={{ maxWidth: '200px', maxHeight: '200px', border: '1px solid var(--clr4))' }} />
               </div>
             )}
           </div>
         </div>
-        {error && <div style={{ color: 'var(--color-error)', margin: '10px 0' }}>{error}</div>}
+        {error && <div style={{ color: 'var(--clr6))', margin: '10px 0' }}>{error}</div>}
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <button type="submit" disabled={loading} style={{ padding: '12px 30px', backgroundColor: 'var(--color-accent)', color: 'var(--color-card-background)', border: 'none', borderRadius: '4px', cursor: loading ? 'not-allowed' : 'pointer', fontSize: '16px' }}>{loading ? 'Guardando...' : 'Guardar Rechazo'}</button>
-          <button type="button" onClick={() => { setRechazoData({ tipo_rechazo: '', mes: new Date().toISOString().substring(0, 7) + '-01', fecha: new Date().toISOString().substring(0, 10), hora: new Date().toTimeString().substring(0, 5), folio: '', oc: '', nombre_local: '', tipo_local: '', cliente_final: '', motivo: '', responsabilidad: '', responsabilidad_area: '', unidades_rechazadas: null, unidades_totales: null, bultos_rechazados: null, bultos_totales: null, transporte: '', foto_rechazado: null }); setFotoPreview(null); setSearchTerm(''); if (fileInputRef.current) { fileInputRef.current.value = ''; } }} style={{ marginLeft: '10px', padding: '12px 30px', backgroundColor: 'var(--color-button-alternative-background)', color: 'var(--color-button-alternative-text)', border: 'var(--color-button-alternative-border)', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}>Cancelar</button>
+          <button type="submit" disabled={loading} style={{ padding: '12px 30px', backgroundColor: 'var(--clr4))', color: 'var(--clr1))', border: 'none', borderRadius: '4px', cursor: loading ? 'not-allowed' : 'pointer', fontSize: '16px' }}>{loading ? 'Guardando...' : 'Guardar Rechazo'}</button>
+          <button type="button" onClick={() => { setRechazoData({ tipo_rechazo: '', mes: new Date().toISOString().substring(0, 7) + '-01', fecha: new Date().toISOString().substring(0, 10), hora: new Date().toTimeString().substring(0, 5), folio: '', oc: '', nombre_local: '', tipo_local: '', cliente_final: '', motivo: '', responsabilidad: '', responsabilidad_area: '', unidades_rechazadas: null, unidades_totales: null, bultos_rechazados: null, bultos_totales: null, transporte: '', foto_rechazado: null }); setFotoPreview(null); setSearchTerm(''); if (fileInputRef.current) { fileInputRef.current.value = ''; } }} style={{ marginLeft: '10px', padding: '12px 30px', backgroundColor: 'var(--clr1))', color: 'var(--clr4))', border: '1px solid var(--clr4))', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}>Cancelar</button>
         </div>
       </form>
     </div>

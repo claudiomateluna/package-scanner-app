@@ -300,7 +300,7 @@ export default function BarcodeScannerZXing({
       </canvas>
 
       <p style={{
-        color: 'var(--color-text-tertiary)',
+        color: 'var(--clr3)',
         fontSize: '0.75rem',
       }}>
         Esto se actualiza cada 0.5 segundo con el área focalizada.

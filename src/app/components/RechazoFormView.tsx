@@ -13,13 +13,13 @@ export default function RechazoFormView({ profile, packageData, onBack }: Props)
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1 style={{ color: '#233D4D' }}>Reportar Rechazo</h1>
+        <h1 style={{ color: 'var(--clr4)' }}>Reportar Rechazo</h1>
         <button 
           onClick={onBack}
           style={{
             padding: '10px 15px',
-            backgroundColor: '#233D4D',
-            color: '#FFFFFF',
+            backgroundColor: 'var(--clr4)',
+            color: 'var(--clr1)',
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer',

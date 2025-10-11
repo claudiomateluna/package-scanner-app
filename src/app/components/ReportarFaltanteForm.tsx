@@ -813,7 +813,7 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
           justify-content: space-between;
           align-items: center;
           padding: 10px;
-          border-bottom: 1px solid #000000;
+          border-bottom: 1px solid var(--clr4);
         }
         
         .modal-header h2 {
@@ -873,11 +873,11 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
         
         .form-input.readonly {
           background-color: var(--clr4);
-          color: #CCCCCC;
+          color: var(--clr2);
         }
         
         .error {
-          color: #ff0000;
+          color: var(--clr6);
           font-size: 14px;
           margin-top: 5px;
           display: block;
@@ -904,7 +904,7 @@ const ReportarFaltanteForm = ({ session, onClose, onReportSaved }: Props) => {
         }
         
         .remove-product-btn {
-          background-color: #ff4444;
+          background-color: var(--clr6);
           color: white;
           border: none;
           padding: 5px 10px;

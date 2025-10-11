@@ -65,18 +65,18 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
         left: 0, 
         right: 0, 
         bottom: 0, 
-        backgroundColor: 'var(--color-background)', 
+        backgroundColor: 'var(--clr1)', 
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center',
         zIndex: 1000
       }}>
         <div style={{ 
-          backgroundColor: 'var(--color-background)', 
+          backgroundColor: 'var(--clr1)', 
           padding: '40px', 
           borderRadius: '8px',
           textAlign: 'center',
-          color: 'var(--color-text-primary)'
+          color: 'var(--clr4)'
         }}>
           <h2>Cargando resumen de recepción...</h2>
         </div>
@@ -99,23 +99,23 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
       padding: '20px'
     }}>
       <div style={{ 
-        backgroundColor: 'var(--color-background)', 
+        backgroundColor: 'var(--clr1)', 
         padding: '10px', 
         borderRadius: '4px',
         maxWidth: '800px',
         width: '100%',
         maxHeight: '90vh',
         overflowY: 'auto',
-        color: 'var(--color-text-primary)'
+        color: 'var(--clr4)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-          <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>Resumen de Recepción</h2>
+          <h2 style={{ margin: 0, color: 'var(--clr4)' }}>Resumen de Recepción</h2>
           <button 
             onClick={onClose}
             style={{
               backgroundColor: 'transparent',
-              border: '1px solid var(--color-text-tertiary)',
-              color: 'var(--color-text-primary)',
+              border: '1px solid var(--clr3)',
+              color: 'var(--clr4)',
               borderRadius: '4px',
               padding: '8px 15px',
               cursor: 'pointer',
@@ -141,7 +141,7 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
               <strong>Estado:</strong><br/>
               <span style={{ 
                 backgroundColor: 'var(--clr5)', 
-                color: 'var(--color-button-text)', 
+                color: 'var(--clr1)', 
                 padding: '4px 8px', 
                 borderRadius: '4px'
               }}>
@@ -152,7 +152,7 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
         </div>
         
         <div style={{ marginBottom: '10px' }}>
-          <h3 style={{ color: 'var(--color-text-primary)', borderBottom: '1px solid #CCCCCC', paddingBottom: '10px' }}>
+          <h3 style={{ color: 'var(--clr4)', borderBottom: '1px solid var(--clr2)', paddingBottom: '10px' }}>
             Estadísticas
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginTop: '10px' }}>
@@ -162,31 +162,31 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
               borderRadius: '5px',
               textAlign: 'center'
             }}>
-              <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
+              <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--clr4)' }}>
                 {detailedData?.olpn_escaneadas} / {detailedData?.olpn_esperadas}
               </div>
               <div>OLPN/Bultos</div>
             </div>
             
             <div style={{ 
-              backgroundColor: 'var(--color-background)', 
+              backgroundColor: 'var(--clr1)', 
               padding: '10px', 
               borderRadius: '5px',
               textAlign: 'center'
             }}>
-              <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
+              <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--clr4)' }}>
                 {detailedData?.dn_escaneadas} / {detailedData?.dn_esperadas}
               </div>
               <div>{detailedData?.user_id ? 'DN' : 'Facturas'}</div>
             </div>
             
             <div style={{ 
-              backgroundColor: 'var(--color-background)', 
+              backgroundColor: 'var(--clr1)', 
               padding: '15px', 
               borderRadius: '5px',
               textAlign: 'center'
             }}>
-              <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
+              <div style={{ fontSize: '2em', fontWeight: 'bold', color: 'var(--clr4)' }}>
                 {detailedData?.unidades_escaneadas} / {detailedData?.unidades_esperadas}
               </div>
               <div>Unidades</div>
@@ -196,19 +196,19 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
         
         {detailedData?.detalles && (
           <div>
-            <h3 style={{ color: 'var(--color-text-primary)', borderBottom: '1px solid var(--color-text-tertiary)', paddingBottom: '10px' }}>
+            <h3 style={{ color: 'var(--clr4)', borderBottom: '1px solid var(--clr3)', paddingBottom: '10px' }}>
               Detalles de Paquetes
             </h3>
             <div style={{ 
               maxHeight: '300px', 
               overflowY: 'auto',
               marginTop: '15px',
-              border: '1px solid var(--color-text-tertiary)',
+              border: '1px solid var(--clr3)',
               borderRadius: '5px'
             }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderBottom: '1px solid var(--color-text-tertiary)' }}>
+                  <tr style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderBottom: '1px solid var(--clr3)' }}>
                     <th style={{ padding: '10px', textAlign: 'left' }}>OLPN/Bulto</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>DN/Factura</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>Unidades</th>
@@ -220,7 +220,7 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
                     <tr 
                       key={index} 
                       style={{ 
-                        borderBottom: '1px solid #555',
+                        borderBottom: '1px solid var(--clr3)',
                         backgroundColor: detalle.escaneado ? 'rgba(161, 193, 129, 0.2)' : 'transparent'
                       }}
                     >
@@ -230,7 +230,7 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
                       <td style={{ padding: '8px' }}>
                         <span style={{ 
                           backgroundColor: detalle.escaneado ? 'var(--clr5)' : 'var(--clr7)', 
-                          color: detalle.escaneado ? '#233D4D' : '#233D4D', 
+                          color: detalle.escaneado ? 'var(--clr3)' : 'var(--clr3)', 
                           padding: '3px 8px', 
                           borderRadius: '3px',
                           fontSize: '0.8em'
@@ -254,8 +254,8 @@ export default function ReceptionSummary({ onClose, receptionData }: ReceptionSu
           <button
             onClick={onClose}
             style={{
-              backgroundColor: 'var(--color-button-background)',
-              color: 'var(--color-button-text)',
+              backgroundColor: 'var(--clr4)',
+              color: 'var(--clr1)',
               border: 'none',
               padding: '12px 30px',
               borderRadius: '4px',

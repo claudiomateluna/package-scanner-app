@@ -267,7 +267,7 @@
 .confirmButton {
   padding: 12px 25px;
   background-color: var(--clr5);
-  color: white;
+  color: var(--clr1);
   border: none;
   border-radius: 4px;
   font-weight: bold;
@@ -726,7 +726,7 @@
 
 .registerButtonDisabled {
   padding: 5px;
-  background-color: #cccccc;
+  background-color: var(--clr2);
   color: var(--clr1);
   border: none;
   border-top-width: 0;

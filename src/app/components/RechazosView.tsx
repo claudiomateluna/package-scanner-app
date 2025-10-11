@@ -28,7 +28,7 @@ export default function RechazosView({ session, profile, packageData }: Props) {
   if (!canViewAdmin) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
-        <h1 style={{ color: '#233D4D', marginBottom: '20px' }}>Acceso Denegado</h1>
+        <h1 style={{ color: 'var(--clr3)', marginBottom: '20px' }}>Acceso Denegado</h1>
         <p>No tienes permisos para acceder a la administración de rechazos.</p>
       </div>
     );
