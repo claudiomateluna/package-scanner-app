@@ -385,14 +385,14 @@ export default function RechazosAdminView({ session }: Props) {
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id} style={{ backgroundColor: 'var(--clr1)', color: 'var(--clr4)' }}>
                   {headerGroup.headers.map(header => (
-                    <th key={header.id} colSpan={header.colSpan} style={{ position: 'relative', width: header.getSize(), padding: '12px', textAlign: 'left', minWidth: header.column.columnDef.minSize ? `${header.column.columnDef.minSize}px` : 'auto' }}>
+                    <th key={header.id} colSpan={header.colSpan} style={{ position: 'relative', width: header.getSize(), padding: '10px', textAlign: 'center', border:'1px solid var(--clr4)', minWidth: header.column.columnDef.minSize ? `${header.column.columnDef.minSize}px` : 'auto' }}>
                       <div {...{ onClick: header.column.getToggleSortingHandler(), className: header.column.getCanSort() ? 'cursor-pointer select-none' : '' }}>
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {{ asc: ' 🔼', desc: ' 🔽' }[header.column.getIsSorted() as string] ?? null}
                       </div>
                       {header.column.getCanFilter() ? (
                         <div>
-                          <input type="text" value={(header.column.getFilterValue() ?? '') as string} onChange={e => header.column.setFilterValue(e.target.value)} placeholder={`Filtrar...`} style={{ width: '100%', marginTop: '5px', padding: '4px', borderRadius: '4px', border: '1px solid var(--clr4)', backgroundColor: 'var(--clr1)', color: 'var(--clr4)' }} onClick={e => e.stopPropagation()} />
+                          <input type="text" value={(header.column.getFilterValue() ?? '') as string} onChange={e => header.column.setFilterValue(e.target.value)} placeholder={`Filtrar...`} style={{ width: '90%', marginTop: '5px', padding: '4px', borderRadius: '4px', border: '1px solid var(--clr4)', backgroundColor: 'var(--clr1)', color: 'var(--clr4)' }} onClick={e => e.stopPropagation()} />
                         </div>
                       ) : null}
                       <div {...{ onMouseDown: header.getResizeHandler(), onTouchStart: header.getResizeHandler() }} className={`resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`} />
@@ -403,9 +403,9 @@ export default function RechazosAdminView({ session }: Props) {
             </thead>
             <tbody>
               {table.getRowModel().rows.map(row => (
-                <tr key={row.id} style={{ borderBottom: '1px solid var(--clr4)' }}>
+                <tr key={row.id} style={{ border: '1px solid var(--clr4)' }}>
                   {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} style={{ width: cell.column.getSize(), padding: '12px' }}>
+                    <td key={cell.id} style={{ width: cell.column.getSize(), padding: '6px', borderRight: '1px solid var(--clr4)', textAlign: cell.column.id === 'ticket_id' ? 'left' : 'center' }}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

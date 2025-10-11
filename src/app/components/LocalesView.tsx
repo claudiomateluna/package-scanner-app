@@ -367,7 +367,7 @@ export default function LocalesView({ profile }: LocalesViewProps) {
       <h3 style={{ marginTop: '20px' }}>Locales Existentes ({filteredLocales.length})</h3>
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', 
         gap: '5px',
         marginTop: '20px'
       }}>

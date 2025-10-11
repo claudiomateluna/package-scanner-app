@@ -2,8 +2,32 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { canUserManageRole } from '@/lib/roleHierarchy'
 
+interface DeleteUserData {
+  id: string;
+}
+
+// Validador de entradas para eliminación de usuario
+function validateDeleteInput(data: DeleteUserData): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  // Validar ID de usuario
+  if (!data.id || typeof data.id !== 'string' || data.id.trim() === '') {
+    errors.push('ID de usuario es requerido y debe ser una cadena no vacía');
+  }
+
+  return { isValid: errors.length === 0, errors };
+}
+
 export async function DELETE(request: Request) {
-  const { id } = await request.json()
+  const requestData = await request.json();
+  
+  // Validar los datos entrantes
+  const validation = validateDeleteInput(requestData);
+  if (!validation.isValid) {
+    return NextResponse.json({ error: 'Error de validación', details: validation.errors }, { status: 400 });
+  }
+  
+  const { id } = requestData;
 
   if (!id) {
     return NextResponse.json({ error: 'Se requiere el ID del usuario.' }, { status: 400 })

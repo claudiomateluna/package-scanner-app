@@ -21,12 +21,25 @@ const nextConfig: NextConfig = {
       { key: 'Pragma', value: 'no-cache' },
       { key: 'Expires', value: '0' },
     ];
+    
+    // Encabezados de seguridad
+    const securityHeaders = [
+      { key: 'X-DNS-Prefetch-Control', value: 'on' },
+      { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+      { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      { key: 'X-XSS-Protection', value: '1; mode=block' },
+      { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
+    ];
 
     return [
-      // 1) Todas las rutas de la app (páginas, APIs y archivos del /public)
+      // 1) Todas las rutas de la app (páginas, APIs y archivos del /public) - combinadas
       {
         source: '/:path*',
-        headers: noCacheHeaders,
+        headers: [
+          ...noCacheHeaders,
+          ...securityHeaders
+        ],
       },
 
       // 2) Service Worker (si existiera en /public)

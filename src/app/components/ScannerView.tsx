@@ -30,6 +30,14 @@ type Package = { OLPN: string; DN: string; Unidades: number; Local: string; Fech
 type ScannedItem = { OLPN: string; Fecha?: string; }
 type DNProgress = { dn: string; totalPackages: number; scannedPackages: number; }
 
+// Interfaz para la paginación
+type Pagination = {
+  currentPage: number;
+  itemsPerPage: number;
+  totalPages: number;
+  totalItems: number;
+};
+
 // SupabaseQuery se eliminó ya que no se usaba
 
 interface CompletedReceptionData {
@@ -107,6 +115,15 @@ export default function ScannerView({ session, profile, selection, currentView, 
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null); // State for selected ticket to view
   const [showTicketViewer, setShowTicketViewer] = useState(false); // State to show TicketViewer
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Estados para la paginación
+  const [pagination, setPagination] = useState<Pagination>({
+    currentPage: 1,
+    itemsPerPage: 50, // 50 paquetes por página por defecto
+    totalPages: 1,
+    totalItems: 0,
+  });
+  const [paginatedPackages, setPaginatedPackages] = useState<Package[]>([]);
 
   const canEditMissing = profile?.role === 'administrador' || profile?.role === 'Store Operator';
   // Acknowledge unused canEditMissing to prevent ESLint warning
@@ -127,19 +144,35 @@ export default function ScannerView({ session, profile, selection, currentView, 
     }
 
     searchTimeoutRef.current = setTimeout(() => {
+      let filtered: Package[] = [];
       if (!packageSearchTerm) {
-        setFilteredPackages(packages);
-        return;
+        filtered = packages;
+      } else {
+        const term = packageSearchTerm.toLowerCase();
+        filtered = packages.filter(pkg => {
+          const olpn = pkg.OLPN.toLowerCase();
+          const dn = pkg.DN.toLowerCase();
+          return olpn.includes(term) || dn.includes(term);
+        });
       }
 
-      const term = packageSearchTerm.toLowerCase();
-      const filtered = packages.filter(pkg => {
-        const olpn = pkg.OLPN.toLowerCase();
-        const dn = pkg.DN.toLowerCase();
-        return olpn.includes(term) || dn.includes(term);
-      });
-
       setFilteredPackages(filtered);
+      
+      // Actualizar la paginación
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / pagination.itemsPerPage);
+      setPagination(prev => ({
+        ...prev,
+        totalItems,
+        totalPages,
+        currentPage: totalItems > 0 ? Math.min(prev.currentPage, totalPages) : 1
+      }));
+      
+      // Actualizar los paquetes paginados
+      const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
+      const endIndex = startIndex + pagination.itemsPerPage;
+      const paginated = filtered.slice(startIndex, endIndex);
+      setPaginatedPackages(paginated);
     }, 250);
 
     return () => {
@@ -147,7 +180,15 @@ export default function ScannerView({ session, profile, selection, currentView, 
         clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [packageSearchTerm, packages]);
+  }, [packageSearchTerm, packages, pagination.itemsPerPage, pagination.currentPage]);
+
+  // useEffect para actualizar paquetes paginados cuando cambia la página
+  useEffect(() => {
+    const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
+    const endIndex = startIndex + pagination.itemsPerPage;
+    const paginated = filteredPackages.slice(startIndex, endIndex);
+    setPaginatedPackages(paginated);
+  }, [filteredPackages, pagination.currentPage, pagination.itemsPerPage]);
 
   const fetchData = useCallback(async () => {
     setError(null)
@@ -183,32 +224,43 @@ export default function ScannerView({ session, profile, selection, currentView, 
         setHasExistingReception(false); // Actualizar el nuevo estado
       }
       
-      // Obtener paquetes esperados para el local seleccionado en la fecha seleccionada
-      const { data: packageData, error: packageError } = await supabase
-        .from('data')
-        .select('*')
-        .eq('Local', selection.local)
-        .gte('Fecha', startDate)
-        .lt('Fecha', endDate);
+      // Obtener paquetes esperados y escaneados en paralelo para mejorar el rendimiento
+      const [packageResult, scannedResult] = await Promise.all([
+        supabase
+          .from('data')
+          .select('*')
+          .eq('Local', selection.local)
+          .gte('Fecha', startDate)
+          .lt('Fecha', endDate),
+        supabase
+          .from('recepcion')
+          .select('OLPN')
+          .eq('Local', selection.local)
+          .gte('Fecha', startDate)
+          .lt('Fecha', endDate)
+      ]);
       
-      if (packageError) throw packageError;
-      setPackages(packageData || []);
+      if (packageResult.error) throw packageResult.error;
+      const packageData = packageResult.data || [];
+      setPackages(packageData);
       
       // Establecer la hora de inicio de la recepción si aún no está establecida y la recepción no ha sido completada
       if (!receptionStartTime && !isReceptionCompleted) {
         setReceptionStartTime(new Date().toISOString());
       }
       
-      // Obtener paquetes ya escaneados para el local seleccionado en la fecha seleccionada
-      const { data: scannedData, error: scannedError } = await supabase
-        .from('recepcion')
-        .select('OLPN')
-        .eq('Local', selection.local)
-        .gte('Fecha', startDate)
-        .lt('Fecha', endDate);
+      // Actualizar la paginación
+      const totalItems = packageData.length;
+      const totalPages = Math.ceil(totalItems / pagination.itemsPerPage);
+      setPagination(prev => ({
+        ...prev,
+        totalItems,
+        totalPages,
+        currentPage: totalItems > 0 ? Math.min(prev.currentPage, totalPages) : 1
+      }));
       
-      if (scannedError) throw scannedError;
-      setScanned(new Set(scannedData?.map((item: ScannedItem) => item.OLPN) || []));
+      if (scannedResult.error) throw scannedResult.error;
+      setScanned(new Set(scannedResult.data?.map((item: ScannedItem) => item.OLPN) || []));
     } catch (error: unknown) { 
       const errorMessage = (error as Error).name === 'AbortError' ? 'La petición tardó demasiado (timeout).' : (error as Error).message;
       setError(errorMessage);
@@ -238,69 +290,43 @@ export default function ScannerView({ session, profile, selection, currentView, 
 
     setLoading(true);
     fetchData();
+    
+    // Configurar canal de suscripción para cambios en recepción
     const channel = supabase.channel('realtime_recepcion')
       .on('postgres_changes', { 
-        event: 'INSERT', 
+        event: '*', // Escuchar todos los eventos (INSERT, UPDATE, DELETE)
         schema: 'public', 
         table: 'recepcion',
         filter: `Local=eq.${selection.local}`
       }, (payload) => {
-        const newRecord = payload.new as ScannedItem
-        // Verificar que el registro sea de la fecha correcta también
-        if (newRecord && newRecord.OLPN && newRecord.Fecha) {
-          // Verificar que el registro pertenezca a la fecha seleccionada
-          const recordDate = newRecord.Fecha.split('T')[0];
-          if (recordDate === selection.fecha) {
-            setScanned(prevScanned => {
-              const newSet = new Set(prevScanned);
-              newSet.add(newRecord.OLPN);
-              return newSet;
-            });
+        // Procesar eficientemente todos los eventos de una sola vez
+        setScanned(prevScanned => {
+          const newSet = new Set(prevScanned);
+          const record = payload.new || payload.old; // Para DELETE, el payload.old contiene el registro
+          
+          // Verificar que el record tenga las propiedades necesarias antes de acceder a ellas
+          if (record && typeof record === 'object' && 'OLPN' in record && 'Fecha' in record && record.OLPN && record.Fecha) {
+            const recordDate = (record.Fecha as string).split('T')[0];
+            
+            // Solo procesar si el registro pertenece a la fecha seleccionada
+            if (recordDate === selection.fecha) {
+              if (payload.eventType === 'DELETE') {
+                newSet.delete(record.OLPN as string);
+              } else {
+                // Para INSERT y UPDATE, añadir al conjunto
+                newSet.add(record.OLPN as string);
+              }
+            }
           }
-        }
-      })
-      .on('postgres_changes', { 
-        event: 'UPDATE', 
-        schema: 'public', 
-        table: 'recepcion',
-        filter: `Local=eq.${selection.local}`
-      }, (payload) => {
-        const updatedRecord = payload.new as ScannedItem
-        // Verificar que el registro sea de la fecha correcta también
-        if (updatedRecord && updatedRecord.OLPN && updatedRecord.Fecha) {
-          // Verificar que el registro pertenezca a la fecha seleccionada
-          const recordDate = updatedRecord.Fecha.split('T')[0];
-          if (recordDate === selection.fecha) {
-            setScanned(prevScanned => {
-              const newSet = new Set(prevScanned);
-              newSet.add(updatedRecord.OLPN);
-              return newSet;
-            });
-          }
-        }
-      })
-      .on('postgres_changes', { 
-        event: 'DELETE', 
-        schema: 'public', 
-        table: 'recepcion',
-        filter: `Local=eq.${selection.local}`
-      }, (payload) => {
-        const deletedRecord = payload.old as ScannedItem
-        // Verificar que el registro sea de la fecha correcta también
-        if (deletedRecord && deletedRecord.OLPN && deletedRecord.Fecha) {
-          // Verificar que el registro pertenecía a la fecha seleccionada
-          const recordDate = deletedRecord.Fecha.split('T')[0];
-          if (recordDate === selection.fecha) {
-            setScanned(prevScanned => {
-              const newSet = new Set(prevScanned);
-              newSet.delete(deletedRecord.OLPN);
-              return newSet;
-            });
-          }
-        }
+          
+          return newSet;
+        });
       })
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+      
+    return () => { 
+      supabase.removeChannel(channel) 
+    }
   }, [fetchData, selection.local, selection.fecha]);
 
   useEffect(() => {
@@ -971,7 +997,12 @@ export default function ScannerView({ session, profile, selection, currentView, 
           )}
           
 
-          <h4 className={styles.expectedPackagesHeader}>Paquetes Esperados ({scanned.size} / {packages.length})</h4>
+          <h4 className={styles.expectedPackagesHeader}>
+            Paquetes Esperados ({scanned.size} / {packages.length})
+            <span style={{ fontSize: '0.8em', marginLeft: '10px' }}>
+              Mostrando {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}-{Math.min(pagination.currentPage * pagination.itemsPerPage, filteredPackages.length)} de {filteredPackages.length}
+            </span>
+          </h4>
           {/* Search input for packages */}
           <div className={styles.searchContainer}>
             <input
@@ -1017,7 +1048,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
                 </tr>
               </thead>
               <tbody>
-                {filteredPackages.map(pkg => (
+                {paginatedPackages.map(pkg => (
                   <tr key={pkg.OLPN} className={
                     (scanned.has(pkg.OLPN) || existingReports[pkg.OLPN] || existingRechazos[pkg.OLPN]) 
                       ? styles.packagesTableRowScanned 
@@ -1070,6 +1101,84 @@ export default function ScannerView({ session, profile, selection, currentView, 
                 ))}
               </tbody>
             </table>
+          </div>
+          
+          {/* Controles de paginación */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            marginTop: '10px',
+            padding: '0 10px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ marginRight: '10px' }}>Elementos por página:</span>
+              <select
+                value={pagination.itemsPerPage}
+                onChange={(e) => {
+                  const newItemsPerPage = Number(e.target.value);
+                  setPagination(prev => ({
+                    ...prev,
+                    itemsPerPage: newItemsPerPage,
+                    currentPage: 1 // Volver a la primera página al cambiar elementos por página
+                  }));
+                }}
+                style={{ 
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  border: '1px solid var(--clr4)'
+                }}
+              >
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={200}>200</option>
+              </select>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <button
+                onClick={() => setPagination(prev => ({
+                  ...prev,
+                  currentPage: Math.max(prev.currentPage - 1, 1)
+                }))}
+                disabled={pagination.currentPage <= 1}
+                style={{ 
+                  padding: '6px 12px', 
+                  margin: '0 5px',
+                  borderRadius: '4px',
+                  border: '1px solid var(--clr4)',
+                  backgroundColor: pagination.currentPage <= 1 ? 'var(--clr1)' : 'var(--clr4)',
+                  color: pagination.currentPage <= 1 ? 'var(--clr2)' : 'var(--clr1)',
+                  cursor: pagination.currentPage <= 1 ? 'not-allowed' : 'pointer'
+                }}
+              >
+                Anterior
+              </button>
+              
+              <span style={{ margin: '0 15px' }}>
+                Página {pagination.currentPage} de {pagination.totalPages}
+              </span>
+              
+              <button
+                onClick={() => setPagination(prev => ({
+                  ...prev,
+                  currentPage: Math.min(prev.currentPage + 1, prev.totalPages)
+                }))}
+                disabled={pagination.currentPage >= pagination.totalPages}
+                style={{ 
+                  padding: '6px 12px', 
+                  margin: '0 5px',
+                  borderRadius: '4px',
+                  border: '1px solid var(--clr4)',
+                  backgroundColor: pagination.currentPage >= pagination.totalPages ? 'var(--clr1)' : 'var(--clr4)',
+                  color: pagination.currentPage >= pagination.totalPages ? 'var(--clr2)' : 'var(--clr1)',
+                  cursor: pagination.currentPage >= pagination.totalPages ? 'not-allowed' : 'pointer'
+                }}
+              >
+                Siguiente
+              </button>
+            </div>
           </div>
         </div>
 

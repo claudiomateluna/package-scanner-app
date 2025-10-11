@@ -35,20 +35,6 @@ export function validatePassword(password: string): { isValid: boolean; errors: 
   };
 }
 
-// Check if password is in history (prevent reuse of recent passwords)
-export function isPasswordInHistory(password: string, passwordHistory: string[] = []): boolean {
-  // In a real implementation, you would hash the password and compare with stored hashes
-  // For this example, we'll compare plain text (not recommended for production)
-  return passwordHistory.includes(password);
-}
-
-// Function to hash password (would use a proper hashing library in production)
-export function hashPassword(password: string): string {
-  // Note: This is a simplified version for demonstration purposes
-  // In a real application, use a proper password hashing library like bcrypt
-  return btoa(password); // Base64 encoding - not secure for production
-}
-
 // Function to check if a user must change their password
 export async function checkIfMustChangePassword(userId: string): Promise<boolean> {
   // This would typically be implemented in the backend, but for client-side checks

@@ -1,10 +1,93 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { canUserManageRole } from '@/lib/roleHierarchy'
-import { hashPassword } from '@/lib/passwordUtils'
+import { serverHashPassword } from '@/lib/serverPasswordUtils'
+import { validateCSRF } from '@/lib/csrfUtils'
+
+interface UpdateUserData {
+  id: string;
+  email?: string;
+  password?: string;
+  role?: string;
+  first_name?: string;
+  last_name?: string;
+  assigned_locals?: string[];
+}
+
+// Validador de entradas
+function validateInput(data: UpdateUserData): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  // Validar ID de usuario
+  if (!data.id || typeof data.id !== 'string' || data.id.trim() === '') {
+    errors.push('ID de usuario es requerido y debe ser una cadena no vacía');
+  }
+
+  // Validar email si se proporciona
+  if (data.email && typeof data.email === 'string') {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      errors.push('Formato de email inválido');
+    }
+  } else if (data.email !== undefined) {
+    errors.push('El email debe ser una cadena válida o no definido');
+  }
+
+  // Validar contraseña si se proporciona
+  if (data.password && typeof data.password === 'string') {
+    if (data.password.length < 8) {
+      errors.push('La contraseña debe tener al menos 8 caracteres');
+    }
+  } else if (data.password !== undefined) {
+    errors.push('La contraseña debe ser una cadena o no definida');
+  }
+
+  // Validar rol si se proporciona
+  if (data.role && typeof data.role === 'string') {
+    const validRoles = ['administrador', 'Warehouse Supervisor', 'Warehouse Operator', 'Store Supervisor', 'Store Operator', 'SKA Operator'];
+    if (!validRoles.includes(data.role)) {
+      errors.push('Rol no válido');
+    }
+  } else if (data.role !== undefined) {
+    errors.push('El rol debe ser una cadena válida o no definido');
+  }
+
+  // Validar nombres si se proporcionan
+  if (data.first_name && typeof data.first_name !== 'string') {
+    errors.push('El nombre debe ser una cadena');
+  }
+  if (data.last_name && typeof data.last_name !== 'string') {
+    errors.push('El apellido debe ser una cadena');
+  }
+
+  // Validar locales asignados si se proporcionan
+  if (data.assigned_locals && !Array.isArray(data.assigned_locals)) {
+    errors.push('assigned_locals debe ser un array');
+  } else if (data.assigned_locals && Array.isArray(data.assigned_locals)) {
+    if (!data.assigned_locals.every(local => typeof local === 'string')) {
+      errors.push('Cada local en assigned_locals debe ser una cadena');
+    }
+  }
+
+  return { isValid: errors.length === 0, errors };
+}
 
 export async function PATCH(request: Request) {
-  const { id, email, password, role, first_name, last_name, assigned_locals } = await request.json()
+  // Validar token CSRF
+  const csrfValid = await validateCSRF(request, 'placeholder-csrf-token'); // En una implementación real, usarías el token adecuado
+  if (!csrfValid) {
+    return NextResponse.json({ error: 'Token CSRF inválido' }, { status: 403 });
+  }
+  
+  const requestData = await request.json();
+  
+  // Validar los datos entrantes
+  const validation = validateInput(requestData);
+  if (!validation.isValid) {
+    return NextResponse.json({ error: 'Error de validación', details: validation.errors }, { status: 400 });
+  }
+  
+  const { id, email, password, role, first_name, last_name, assigned_locals } = requestData;
 
   if (!id) {
     return NextResponse.json({ error: 'Se requiere el ID del usuario.' }, { status: 400 })
@@ -145,7 +228,7 @@ export async function PATCH(request: Request) {
     }
     
     // Añadir la nueva contraseña al historial
-    const hashedNewPassword = hashPassword(password);
+    const hashedNewPassword = await serverHashPassword(password);
     currentPasswordHistory.push(hashedNewPassword);
 
     profileDataToUpdate.password_history = currentPasswordHistory;
