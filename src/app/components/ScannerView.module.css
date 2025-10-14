@@ -286,7 +286,7 @@
 }
 
 .progressContainer {
-  margin-top: 20px;
+  margin-top: 0px;
   padding: 15px;
   background-color: var(--clr1);
   border: 1px solid var(--clr4);
