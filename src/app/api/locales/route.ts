@@ -1,5 +1,6 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { createSupabaseServiceClient } from '@/lib/supabaseServerClient';
 
 // Helper function to get user role
 async function getUserRole(supabase: SupabaseClient, userId: string) {
@@ -29,6 +30,7 @@ export async function GET(request: Request) {
   const token = authHeader.substring(7) // Remover 'Bearer ' del inicio
 
   // Crear un cliente de Supabase con el token del usuario
+  const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
@@ -55,10 +57,7 @@ export async function GET(request: Request) {
   }
 
   // Crear un cliente de Supabase especial para tareas de admin
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-  )
+  const supabaseAdmin = createSupabaseServiceClient();
 
   // Obtener todos los locales
   const { data, error } = await supabaseAdmin
@@ -85,6 +84,7 @@ export async function POST(request: Request) {
   const token = authHeader.substring(7) // Remover 'Bearer ' del inicio
 
   // Crear un cliente de Supabase con el token del usuario
+  const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
@@ -116,10 +116,7 @@ export async function POST(request: Request) {
   }
 
   // Crear un cliente de Supabase especial para tareas de admin
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-  )
+  const supabaseAdmin = createSupabaseServiceClient();
 
   // Crear el nuevo local
   const { data, error } = await supabaseAdmin
@@ -151,6 +148,7 @@ export async function PUT(request: Request) {
   const token = authHeader.substring(7) // Remover 'Bearer ' del inicio
 
   // Crear un cliente de Supabase con el token del usuario
+  const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
@@ -182,10 +180,7 @@ export async function PUT(request: Request) {
   }
 
   // Crear un cliente de Supabase especial para tareas de admin
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-  )
+  const supabaseAdmin = createSupabaseServiceClient();
 
   // Actualizar el local
   const { error } = await supabaseAdmin
@@ -215,6 +210,7 @@ export async function DELETE(request: Request) {
   const token = authHeader.substring(7) // Remover 'Bearer ' del inicio
 
   // Crear un cliente de Supabase con el token del usuario
+  const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
@@ -246,10 +242,7 @@ export async function DELETE(request: Request) {
   }
 
   // Crear un cliente de Supabase especial para tareas de admin
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-  )
+  const supabaseAdmin = createSupabaseServiceClient();
 
   // Obtener el nombre del local antes de eliminarlo
   const { data: localData, error: localError } = await supabaseAdmin
@@ -282,7 +275,7 @@ export async function DELETE(request: Request) {
   // Verificar si el local está en la tabla data
   const { data: dataData, error: dataError } = await supabaseAdmin
     .from('data')
-    .select('id')
+    .select('*')
     .eq('Local', nombre_local)
     .limit(1)
   

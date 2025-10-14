@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { createSupabaseServerClient } from './supabaseServerClient'
 
 // Acknowledge unused NextResponse to prevent ESLint warning
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -8,10 +8,7 @@ const _NextResponse = NextResponse;
 // Middleware para verificar la autenticación
 export async function authenticateUser() {
   // Crear un cliente de Supabase
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-  )
+  const supabase = createSupabaseServerClient()
 
   // Obtener la sesión del usuario
   const { data: { session } } = await supabase.auth.getSession()

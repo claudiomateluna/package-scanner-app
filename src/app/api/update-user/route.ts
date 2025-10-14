@@ -1,8 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { createSupabaseServiceClient } from '@/lib/supabaseServerClient'
 import { canUserManageRole } from '@/lib/roleHierarchy'
 import { serverHashPassword } from '@/lib/serverPasswordUtils'
-import { validateCSRF } from '@/lib/csrfUtils'
+import { generateAndStoreCSRFToken } from '@/lib/csrfUtils'
 
 interface UpdateUserData {
   id: string;
@@ -73,27 +73,7 @@ function validateInput(data: UpdateUserData): { isValid: boolean; errors: string
 }
 
 export async function PATCH(request: Request) {
-  // Validar token CSRF
-  const csrfValid = await validateCSRF(request, 'placeholder-csrf-token'); // En una implementación real, usarías el token adecuado
-  if (!csrfValid) {
-    return NextResponse.json({ error: 'Token CSRF inválido' }, { status: 403 });
-  }
-  
-  const requestData = await request.json();
-  
-  // Validar los datos entrantes
-  const validation = validateInput(requestData);
-  if (!validation.isValid) {
-    return NextResponse.json({ error: 'Error de validación', details: validation.errors }, { status: 400 });
-  }
-  
-  const { id, email, password, role, first_name, last_name, assigned_locals } = requestData;
-
-  if (!id) {
-    return NextResponse.json({ error: 'Se requiere el ID del usuario.' }, { status: 400 })
-  }
-
-  // Obtener el token de autorización del encabezado
+  // Obtener el token de autorización del encabezado para obtener el ID de usuario
   const authHeader = request.headers.get('authorization')
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
@@ -102,6 +82,7 @@ export async function PATCH(request: Request) {
   const token = authHeader.substring(7) // Remover 'Bearer ' del inicio
 
   // Crear un cliente de Supabase con el token del usuario
+  const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
@@ -119,6 +100,20 @@ export async function PATCH(request: Request) {
   
   if (sessionError || !user) {
     return NextResponse.json({ error: 'Sesión inválida' }, { status: 401 })
+  }
+  
+  const requestData = await request.json();
+  
+  // Validar los datos entrantes
+  const validation = validateInput(requestData);
+  if (!validation.isValid) {
+    return NextResponse.json({ error: 'Error de validación', details: validation.errors }, { status: 400 });
+  }
+  
+  const { id, email, password, role, first_name, last_name, assigned_locals } = requestData;
+
+  if (!id) {
+    return NextResponse.json({ error: 'Se requiere el ID del usuario.' }, { status: 400 })
   }
 
   // Obtener el rol del usuario que hace la petición
@@ -171,10 +166,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'No tienes permisos para asignar ese rol' }, { status: 403 })
   }
 
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-  )
+  const supabaseAdmin = createSupabaseServiceClient()
 
   // --- Actualizar datos de Autenticación (email/contraseña) ---
   const authDataToUpdate: { email?: string; password?: string } = {}
@@ -268,6 +260,9 @@ export async function PATCH(request: Request) {
       }
     }
   }
+
+  // Generar y almacenar un nuevo token CSRF para el usuario actual después de la operación exitosa
+  await generateAndStoreCSRFToken(user.id);
 
   return NextResponse.json({ message: 'Usuario actualizado exitosamente' })
 }

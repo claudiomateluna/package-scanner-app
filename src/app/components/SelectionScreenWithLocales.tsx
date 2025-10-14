@@ -151,14 +151,14 @@ export default function SelectionScreenWithLocales({ profile, onSelectionComplet
 
   useEffect(() => {
     async function fetchLocals() {
-      console.log('SelectionScreenWithLocales: fetchLocals iniciado');
-      console.log('SelectionScreenWithLocales: profile.role:', profile.role);
-      console.log('SelectionScreenWithLocales: session?.user?.id:', session?.user?.id);
+      //console.log('SelectionScreenWithLocales: fetchLocals iniciado');
+      //console.log('SelectionScreenWithLocales: profile.role:', profile.role);
+      //console.log('SelectionScreenWithLocales: session?.user?.id:', session?.user?.id);
       
       try {
         // Para usuarios que pueden ver todos los locales, obtener todos los locales de la tabla locales
         if (canViewAllLocals) {
-          console.log('SelectionScreenWithLocales: Usuario puede ver todos los locales, obteniendo todos los locales');
+          //console.log('SelectionScreenWithLocales: Usuario puede ver todos los locales, obteniendo todos los locales');
           const { data, error } = await supabase.from('locales').select('*').order('tipo_local').order('nombre_local');
           // Acknowledge unused error to prevent ESLint warning
           // eslint-disable-next-line @typescript-eslint/no-unused-vars

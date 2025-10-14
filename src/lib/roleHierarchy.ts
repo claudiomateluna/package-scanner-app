@@ -10,12 +10,6 @@ export const roleHierarchy: { [key: string]: number } = {
 
 // Función para verificar si un usuario puede editar/eliminar a otro usuario
 export function canUserManageRole(userRole: string, targetRole: string, userLocal: string | null, targetLocal: string | null): boolean {
-  // Acknowledge unused parameters to prevent ESLint warnings
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _userLocal = userLocal;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _targetLocal = targetLocal;
-  
   const userRank = roleHierarchy[userRole];
   const targetRank = roleHierarchy[targetRole];
   
@@ -28,13 +22,50 @@ export function canUserManageRole(userRole: string, targetRole: string, userLoca
   // Verificar la jerarquía de roles
   const rankCheck = userRank <= targetRank;
   
-  // Para Store Supervisor, puede gestionar usuarios de niveles inferiores (ranks más altos)
-  if (userRole === 'Store Supervisor') {
-    return rankCheck && targetRank > userRank; // Solo puede gestionar roles con rank mayor (nivel inferior)
+  // Administrador puede gestionar cualquier rol
+  if (userRole === 'administrador') {
+    return true;
   }
   
-  // Para otros roles, solo verificar la jerarquía
-  return rankCheck;
+  // Warehouse Supervisor puede gestionar cualquier rol excepto administrador
+  if (userRole === 'Warehouse Supervisor' && targetRole !== 'administrador') {
+    return rankCheck;
+  }
+  
+  // Store Supervisor puede gestionar usuarios de niveles inferiores (ranks más altos)
+  if (userRole === 'Store Supervisor') {
+    // Solo puede gestionar roles con rank mayor (nivel inferior) y debe ser en su mismo local
+    const localCheck = userLocal !== null && targetLocal !== null && userLocal === targetLocal;
+    return rankCheck && targetRank > userRank && localCheck;
+  }
+  
+  // Warehouse Operator puede gestionar Store Supervisor, Store Operator y SKA Operator
+  if (userRole === 'Warehouse Operator') {
+    const allowedTargetRoles = ['Store Supervisor', 'Store Operator', 'SKA Operator'];
+    if (!allowedTargetRoles.includes(targetRole)) {
+      return false;
+    }
+    return rankCheck;
+  }
+  
+  // Para otros roles, verificar jerarquía y local
+  // Por defecto, un usuario solo puede gestionar roles de igual o menor rango en su mismo local
+  if (userRole === targetRole) {
+    // Mismo rol - permitir solo en el mismo local
+    return userLocal !== null && targetLocal !== null && userLocal === targetLocal;
+  }
+  
+  // Otros casos de jerarquía - verificar local si está especificado
+  if (userLocal !== null && targetLocal !== null) {
+    // Ambos locales están definidos - deben coincidir
+    return rankCheck && userLocal === targetLocal;
+  } else if (userLocal === null && targetLocal === null) {
+    // Ambos locales no están definidos - usar solo jerarquía
+    return rankCheck;
+  }
+  
+  // Un local está definido y el otro no - no permitido
+  return false;
 }
 
 // Función para obtener roles que un usuario puede asignar

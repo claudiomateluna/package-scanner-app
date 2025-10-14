@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabaseClient'
 import toast from 'react-hot-toast'
 import '@/app/globals.css'
 import styles from './Login.module.css'
-import { isUserLocked, incrementLoginAttempts, resetLoginAttempts, lockUser, formatTime } from '@/lib/authUtils'
+import { formatTime } from '@/lib/authUtils'
+import { incrementFailedLoginAttempts, isEmailBlocked } from '@/lib/rateLimitUtils'
 
 interface LoginProps {
   onLoginSuccess: () => void
@@ -17,50 +18,77 @@ export default function MinimalLogin({ onLoginSuccess }: LoginProps) {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [loginAttempts, setLoginAttempts] = useState(0)
-  const [isLocked, setIsLocked] = useState(false)
-  const [lockTimeout, setLockTimeout] = useState(0)
+  const [isBlocked, setIsBlocked] = useState(false)
+  const [blockTimeout, setBlockTimeout] = useState(0)
   const [isClient, setIsClient] = useState(false)
   const [activeTab, setActiveTab] = useState('developed') // Estado para tabs del footer
 
-  // Verificar si hay un bloqueo guardado en localStorage
+  // Verificar si hay un bloqueo guardado en el servidor
   useEffect(() => {
     setIsClient(true)
-    
-    const { isLocked: locked, remainingTime } = isUserLocked()
-    
-    if (locked) {
-      setIsLocked(true)
-      setLockTimeout(remainingTime)
-      
-      // Actualizar el temporizador
-      const timer = setInterval(() => {
-        const { isLocked: stillLocked, remainingTime: timeLeft } = isUserLocked()
-        if (!stillLocked) {
-          clearInterval(timer)
-          setIsLocked(false)
-          setLoginAttempts(0)
-          resetLoginAttempts()
-        } else {
-          setLockTimeout(timeLeft)
-        }
-      }, 1000)
-      
-      return () => clearInterval(timer)
-    }
-    
-    // Obtener intentos guardados
-    const savedAttempts = localStorage.getItem('login_attempts')
-    if (savedAttempts) {
-      setLoginAttempts(parseInt(savedAttempts))
-    }
   }, [])
+
+  // Verificar estado de bloqueo cada vez que cambie el email, con debounce
+  useEffect(() => {
+    // Solo verificar bloqueo si hay un email válido (contiene @)
+    if (!email || !email.includes('@')) {
+      setIsBlocked(false); // Resetear estado de bloqueo si no hay email válido
+      return;
+    }
+    
+    // Usar debounce para evitar llamadas frecuentes a la API
+    const timer = setTimeout(() => {
+      const checkBlockStatus = async () => {
+        try {
+          // Solo verificar bloqueo si el email parece válido
+          if (email && email.includes('@')) {
+            const blockStatus = await isEmailBlocked(email);
+            if (blockStatus.isBlocked) {
+              setIsBlocked(true);
+              setBlockTimeout(blockStatus.remainingTime);
+              
+              // Actualizar el temporizador
+              const timer = setInterval(() => {
+                setBlockTimeout(prev => {
+                  const newTime = Math.max(0, prev - 1000);
+                  if (newTime <= 0) {
+                    clearInterval(timer);
+                    setIsBlocked(false);
+                    return 0;
+                  }
+                  return newTime;
+                });
+              }, 1000);
+              
+              return () => clearInterval(timer);
+            } else {
+              // Asegurarse de resetear el estado de bloqueo si el email no está bloqueado
+              setIsBlocked(false);
+            }
+          }
+        } catch (error) {
+          console.error('Error verificando estado de bloqueo:', error);
+          // No cambiar el estado de bloqueo en caso de error, pero resetear si hay error de autenticación
+          if (error instanceof Error && error.message.includes('supabaseKey is required')) {
+            // Si hay un error de configuración de Supabase, resetear el estado de bloqueo
+            setIsBlocked(false);
+          }
+        }
+      };
+      
+      checkBlockStatus();
+    }, 500); // 500ms de delay después de dejar de escribir
+    
+    // Limpiar timeout si cambia el email antes del delay
+    return () => clearTimeout(timer);
+  }, [email]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // Verificar si está bloqueado
-    if (isLocked) {
-      toast.error(`Demasiados intentos fallidos. Intente nuevamente en ${formatTime(lockTimeout)}`)
+    if (isBlocked) {
+      toast.error(`Demasiados intentos fallidos. Intente nuevamente en ${formatTime(blockTimeout)}`)
       return
     }
     
@@ -79,27 +107,47 @@ export default function MinimalLogin({ onLoginSuccess }: LoginProps) {
       })
       
       if (error) {
-        // Incrementar intentos fallidos
-        const newAttempts = incrementLoginAttempts()
-        setLoginAttempts(newAttempts)
-        
-        // Bloquear después de 3 intentos
-        if (newAttempts >= 3) {
-          lockUser(5) // Bloquear por 5 minutos
-          setIsLocked(true)
-          setLockTimeout(5 * 60 * 1000)
+        // Manejar errores de autenticación con mejor manejo de errores
+        try {
+          // Incrementar intentos fallidos en el servidor
+          const newAttempts = await incrementFailedLoginAttempts(email)
+          setLoginAttempts(newAttempts)
           
-          // Temporizador para desbloquear
-          setTimeout(() => {
-            setIsLocked(false)
-            setLoginAttempts(0)
-            resetLoginAttempts()
-            toast.success('Puede intentar iniciar sesión nuevamente')
-          }, 5 * 60 * 1000)
-          
-          toast.error('Demasiados intentos fallidos. Cuenta bloqueada por 5 minutos.')
-        } else {
-          toast.error(`Credenciales incorrectas. Intento ${newAttempts}/3`)
+          // Verificar si hay que bloquear al usuario
+          if (newAttempts >= 3) {
+            const blockStatus = await isEmailBlocked(email)
+            if (blockStatus.isBlocked) {
+              setIsBlocked(true)
+              setBlockTimeout(blockStatus.remainingTime)
+              
+              // Temporizador para actualizar UI cuando expire
+              const timer = setInterval(() => {
+                setBlockTimeout(prev => {
+                  const newTime = Math.max(0, prev - 1000);
+                  if (newTime <= 0) {
+                    clearInterval(timer);
+                    setIsBlocked(false);
+                    return 0;
+                  }
+                  return newTime;
+                });
+              }, 1000);
+              
+              toast.error('Demasiados intentos fallidos. Cuenta bloqueada por 5 minutos.')
+              return () => clearInterval(timer);
+            }
+          } else {
+            // Mostrar mensaje de error de autenticación más específico
+            if (error.message && error.message.includes('Invalid login credentials')) {
+              toast.error('Credenciales inválidas. Verifique su email y contraseña.')
+            } else {
+              toast.error(`Credenciales incorrectas. Intento ${newAttempts}/3`)
+            }
+          }
+        } catch (incrementError) {
+          console.error('Error al incrementar intentos fallidos:', incrementError);
+          // Mostrar mensaje genérico si falla el incremento de intentos
+          toast.error('Error de autenticación. Por favor intente nuevamente.')
         }
         setLoading(false)
         return
@@ -107,8 +155,6 @@ export default function MinimalLogin({ onLoginSuccess }: LoginProps) {
       
       // Login exitoso
       if (data.session) {
-        resetLoginAttempts()
-        setLoginAttempts(0)
         toast.success('Inicio de sesión exitoso')
         // Llamar inmediatamente a onLoginSuccess
         onLoginSuccess()
@@ -117,7 +163,12 @@ export default function MinimalLogin({ onLoginSuccess }: LoginProps) {
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Error al iniciar sesión'
-      toast.error(errorMessage)
+      // Manejar errores específicos de Supabase
+      if (errorMessage.includes('supabaseKey is required')) {
+        toast.error('Error de configuración. Por favor contacte al administrador.')
+      } else {
+        toast.error('Error al iniciar sesión. Por favor intente nuevamente.')
+      }
       setLoading(false)
     }
   }
@@ -135,7 +186,7 @@ export default function MinimalLogin({ onLoginSuccess }: LoginProps) {
     )
   }
 
-  if (isLocked) {
+  if (isBlocked) {
     return (
       <div className={styles.container}>
         <div className={styles.loginBox}>
@@ -144,7 +195,7 @@ export default function MinimalLogin({ onLoginSuccess }: LoginProps) {
             <p className={styles.lockedParagraph}>
               Demasiados intentos fallidos. 
               <br />
-              Intente nuevamente en: <strong>{formatTime(lockTimeout)}</strong>
+              Intente nuevamente en: <strong>{formatTime(blockTimeout)}</strong>
             </p>
           </div>
         </div>

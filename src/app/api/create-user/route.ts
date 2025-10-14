@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { createSupabaseServiceClient } from '@/lib/supabaseServerClient'
 
 export async function POST(request: Request) {
   // Extraer todos los campos del cuerpo de la petición
@@ -11,10 +11,7 @@ export async function POST(request: Request) {
   }
 
   // Crear un cliente de Supabase especial para tareas de admin
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-  )
+  const supabaseAdmin = createSupabaseServiceClient()
 
   // Crear el nuevo usuario en el sistema de autenticación
   const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({

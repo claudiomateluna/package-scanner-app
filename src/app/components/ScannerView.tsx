@@ -512,7 +512,7 @@ export default function ScannerView({ session, profile, selection, currentView, 
       // Release lock
       setIsRegistering(false);
     }
-  }
+  };
 
   // Función para mostrar el historial de recepciones
   const handleShowReceptionHistory = () => {

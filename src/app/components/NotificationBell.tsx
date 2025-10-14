@@ -31,7 +31,7 @@ export default function NotificationBell({ userId, onNotificationClick, session 
     fetchUnreadCount().finally(() => setLoading(false));
 
     // --- Suscripción al canal Realtime (patrón simplificado y estándar) ---
-    console.log('Realtime: Attempting to subscribe to channel...');
+    //console.log('Realtime: Attempting to subscribe to channel...');
     const readsChannel = supabase.channel(`notification-reads-changes-for-${userId}`)
       .on('postgres_changes', {
         event: 'INSERT', // Listen for new notification entries for this user
@@ -68,10 +68,10 @@ export default function NotificationBell({ userId, onNotificationClick, session 
     // Actualización periódica como respaldo (cada 30 segundos)
     const intervalId = setInterval(fetchUnreadCount, 30000); // 30 segundos
 
-    console.log('Realtime: Subscribed to channel:', readsChannel);
+    //console.log('Realtime: Subscribed to channel:', readsChannel);
 
     return () => {
-      console.log('Realtime: Unsubscribing from channel:', readsChannel);
+      //console.log('Realtime: Unsubscribing from channel:', readsChannel);
       supabase.removeChannel(readsChannel);
       clearInterval(intervalId); // Limpiar el intervalo al desmontar
     };

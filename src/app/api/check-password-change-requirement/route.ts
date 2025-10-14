@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { createSupabaseServerClient } from '@/lib/supabaseServerClient';
 
 export async function POST(request: Request) {
   try {
@@ -10,10 +10,7 @@ export async function POST(request: Request) {
     }
 
     // Create Supabase client
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
+    const supabase = createSupabaseServerClient();
 
     // Query the profiles table to check if user must change password
     const { data, error } = await supabase
