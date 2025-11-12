@@ -99,14 +99,69 @@ function DataUploader() {
       header: true,
       skipEmptyLines: true,
       complete: async (results) => {
-        toast.dismiss(loadingToast);
-        const loadingUploadToast = toast.loading('Cargando datos a la base de datos...');
-        const response = await fetch('/api/upload-data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(results.data) });
-        toast.dismiss(loadingUploadToast);
-        if (response.ok) { toast.success('¡Datos cargados exitosamente!'); } 
-        else { const { error } = await response.json(); toast.error(`Error al cargar: ${error}`); }
-        setUploading(false);
-        setFile(null);
+        try {
+          toast.dismiss(loadingToast);
+          const loadingUploadToast = toast.loading('Cargando datos a la base de datos...');
+          
+          // Verificar que la sesión actual sea válida
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          
+          if (sessionError) {
+            console.error('Error al obtener sesión:', sessionError);
+            throw new Error('Error de autenticación: ' + sessionError.message);
+          }
+          
+          if (!session) {
+            throw new Error('No hay sesión activa. Por favor, inicia sesión nuevamente.');
+          }
+          
+          // Verificar si el access_token está a punto de expirar y refrescar si es necesario
+          const currentTime = Math.floor(Date.now() / 1000); // Tiempo actual en segundos
+          const expiresAt = session.expires_at; // Tiempo de expiración en segundos
+          
+          // Si la sesión expira en menos de 1 minuto, intentar refrescarla
+          if (expiresAt && expiresAt - currentTime < 60) {
+            console.log('La sesión está a punto de expirar, intentando refrescar...');
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+            
+            if (refreshError) {
+              console.error('Error al refrescar la sesión:', refreshError);
+              throw new Error('La sesión ha expirado. Por favor, inicia sesión nuevamente.');
+            }
+            
+            // Usar la sesión refrescada
+            const refreshedSession = refreshData.session;
+            if (!refreshedSession) {
+              throw new Error('No se pudo refrescar la sesión. Por favor, inicia sesión nuevamente.');
+            }
+            
+            session.access_token = refreshedSession.access_token;
+          }
+          
+          // Enviar datos a la API con autenticación
+          const response = await fetch('/api/upload-data', { 
+            method: 'POST', 
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`  // Añadir token de autorización
+            }, 
+            body: JSON.stringify(results.data) 
+          });
+          
+          toast.dismiss(loadingUploadToast);
+          
+          if (response.ok) {
+            toast.success('¡Datos cargados exitosamente!');
+          } else {
+            const { error } = await response.json();
+            toast.error(`Error al cargar: ${error}`);
+          }
+        } catch (error: any) {
+          toast.error(`Error al procesar la carga: ${error.message || 'Error desconocido'}`);
+        } finally {
+          setUploading(false);
+          setFile(null);
+        }
       },
       error: (error) => {
         toast.dismiss(loadingToast);
@@ -503,7 +558,7 @@ export default function AdminView({ profile }: AdminViewProps) {
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const userRole = profile?.role;
-  const canUpload = userRole === 'administrador' || userRole === 'Warehouse Operator';
+  const canUpload = userRole === 'administrador' || userRole === 'Warehouse Supervisor' || userRole === 'Warehouse Operator';
   const canManageUsers = userRole === 'administrador' || userRole === 'Warehouse Supervisor' || userRole === 'Store Supervisor' || userRole === 'Warehouse Operator';
   const canDeleteUsers = userRole === 'administrador' || userRole === 'Warehouse Supervisor' || userRole === 'Store Supervisor';
   const canManageLocales = userRole === 'administrador' || userRole === 'Warehouse Supervisor' || userRole === 'Warehouse Operator';

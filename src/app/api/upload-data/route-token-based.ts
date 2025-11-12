@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     
     const token = authHeader.substring(7) // Remover 'Bearer ' del principio
     
-    // Crear cliente de Supabase usando el token de sesión
+    // Usar el token directamente para crear un cliente autenticado
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -23,21 +23,23 @@ export async function POST(request: Request) {
           headers: {
             Authorization: `Bearer ${token}`
           }
+        },
+        auth: {
+          persistSession: false // No persistir sesión en el servidor
         }
       }
     )
 
-    // Verificar el usuario usando el token proporcionado
+    // Verificar la sesión usando el token proporcionado
     const { data: { user }, error: userError } = await supabase.auth.getUser(token)
     
     if (userError) {
       console.error('User verification error:', userError)
-      return NextResponse.json({ error: `Error de autenticación: ${userError.message}` }, { status: 401 })
+      return NextResponse.json({ error: 'No autorizado - token inválido' }, { status: 401 })
     }
     
     if (!user) {
-      console.error('No valid user found with provided token')
-      return NextResponse.json({ error: 'No autorizado - token inválido' }, { status: 401 })
+      return NextResponse.json({ error: 'No autorizado - usuario no válido' }, { status: 401 })
     }
 
     // Obtener el perfil del usuario para verificar su rol
@@ -58,8 +60,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Permiso denegado. Rol no autorizado.' }, { status: 403 })
     }
 
-    console.log('User authorized, proceeding with upsert for user:', user.id)
-
     // Si el rol es correcto, usar el cliente de servicio para hacer el upsert
     const supabaseAdmin = createSupabaseServiceClient()
 
@@ -72,10 +72,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Error al guardar los datos: ${upsertError.message}` }, { status: 500 })
     }
 
-    console.log('Data uploaded successfully')
     return NextResponse.json({ message: 'Datos cargados exitosamente' })
   } catch (error: any) {
-    console.error('Unexpected error in upload-data API:', error?.message || error)
+    console.error('Error in upload-data API (token-based):', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
 }
